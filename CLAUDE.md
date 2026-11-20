@@ -10,7 +10,7 @@ A web application that replaces the mailbox and email for a small team (about 10
 
 - Backend: Python 3.12, FastAPI, SQLAlchemy 2 (async), Alembic, Pydantic v2, PostgreSQL 16
 - Real-time: FastAPI WebSockets (add Redis pub/sub only when running several API instances)
-- Files: S3-compatible storage (MinIO) behind a storage interface
+- Files: storage interface with a Nextcloud backend (WebDAV, our own server) and a local-folder backend for dev/tests (changed from MinIO at the owner's request)
 - AI: LiteLLM (Claude, Qwen, OpenAI, Ollama); keys encrypted at rest with Fernet
 - Jobs and scheduling: APScheduler (playbooks, reminders, weekly/monthly reports)
 - Email: SMTP client with HTML templates (Jinja2 + MJML or inline-CSS HTML), plain-text fallback

@@ -11,15 +11,6 @@ services:
       interval: 5s
       retries: 10
 
-  minio:
-    image: minio/minio:latest
-    command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-    volumes: [minio-data:/data]
-    ports: ["127.0.0.1:9001:9001"]
-
   mailpit:
     image: axllent/mailpit:latest
     profiles: [dev]
@@ -30,6 +21,8 @@ services:
     env_file: .env
     environment:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      LOCAL_STORAGE_DIR: /data/files
+    volumes: [files-data:/data/files]  # used when STORAGE_BACKEND=local
     depends_on:
       postgres: { condition: service_healthy }
 
@@ -48,5 +41,5 @@ services:
 
 volumes:
   postgres-data:
-  minio-data:
+  files-data:
   caddy-data:

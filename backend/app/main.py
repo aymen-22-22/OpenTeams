@@ -8,6 +8,7 @@ from app.core.csrf import register_csrf
 from app.core.errors import register_error_handlers
 from app.core.logging import setup_logging
 from app.core.settings import get_settings
+from app.files.router import router as files_router
 from app.search.router import router as search_router
 from app.users.router import router as users_router
 
@@ -26,6 +27,7 @@ def create_app() -> FastAPI:
         admin_router,
         chat_router,
         search_router,
+        files_router,
     ):
         app.include_router(router, prefix="/api/v1")
     app.include_router(ws.router)

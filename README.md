@@ -2,7 +2,7 @@
 
 Self-hosted team chat and work platform: chat, files, kanban tasks, calendar, reminders and personal AI. The full specification is in [CLAUDE.md](CLAUDE.md).
 
-**Status:** Phase 3 done: login, roles, presence, and real-time direct chat (replies, edit/delete, read state, typing, pins, search). Files, tasks and AI in the shell are still placeholders.
+**Status:** Phase 3 done: login, roles, presence, and real-time direct chat (replies, edit/delete, read state, typing, pins, search). Files per conversation (Nextcloud or local storage, versions). Tasks and AI in the shell are still placeholders.
 
 ## Run everything with Docker
 
@@ -17,7 +17,6 @@ docker compose --profile dev up --build
 | https://localhost/api/v1/health | Health check |
 | https://localhost/api/docs | API docs (OpenAPI) |
 | http://localhost:8025 | Mailpit (development emails) |
-| http://localhost:9001 | MinIO console |
 
 Migrations run automatically when the API starts. Create the first admin (asks for a password):
 
@@ -26,6 +25,16 @@ docker compose exec api python -m app.cli create-admin admin@example.com "Admin"
 ```
 
 The admin creates other users through the API (`POST /api/v1/admin/users`, see `/api/docs`). An admin screen comes later. In production, drop `--profile dev` (no Mailpit) and set `SITE_ADDRESS` to your domain.
+
+## File storage (Nextcloud)
+
+Files can be stored directly in your Nextcloud server:
+
+1. In Nextcloud, create a user (for example `openteams`) and, logged in as it, an app password: *Settings → Security → Devices & sessions*.
+2. In `.env`: `STORAGE_BACKEND=nextcloud`, `NEXTCLOUD_URL`, `NEXTCLOUD_USER`, `NEXTCLOUD_APP_PASSWORD`, optionally `NEXTCLOUD_FOLDER` (default `OpenTeams`).
+3. Restart the API. Files appear in that user's folder under random names; names, versions and permissions are kept by OpenTeams.
+
+Uploads are streamed from the browser through the API to Nextcloud (no temp files). Downloads use short-lived signed links (5 minutes) and are always sent as attachments. Without Nextcloud, `STORAGE_BACKEND=local` stores files in a Docker volume.
 
 ## Local development (fast reload)
 

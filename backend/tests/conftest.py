@@ -1,6 +1,10 @@
 import os
+import tempfile
 
 os.environ["ENVIRONMENT"] = "test"
+os.environ["STORAGE_BACKEND"] = "local"
+os.environ["LOCAL_STORAGE_DIR"] = tempfile.mkdtemp(prefix="openteams-files-")
+os.environ["MAX_UPLOAD_MB"] = "1"
 os.environ["DATABASE_URL"] = os.environ.get(
     "TEST_DATABASE_URL",
     "postgresql+asyncpg://openteams:openteams@localhost:5432/openteams_test",
@@ -26,8 +30,8 @@ from app.users.models import Role, User  # noqa: E402
 
 PASSWORD = "correct-horse-battery"
 TABLES = (
-    "realtime_events, pins, message_reads, messages, conversation_members, conversations, "
-    "audit_log, sessions, team_members, teams, users"
+    "file_versions, files, realtime_events, pins, message_reads, messages, "
+    "conversation_members, conversations, audit_log, sessions, team_members, teams, users"
 )
 
 
