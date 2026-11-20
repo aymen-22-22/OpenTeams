@@ -1,0 +1,12 @@
+{
+  "app": { "name": "OpenTeams", "language": "اللغة", "theme": "تبديل المظهر", "search": "بحث" },
+  "people": { "title": "الأشخاص", "myAssistant": "مساعدي", "aiActive": "الذكاء الاصطناعي مفعّل", "aiInactive": "الذكاء الاصطناعي غير مفعّل",
+    "status": { "online": "متصل", "away": "غائب", "offline": "غير متصل" } },
+  "tabs": { "chat": "محادثة", "ai": "ذكاؤه الاصطناعي", "files": "الملفات", "tasks": "المهام" },
+  "chat": { "placeholder": "اكتب رسالة…", "send": "إرسال" },
+  "ai": { "label": "الذكاء الاصطناعي لـ {{name}}", "notice": "أنت تتحدث مع ذكاء اصطناعي، وليس مع {{name}}." },
+  "tasks": { "pending": "قيد الانتظار", "in_progress": "قيد التنفيذ", "finished": "منتهية", "openBoard": "فتح اللوحة" },
+  "side": { "pins": "المثبّتة", "files": "الملفات الأخيرة", "tasks": "المهام", "reminders": "التذكيرات" },
+  "files": { "pdf": "PDF", "spreadsheet": "جدول بيانات", "document": "مستند", "image": "صورة", "other": "أخرى" },
+  "nav": { "people": "الأشخاص", "conversation": "المحادثة", "details": "التفاصيل" }
+}
