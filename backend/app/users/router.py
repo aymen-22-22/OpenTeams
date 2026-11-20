@@ -1,6 +1,8 @@
 from fastapi import APIRouter
 from sqlalchemy import select
 
+from app.ai.models import AIProfile
+from app.ai.rules import is_ready
 from app.auth.deps import DB, CurrentUser
 from app.users import presence
 from app.users.models import Team, TeamMember, User
@@ -27,13 +29,14 @@ async def list_people(_: CurrentUser, db: DB) -> list[PersonOut]:
     users = await db.scalars(
         select(User).where(User.is_active.is_(True)).order_by(User.display_name)
     )
+    profiles = {p.user_id: p for p in await db.scalars(select(AIProfile))}
     return [
         PersonOut(
             id=u.id,
             display_name=u.display_name,
             role=u.role,
             presence=presence.get(u.id),
-            ai_active=False,
+            ai_active=is_ready(profiles.get(u.id)),
         )
         for u in users
     ]

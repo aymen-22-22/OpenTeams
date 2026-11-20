@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from app.admin.router import router as admin_router
+from app.ai.router import router as ai_router
 from app.api import health, ws
 from app.auth.router import router as auth_router
 from app.chat.router import router as chat_router
@@ -30,6 +31,7 @@ def create_app() -> FastAPI:
         search_router,
         files_router,
         tasks_router,
+        ai_router,
     ):
         app.include_router(router, prefix="/api/v1")
     app.include_router(ws.router)

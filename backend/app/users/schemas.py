@@ -26,7 +26,7 @@ class PersonOut(BaseModel):
     display_name: str
     role: Role
     presence: Presence
-    ai_active: bool  # always False until the personal AI module exists (Phase 6)
+    ai_active: bool
 
 
 class MeUpdate(BaseModel):

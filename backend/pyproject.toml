@@ -13,6 +13,8 @@ dependencies = [
     "argon2-cffi>=23.1",
     "pyjwt>=2.10",
     "httpx>=0.28",
+    "litellm>=1.55",
+    "cryptography>=43",
 ]
 
 [project.optional-dependencies]
@@ -20,6 +22,8 @@ dev = [
     "pytest>=8.3",
     "pytest-asyncio>=0.24",
     "httpx>=0.28",
+    "litellm>=1.55",
+    "cryptography>=43",
     "ruff>=0.8",
     "mypy>=1.13",
 ]

@@ -31,6 +31,16 @@ class Settings(BaseSettings):
     max_upload_mb: int = 100
     download_url_seconds: int = 300
 
+    # Personal AI. AI_ENCRYPTION_KEY is a Fernet key; if empty it is derived from SECRET_KEY.
+    ai_encryption_key: str = ""
+    ai_timeout_seconds: int = 60
+    ai_daily_token_budget: int = 200_000  # per owner
+    ai_caller_per_minute: int = 10
+    ai_owner_per_hour: int = 120
+    ollama_url: str = "http://ollama:11434"
+    qwen_url: str = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+    timezone: str = "Europe/Paris"
+
     login_max_attempts: int = 5
     login_window_seconds: int = 300
 
