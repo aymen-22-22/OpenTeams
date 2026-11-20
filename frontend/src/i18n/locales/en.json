@@ -1,12 +1,68 @@
 {
-  "app": { "name": "OpenTeams", "language": "Language", "theme": "Toggle theme", "search": "Search" },
-  "people": { "title": "People", "myAssistant": "My assistant", "aiActive": "AI active", "aiInactive": "AI inactive",
-    "status": { "online": "Online", "away": "Away", "offline": "Offline" } },
-  "tabs": { "chat": "Chat", "ai": "His AI", "files": "Files", "tasks": "Tasks" },
-  "chat": { "placeholder": "Write a message…", "send": "Send" },
-  "ai": { "label": "AI of {{name}}", "notice": "You are talking to an AI, not to {{name}}." },
-  "tasks": { "pending": "Pending", "in_progress": "In progress", "finished": "Finished", "openBoard": "Open board" },
-  "side": { "pins": "Pinned", "files": "Recent files", "tasks": "Tasks", "reminders": "Reminders" },
-  "files": { "pdf": "PDF", "spreadsheet": "Spreadsheet", "document": "Document", "image": "Image", "other": "Other" },
-  "nav": { "people": "People", "conversation": "Conversation", "details": "Details" }
+  "app": {
+    "name": "OpenTeams",
+    "language": "Language",
+    "theme": "Toggle theme",
+    "search": "Search",
+    "logout": "Sign out"
+  },
+  "people": {
+    "title": "People",
+    "myAssistant": "My assistant",
+    "aiActive": "AI active",
+    "aiInactive": "AI inactive",
+    "status": {
+      "online": "Online",
+      "away": "Away",
+      "offline": "Offline"
+    },
+    "empty": "No other people yet."
+  },
+  "tabs": {
+    "chat": "Chat",
+    "ai": "His AI",
+    "files": "Files",
+    "tasks": "Tasks"
+  },
+  "chat": {
+    "placeholder": "Write a message…",
+    "send": "Send"
+  },
+  "ai": {
+    "label": "AI of {{name}}",
+    "notice": "You are talking to an AI, not to {{name}}."
+  },
+  "tasks": {
+    "pending": "Pending",
+    "in_progress": "In progress",
+    "finished": "Finished",
+    "openBoard": "Open board"
+  },
+  "side": {
+    "pins": "Pinned",
+    "files": "Recent files",
+    "tasks": "Tasks",
+    "reminders": "Reminders"
+  },
+  "files": {
+    "pdf": "PDF",
+    "spreadsheet": "Spreadsheet",
+    "document": "Document",
+    "image": "Image",
+    "other": "Other"
+  },
+  "nav": {
+    "people": "People",
+    "conversation": "Conversation",
+    "details": "Details"
+  },
+  "login": {
+    "title": "Sign in to your team space",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "invalid": "Incorrect email or password.",
+    "rateLimited": "Too many attempts. Try again in a few minutes.",
+    "failed": "Could not sign in. Please try again."
+  }
 }

@@ -2,11 +2,11 @@ import { Info, MessageSquare, Users } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { usePeople, type User } from '@/features/auth/api'
 import { cn } from '@/lib/utils'
 
 import { ConversationArea } from './ConversationArea'
 import { PeoplePanel } from './PeoplePanel'
-import { PEOPLE } from './placeholder'
 import { SidePanel } from './SidePanel'
 import { TopBar } from './TopBar'
 
@@ -19,28 +19,31 @@ const NAV = [
 ] as const
 
 /** Three columns on desktop; one column at a time with bottom navigation on mobile. */
-export function AppShell() {
+export function AppShell({ me }: { me: User }) {
   const { t } = useTranslation()
-  const [person, setPerson] = useState(PEOPLE[0])
+  const people = (usePeople().data ?? []).filter((p) => p.id !== me.id)
+  const [selectedId, setSelectedId] = useState<string>()
   const [column, setColumn] = useState<Column>('conversation')
 
+  const person = people.find((p) => p.id === selectedId) ?? people[0]
   const visible = (c: Column) => (column === c ? 'flex' : 'hidden')
 
   return (
     <div className="flex h-dvh flex-col">
-      <TopBar />
+      <TopBar me={me} />
       <main className="flex flex-1 overflow-hidden">
         <div className={cn(visible('people'), 'w-full flex-col overflow-y-auto border-e border-border md:flex md:w-72')}>
           <PeoplePanel
-            selectedId={person.id}
+            people={people}
+            selectedId={person?.id}
             onSelect={(p) => {
-              setPerson(p)
+              setSelectedId(p.id)
               setColumn('conversation')
             }}
           />
         </div>
         <div className={cn(visible('conversation'), 'flex-1 flex-col md:flex')}>
-          <ConversationArea person={person} />
+          {person && <ConversationArea person={person} />}
         </div>
         <div className={cn(visible('details'), 'w-full flex-col overflow-y-auto border-s border-border lg:flex lg:w-80')}>
           <SidePanel />

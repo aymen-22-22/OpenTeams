@@ -1,15 +1,17 @@
-import { Moon, Sun } from 'lucide-react'
+import { LogOut, Moon, Sun } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
+import { useLogout, type User } from '@/features/auth/api'
 import { useTheme } from '@/hooks/useTheme'
 import { LANGUAGES } from '@/i18n'
 
 const LANGUAGE_NAMES = { fr: 'Français', en: 'English', ar: 'العربية' } as const
 
-export function TopBar() {
+export function TopBar({ me }: { me: User }) {
   const { t, i18n } = useTranslation()
   const { theme, toggle } = useTheme()
+  const logout = useLogout()
 
   return (
     <header className="flex items-center gap-2 border-b border-border px-4 py-2">
@@ -25,6 +27,10 @@ export function TopBar() {
       </select>
       <Button variant="ghost" onClick={toggle} aria-label={t('app.theme')}>
         {theme === 'dark' ? <Sun className="size-5" aria-hidden /> : <Moon className="size-5" aria-hidden />}
+      </Button>
+      <span className="hidden text-sm text-muted-foreground sm:inline">{me.display_name}</span>
+      <Button variant="ghost" onClick={() => logout.mutate()} aria-label={t('app.logout')}>
+        <LogOut className="size-5 rtl:-scale-x-100" aria-hidden />
       </Button>
     </header>
   )

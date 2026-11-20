@@ -2,7 +2,7 @@
 
 Self-hosted team chat and work platform: chat, files, kanban tasks, calendar, reminders and personal AI. The full specification is in [CLAUDE.md](CLAUDE.md).
 
-**Status:** Phase 1 (skeleton) is done: health endpoint, and an app shell with placeholder data in French, English and Arabic.
+**Status:** Phase 2 done: login, users, roles, teams, live presence. Messages, files and tasks in the shell are still placeholders.
 
 ## Run everything with Docker
 
@@ -19,7 +19,13 @@ docker compose --profile dev up --build
 | http://localhost:8025 | Mailpit (development emails) |
 | http://localhost:9001 | MinIO console |
 
-Migrations run automatically when the API starts. In production, drop `--profile dev` (no Mailpit) and set `SITE_ADDRESS` to your domain.
+Migrations run automatically when the API starts. Create the first admin (asks for a password):
+
+```bash
+docker compose exec api python -m app.cli create-admin admin@example.com "Admin"
+```
+
+The admin creates other users through the API (`POST /api/v1/admin/users`, see `/api/docs`). An admin screen comes later. In production, drop `--profile dev` (no Mailpit) and set `SITE_ADDRESS` to your domain.
 
 ## Local development (fast reload)
 
@@ -29,11 +35,18 @@ Requirements: Python 3.12+, Node 22, Docker.
 make install                 # backend venv + frontend packages
 docker compose up -d postgres
 make migrate
+cd backend && .venv/bin/python -m app.cli create-admin admin@example.com "Admin" && cd ..
 make dev-api                 # http://localhost:8000
 make dev-web                 # http://localhost:5173 (proxies /api to the API)
 ```
 
 ## Tests and checks
+
+Backend tests need PostgreSQL with a database `openteams_test` (user/password `openteams`), or set `TEST_DATABASE_URL`. Quick way:
+
+```bash
+docker run -d --name ot-test-db -p 5432:5432 -e POSTGRES_USER=openteams -e POSTGRES_PASSWORD=openteams -e POSTGRES_DB=openteams_test postgres:16-alpine
+```
 
 ```bash
 make test    # pytest + vitest
@@ -41,6 +54,13 @@ make lint    # ruff, mypy, eslint, tsc
 ```
 
 CI (GitHub Actions) runs the same checks, plus `pip-audit` and `npm audit`.
+
+## Security in short
+
+- Passwords hashed with argon2. Session = JWT in an httpOnly, Secure, SameSite cookie, linked to a `sessions` row so logout revokes it.
+- CSRF: every POST/PATCH/DELETE must send the `csrf_token` cookie value in the `X-CSRF-Token` header (the frontend does it).
+- Login is rate-limited (5 attempts / 5 minutes per IP and email). Logins and admin actions go to `audit_log`.
+- The WebSocket `/ws` requires the session cookie and an allowed `Origin` (`ALLOWED_ORIGINS`).
 
 ## Layout
 

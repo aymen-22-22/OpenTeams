@@ -1,12 +1,68 @@
 {
-  "app": { "name": "OpenTeams", "language": "Langue", "theme": "Basculer le thème", "search": "Rechercher" },
-  "people": { "title": "Personnes", "myAssistant": "Mon assistant", "aiActive": "IA active", "aiInactive": "IA inactive",
-    "status": { "online": "En ligne", "away": "Absent", "offline": "Hors ligne" } },
-  "tabs": { "chat": "Chat", "ai": "Son IA", "files": "Fichiers", "tasks": "Tâches" },
-  "chat": { "placeholder": "Écrire un message…", "send": "Envoyer" },
-  "ai": { "label": "IA de {{name}}", "notice": "Vous parlez à une IA, pas à {{name}}." },
-  "tasks": { "pending": "En attente", "in_progress": "En cours", "finished": "Terminé", "openBoard": "Ouvrir le tableau" },
-  "side": { "pins": "Épinglés", "files": "Fichiers récents", "tasks": "Tâches", "reminders": "Rappels" },
-  "files": { "pdf": "PDF", "spreadsheet": "Tableur", "document": "Document", "image": "Image", "other": "Autre" },
-  "nav": { "people": "Personnes", "conversation": "Conversation", "details": "Détails" }
+  "app": {
+    "name": "OpenTeams",
+    "language": "Langue",
+    "theme": "Basculer le thème",
+    "search": "Rechercher",
+    "logout": "Se déconnecter"
+  },
+  "people": {
+    "title": "Personnes",
+    "myAssistant": "Mon assistant",
+    "aiActive": "IA active",
+    "aiInactive": "IA inactive",
+    "status": {
+      "online": "En ligne",
+      "away": "Absent",
+      "offline": "Hors ligne"
+    },
+    "empty": "Aucune autre personne pour l'instant."
+  },
+  "tabs": {
+    "chat": "Chat",
+    "ai": "Son IA",
+    "files": "Fichiers",
+    "tasks": "Tâches"
+  },
+  "chat": {
+    "placeholder": "Écrire un message…",
+    "send": "Envoyer"
+  },
+  "ai": {
+    "label": "IA de {{name}}",
+    "notice": "Vous parlez à une IA, pas à {{name}}."
+  },
+  "tasks": {
+    "pending": "En attente",
+    "in_progress": "En cours",
+    "finished": "Terminé",
+    "openBoard": "Ouvrir le tableau"
+  },
+  "side": {
+    "pins": "Épinglés",
+    "files": "Fichiers récents",
+    "tasks": "Tâches",
+    "reminders": "Rappels"
+  },
+  "files": {
+    "pdf": "PDF",
+    "spreadsheet": "Tableur",
+    "document": "Document",
+    "image": "Image",
+    "other": "Autre"
+  },
+  "nav": {
+    "people": "Personnes",
+    "conversation": "Conversation",
+    "details": "Détails"
+  },
+  "login": {
+    "title": "Connectez-vous à votre espace d'équipe",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "submit": "Se connecter",
+    "invalid": "E-mail ou mot de passe incorrect.",
+    "rateLimited": "Trop de tentatives. Réessayez dans quelques minutes.",
+    "failed": "Connexion impossible. Réessayez."
+  }
 }

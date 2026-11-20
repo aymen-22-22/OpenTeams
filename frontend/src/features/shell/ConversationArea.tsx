@@ -5,7 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 
 import { FileIcon } from './FileIcon'
-import { FILES, ME, MESSAGES, TASK_COUNTS, type Person, type TaskStatus } from './placeholder'
+import type { Person } from '@/features/auth/api'
+
+import { FILES, MESSAGES, TASK_COUNTS, type TaskStatus } from './placeholder'
 
 const STATUSES: TaskStatus[] = ['pending', 'in_progress', 'finished']
 
@@ -13,8 +15,8 @@ export function ConversationArea({ person }: { person: Person }) {
   const { t } = useTranslation()
 
   return (
-    <section aria-label={person.name} className="flex h-full flex-col">
-      <header className="border-b border-border px-4 py-3 font-semibold">{person.name}</header>
+    <section aria-label={person.display_name} className="flex h-full flex-col">
+      <header className="border-b border-border px-4 py-3 font-semibold">{person.display_name}</header>
       <Tabs defaultValue="chat" className="flex flex-1 flex-col overflow-hidden">
         <TabsList>
           <TabsTrigger value="chat">{t('tabs.chat')}</TabsTrigger>
@@ -25,7 +27,7 @@ export function ConversationArea({ person }: { person: Person }) {
 
         <TabsContent value="chat" className="flex flex-col gap-2">
           {MESSAGES.map((m) => (
-            <p key={m.id} className={cn('max-w-[75%] rounded-lg px-3 py-2', m.authorId === ME ? 'ms-auto bg-accent text-accent-foreground' : 'me-auto bg-muted')}>
+            <p key={m.id} className={cn('max-w-[75%] rounded-lg px-3 py-2', m.mine ? 'ms-auto bg-accent text-accent-foreground' : 'me-auto bg-muted')}>
               {m.text}
             </p>
           ))}
@@ -37,10 +39,10 @@ export function ConversationArea({ person }: { person: Person }) {
 
         <TabsContent value="ai" className="flex flex-col gap-2">
           <p role="note" className="rounded-md border border-ai-foreground/30 bg-ai px-3 py-2 text-sm text-ai-foreground">
-            {t('ai.notice', { name: person.name })}
+            {t('ai.notice', { name: person.display_name })}
           </p>
           <div className="me-auto max-w-[75%] rounded-lg bg-ai px-3 py-2 text-ai-foreground">
-            <span className="block text-xs font-semibold">{t('ai.label', { name: person.name })}</span>
+            <span className="block text-xs font-semibold">{t('ai.label', { name: person.display_name })}</span>
             …
           </div>
         </TabsContent>

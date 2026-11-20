@@ -1,15 +1,7 @@
-// Placeholder data for the Phase 1 shell. Replaced by API data in later phases.
+// Placeholder data for parts of the shell not built yet (messages, files, tasks).
 
-export type Presence = 'online' | 'away' | 'offline'
 export type FileKind = 'pdf' | 'spreadsheet' | 'document' | 'image' | 'other'
 export type TaskStatus = 'pending' | 'in_progress' | 'finished'
-
-export interface Person {
-  id: string
-  name: string
-  presence: Presence
-  aiActive: boolean
-}
 
 export interface ChatFile {
   id: string
@@ -19,22 +11,13 @@ export interface ChatFile {
 
 export interface Message {
   id: string
-  authorId: string
+  mine: boolean
   text: string
 }
 
-export const PEOPLE: Person[] = [
-  { id: 'u1', name: 'Amina Benali', presence: 'online', aiActive: true },
-  { id: 'u2', name: 'Lucas Martin', presence: 'away', aiActive: false },
-  { id: 'u3', name: 'Sara Haddad', presence: 'offline', aiActive: true },
-  { id: 'u4', name: 'Karim Ziani', presence: 'online', aiActive: false },
-]
-
-export const ME = 'me'
-
 export const MESSAGES: Message[] = [
-  { id: 'm1', authorId: 'u1', text: 'Bonjour ! Le rapport est prêt.' },
-  { id: 'm2', authorId: ME, text: 'Merci, je regarde ça.' },
+  { id: 'm1', mine: false, text: 'Bonjour ! Le rapport est prêt.' },
+  { id: 'm2', mine: true, text: 'Merci, je regarde ça.' },
 ]
 
 export const FILES: ChatFile[] = [
