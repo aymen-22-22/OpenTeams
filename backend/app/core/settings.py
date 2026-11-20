@@ -41,6 +41,16 @@ class Settings(BaseSettings):
     qwen_url: str = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
     timezone: str = "Europe/Paris"
 
+    # Public address of the app, used for links in emails.
+    app_url: str = "https://localhost"
+    scheduler_enabled: bool = True
+    smtp_host: str = "mailpit"
+    smtp_port: int = 1025
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_starttls: bool = False
+    mail_from: str = "OpenTeams <no-reply@openteams.local>"
+
     login_max_attempts: int = 5
     login_window_seconds: int = 300
 

@@ -11,6 +11,8 @@ from app.chat.events import commit_and_publish
 from app.chat.models import Conversation, ConversationMember, ConversationType
 from app.core import clock
 from app.core.errors import AppError
+from app.reminders.models import NotificationType
+from app.reminders.notify import notify, push
 from app.tasks.access import require_task, visible_tasks
 from app.tasks.models import Task, TaskEvent, TaskStatus
 from app.tasks.schemas import TaskCounts, TaskCreate, TaskMove, TaskOut, TaskUpdate
@@ -43,12 +45,28 @@ async def _add_member(db: AsyncSession, conversation_id: uuid.UUID, user_id: uui
         db.add(ConversationMember(conversation_id=conversation_id, user_id=user_id))
 
 
-async def _publish(db: AsyncSession, task: Task, actor: User, type_: str, **data: Any) -> TaskOut:
+async def _publish(
+    db: AsyncSession, task: Task, actor: User, type_: str, assigned: bool = False, **data: Any
+) -> TaskOut:
+    """Record history, publish to the task chat, and tell a new assignee (not themselves)."""
     db.add(TaskEvent(task_id=task.id, actor_id=actor.id, type=type_, data=data))
+    created = []
+    if assigned and task.assignee_id and task.assignee_id != actor.id:
+        created.append(
+            await notify(
+                db,
+                task.assignee_id,
+                NotificationType.TASK,
+                task.title,
+                body=actor.display_name,
+                link=f"/tasks/{task.id}",
+            )
+        )
     await db.flush()
     await db.refresh(task)
     out = _out(task)
     await commit_and_publish(db, task.conversation_id, f"task.{type_}", out.model_dump(mode="json"))
+    await push(db, created)
     return out
 
 
@@ -105,7 +123,7 @@ async def create_task(body: TaskCreate, user: CurrentUser, db: DB) -> TaskOut:
     )
     db.add(task)
     await db.flush()
-    return await _publish(db, task, user, "created")
+    return await _publish(db, task, user, "created", assigned=True)
 
 
 @router.get("/{task_id}", response_model=TaskOut)
@@ -131,7 +149,9 @@ async def update_task(task_id: uuid.UUID, body: TaskUpdate, user: CurrentUser, d
         conversation = await db.get(Conversation, task.conversation_id)
         if conversation:
             conversation.title = changes["title"]
-    return await _publish(db, task, user, "updated", fields=sorted(changes))
+    return await _publish(
+        db, task, user, "updated", assigned="assignee_id" in changes, fields=sorted(changes)
+    )
 
 
 @router.post("/{task_id}/move", response_model=TaskOut)
@@ -158,7 +178,7 @@ async def move_task(task_id: uuid.UUID, body: TaskMove, user: CurrentUser, db: D
     task.position = position
     task.finished_at = clock.now() if body.status == TaskStatus.FINISHED else None
     return await _publish(
-        db, task, user, "moved", **{"from": old_status.value, "to": body.status.value}
+        db, task, user, "moved", from_status=old_status.value, to_status=body.status.value
     )
 
 

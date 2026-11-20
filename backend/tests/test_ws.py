@@ -155,3 +155,19 @@ def test_typing_in_foreign_conversation_rejected(tc: TestClient) -> None:
         ws.receive_json()
         ws.send_json({"type": "typing", "conversation_id": conv})
         assert ws.receive_json() == {"type": "error", "code": "forbidden"}
+
+
+def test_notification_pushed_live(tc: TestClient) -> None:
+    _, l_cookie, conv, csrf = _setup_conversation(tc)
+    with tc.websocket_connect("/ws", headers={"cookie": l_cookie}) as l_ws:
+        l_ws.receive_json()  # presence
+        tc.post(
+            f"/api/v1/conversations/{conv}/messages",
+            json={"body": "ping"},
+            headers={"X-CSRF-Token": csrf},
+        )
+        events = [l_ws.receive_json(), l_ws.receive_json()]
+        types = sorted(e["type"] for e in events)
+        assert types == ["message.created", "notification.created"]
+        notification = next(e for e in events if e["type"] == "notification.created")
+        assert notification["data"]["body"] == "ping"

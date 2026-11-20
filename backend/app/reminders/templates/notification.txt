@@ -1,0 +1,8 @@
+{{ title }}
+
+{% if body %}{{ body }}
+
+{% endif %}{{ t.open }}: {{ link_url }}
+
+--
+{{ t.footer }} {{ t.preferences }}: {{ preferences_url }}

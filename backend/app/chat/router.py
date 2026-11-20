@@ -28,6 +28,8 @@ from app.chat.schemas import (
 )
 from app.core import clock
 from app.core.errors import AppError
+from app.reminders.models import NotificationType
+from app.reminders.notify import notify_members, push
 from app.users.models import User
 
 router = APIRouter(tags=["chat"])
@@ -184,7 +186,11 @@ async def send_message(
         raise AppError("idempotency_conflict", "Duplicate message", 409) from exc
     await db.refresh(message)
     out = MessageOut.of(message)
+    created = await notify_members(
+        db, conversation_id, user.id, NotificationType.MESSAGE, user.display_name, body.body[:200]
+    )
     await commit_and_publish(db, conversation_id, "message.created", out.model_dump(mode="json"))
+    await push(db, created)
     response.status_code = 201
     return out
 

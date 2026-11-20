@@ -44,6 +44,7 @@ class Task(Base):
     position: Mapped[float] = mapped_column(Float)
     due_date: Mapped[date | None] = mapped_column(Date)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    nudged_on: Mapped[date | None] = mapped_column(Date)  # last overdue reminder sent
     creator_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL")
     )

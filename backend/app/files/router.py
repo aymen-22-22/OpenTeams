@@ -22,6 +22,8 @@ from app.files import rules
 from app.files.models import File, FileVersion
 from app.files.scan import scan
 from app.files.schemas import DownloadUrl, FileOut
+from app.reminders.models import NotificationType
+from app.reminders.notify import notify_members, push
 
 router = APIRouter(tags=["files"])
 
@@ -98,7 +100,11 @@ async def upload_file(
     await db.flush()
     await db.refresh(file)
     out = FileOut.model_validate(file)
+    created = await notify_members(
+        db, conversation_id, user.id, NotificationType.FILE, file.name, user.display_name
+    )
     await commit_and_publish(db, conversation_id, "file.created", out.model_dump(mode="json"))
+    await push(db, created)
     return out
 
 
