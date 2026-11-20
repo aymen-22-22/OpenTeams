@@ -1,4 +1,4 @@
-import { Bot } from 'lucide-react'
+import { Bot, KanbanSquare } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/lib/utils'
@@ -16,9 +16,10 @@ interface Props {
   unread: Map<string, number>
   selectedId: string | undefined
   onSelect: (person: Person) => void
+  onMyTasks: () => void
 }
 
-export function PeoplePanel({ people, unread, selectedId, onSelect }: Props) {
+export function PeoplePanel({ people, unread, selectedId, onSelect, onMyTasks }: Props) {
   const { t } = useTranslation()
 
   return (
@@ -26,6 +27,10 @@ export function PeoplePanel({ people, unread, selectedId, onSelect }: Props) {
       <button type="button" className="flex min-h-11 items-center gap-2 rounded-md px-2 text-start font-medium text-accent hover:bg-muted">
         <Bot className="size-5" aria-hidden />
         {t('people.myAssistant')}
+      </button>
+      <button type="button" onClick={onMyTasks} className="flex min-h-11 items-center gap-2 rounded-md px-2 text-start font-medium hover:bg-muted">
+        <KanbanSquare className="size-5" aria-hidden />
+        {t('tasks.myTasks')}
       </button>
 
       <h2 className="px-2 pt-2 text-xs font-semibold uppercase text-muted-foreground">{t('people.title')}</h2>

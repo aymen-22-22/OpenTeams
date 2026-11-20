@@ -5,6 +5,7 @@ import { ME_KEY, PEOPLE_KEY, type Person, type Presence } from '@/features/auth/
 import { keys, upsertMessage, type Message, type MessagesData } from '@/features/chat/api'
 import { clearTyping, markTyping } from '@/features/chat/typing'
 import { filesKey } from '@/features/files/api'
+import { taskKeys } from '@/features/tasks/api'
 import { realtime, type ServerEvent } from '@/lib/realtime'
 
 /** Connects the socket while logged in and applies server events to the query cache. */
@@ -46,6 +47,11 @@ export function useRealtime(enabled: boolean) {
           break
         case 'file.created':
           if (conv) void qc.invalidateQueries({ queryKey: filesKey(conv) })
+          break
+        case 'task.created':
+        case 'task.updated':
+        case 'task.moved':
+          void qc.invalidateQueries({ queryKey: taskKeys.all })
           break
         case 'typing':
           if (conv && e.data?.user_id) markTyping(conv, String(e.data.user_id))

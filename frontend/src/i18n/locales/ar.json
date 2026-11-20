@@ -53,7 +53,25 @@
     "pending": "قيد الانتظار",
     "in_progress": "قيد التنفيذ",
     "finished": "منتهية",
-    "openBoard": "فتح اللوحة"
+    "openBoard": "فتح اللوحة",
+    "myTasks": "مهامي",
+    "new": "مهمة جديدة",
+    "create": "إنشاء",
+    "title": "العنوان",
+    "assignee": "مسندة إلى",
+    "me": "أنا",
+    "dueDate": "تاريخ الاستحقاق",
+    "priorityLabel": "الأولوية",
+    "priority": {
+      "low": "منخفضة",
+      "normal": "عادية",
+      "high": "عالية"
+    },
+    "overdue": "متأخرة",
+    "fromMessage": "إنشاء مهمة",
+    "createFailed": "تعذّر إنشاء المهمة.",
+    "back": "رجوع",
+    "status": "الحالة"
   },
   "side": {
     "pins": "المثبّتة",

@@ -2,7 +2,7 @@
 
 Self-hosted team chat and work platform: chat, files, kanban tasks, calendar, reminders and personal AI. The full specification is in [CLAUDE.md](CLAUDE.md).
 
-**Status:** Phase 3 done: login, roles, presence, and real-time direct chat (replies, edit/delete, read state, typing, pins, search). Files per conversation (Nextcloud or local storage, versions). Tasks and AI in the shell are still placeholders.
+**Status:** Phase 3 done: login, roles, presence, and real-time direct chat (replies, edit/delete, read state, typing, pins, search). Files per conversation (Nextcloud or local storage, versions). Kanban tasks with their own task chats. AI and reminders are still placeholders.
 
 ## Run everything with Docker
 
@@ -70,6 +70,7 @@ CI (GitHub Actions) runs the same checks, plus `pip-audit` and `npm audit`.
 - CSRF: every POST/PATCH/DELETE must send the `csrf_token` cookie value in the `X-CSRF-Token` header (the frontend does it).
 - Login is rate-limited (5 attempts / 5 minutes per IP and email). Logins and admin actions go to `audit_log`.
 - The WebSocket `/ws` requires the session cookie and an allowed `Origin` (`ALLOWED_ORIGINS`).
+- Tasks are visible to the members of their task chat (creator, assignee) and to managers/admins.
 - Only members of a conversation can read it, write in it, search it, or receive its events; outsiders get 404.
 
 ## Real-time events
@@ -81,6 +82,8 @@ One WebSocket at `/ws`. Stored events have an `id`; reconnect with `/ws?last_eve
 | `message.created`, `message.updated`, `message.deleted` | chat messages |
 | `conversation.read` | a member read up to a message |
 | `pin.added`, `pin.removed` | pins |
+| `file.created` | a file was uploaded |
+| `task.created`, `task.updated`, `task.moved` | tasks (sent to the task chat members) |
 | `presence.changed` | online / away / offline (not stored) |
 | `typing` | someone is typing (not stored; client sends `{"type":"typing","conversation_id":...}`) |
 

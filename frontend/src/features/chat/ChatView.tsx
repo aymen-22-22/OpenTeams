@@ -26,9 +26,10 @@ interface Props {
   conversation: Conversation
   meId: string
   people: Map<string, Person>
+  onCreateTask?: (message: Message) => void
 }
 
-export function ChatView({ conversation, meId, people }: Props) {
+export function ChatView({ conversation, meId, people, onCreateTask }: Props) {
   const { t } = useTranslation()
   const messages = useMessages(conversation.id)
   const pins = usePins(conversation.id)
@@ -119,6 +120,7 @@ export function ChatView({ conversation, meId, people }: Props) {
             }}
             onEdit={() => startEdit(m)}
             onDelete={() => remove.mutate(m.id)}
+            onCreateTask={onCreateTask ? () => onCreateTask(m) : undefined}
             onTogglePin={() => togglePin.mutate({ id: m.id, pinned: pinnedIds.has(m.id) })}
           />
         ))}

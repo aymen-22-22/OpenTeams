@@ -1,30 +1,39 @@
 import { useTranslation } from 'react-i18next'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-
 import type { Person } from '@/features/auth/api'
-import type { Conversation } from '@/features/chat/api'
+import type { Conversation, Message } from '@/features/chat/api'
 import { ChatView } from '@/features/chat/ChatView'
 import { FilesTab } from '@/features/files/FilesTab'
 
-import { TASK_COUNTS, type TaskStatus } from './placeholder'
+import { Button } from '@/components/ui/button'
+import type { Task } from '@/features/tasks/api'
+import { useTasks } from '@/features/tasks/api'
+import { KanbanBoard } from '@/features/tasks/KanbanBoard'
 
-const STATUSES: TaskStatus[] = ['pending', 'in_progress', 'finished']
+export type ConversationTab = 'chat' | 'ai' | 'files' | 'tasks'
 
 interface Props {
   person: Person
   conversation: Conversation | undefined
   meId: string
   people: Map<string, Person>
+  tab: ConversationTab
+  onTabChange: (tab: ConversationTab) => void
+  onOpenTask: (task: Task) => void
+  onNewTask: () => void
+  onCreateTaskFromMessage: (message: Message) => void
 }
 
-export function ConversationArea({ person, conversation, meId, people }: Props) {
+export function ConversationArea(props: Props) {
+  const { person, conversation, meId, people, tab, onTabChange, onOpenTask, onNewTask } = props
   const { t } = useTranslation()
+  const tasks = useTasks(person.id).data ?? []
 
   return (
     <section aria-label={person.display_name} className="flex h-full flex-col">
       <header className="border-b border-border px-4 py-3 font-semibold">{person.display_name}</header>
-      <Tabs defaultValue="chat" className="flex flex-1 flex-col overflow-hidden">
+      <Tabs value={tab} onValueChange={(v) => onTabChange(v as ConversationTab)} className="flex flex-1 flex-col overflow-hidden">
         <TabsList>
           <TabsTrigger value="chat">{t('tabs.chat')}</TabsTrigger>
           <TabsTrigger value="ai">{t('tabs.ai')}</TabsTrigger>
@@ -33,7 +42,9 @@ export function ConversationArea({ person, conversation, meId, people }: Props) 
         </TabsList>
 
         <TabsContent value="chat" className="flex flex-col overflow-hidden p-0">
-          {conversation ? <ChatView conversation={conversation} meId={meId} people={people} /> : null}
+          {conversation ? (
+            <ChatView conversation={conversation} meId={meId} people={people} onCreateTask={props.onCreateTaskFromMessage} />
+          ) : null}
         </TabsContent>
 
         <TabsContent value="ai" className="flex flex-col gap-2">
@@ -50,15 +61,9 @@ export function ConversationArea({ person, conversation, meId, people }: Props) 
           {conversation ? <FilesTab conversationId={conversation.id} /> : null}
         </TabsContent>
 
-        <TabsContent value="tasks">
-          <div className="grid gap-3 md:grid-cols-3">
-            {STATUSES.map((s) => (
-              <div key={s} className="rounded-md border border-border p-3">
-                <h3 className="font-medium">{t(`tasks.${s}`)}</h3>
-                <p className="text-2xl font-semibold">{TASK_COUNTS[s]}</p>
-              </div>
-            ))}
-          </div>
+        <TabsContent value="tasks" className="flex flex-col gap-3">
+          <Button className="self-start" onClick={onNewTask}>{t('tasks.new')}</Button>
+          <KanbanBoard tasks={tasks} people={people} onOpen={onOpenTask} />
         </TabsContent>
       </Tabs>
     </section>

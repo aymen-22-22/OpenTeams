@@ -1,4 +1,4 @@
-import { Pencil, Pin, PinOff, Reply, Trash2 } from 'lucide-react'
+import { ListPlus, Pencil, Pin, PinOff, Reply, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/lib/utils'
@@ -15,6 +15,7 @@ interface Props {
   onEdit: () => void
   onDelete: () => void
   onTogglePin: () => void
+  onCreateTask?: () => void
 }
 
 function ActionButton({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) {
@@ -57,6 +58,9 @@ export function MessageItem({ message, mine, authorName, replyTo, pinned, ...act
           <ActionButton label={pinned ? t('chat.unpin') : t('chat.pin')} onClick={actions.onTogglePin}>
             {pinned ? <PinOff className="size-4" /> : <Pin className="size-4" />}
           </ActionButton>
+          {actions.onCreateTask && (
+            <ActionButton label={t('tasks.fromMessage')} onClick={actions.onCreateTask}><ListPlus className="size-4" /></ActionButton>
+          )}
           {mine && (
             <>
               <ActionButton label={t('chat.edit')} onClick={actions.onEdit}><Pencil className="size-4" /></ActionButton>

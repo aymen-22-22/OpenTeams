@@ -86,3 +86,11 @@ test('logout returns to the login page', async () => {
   await userEvent.click(await screen.findByRole('button', { name: 'Se déconnecter' }))
   expect(await screen.findByRole('button', { name: 'Se connecter' })).toBeInTheDocument()
 })
+
+test('tabs follow the language direction (Radix would default to ltr)', async () => {
+  mockApi(LOGGED_IN)
+  renderApp()
+  await userEvent.selectOptions(await screen.findByLabelText('Langue'), 'ar')
+  const tablist = screen.getByRole('tablist')
+  expect(tablist.closest('[dir]')).toHaveAttribute('dir', 'rtl')
+})

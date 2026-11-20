@@ -53,7 +53,25 @@
     "pending": "En attente",
     "in_progress": "En cours",
     "finished": "Terminé",
-    "openBoard": "Ouvrir le tableau"
+    "openBoard": "Ouvrir le tableau",
+    "myTasks": "Mes tâches",
+    "new": "Nouvelle tâche",
+    "create": "Créer",
+    "title": "Titre",
+    "assignee": "Assignée à",
+    "me": "Moi",
+    "dueDate": "Échéance",
+    "priorityLabel": "Priorité",
+    "priority": {
+      "low": "Basse",
+      "normal": "Normale",
+      "high": "Haute"
+    },
+    "overdue": "en retard",
+    "fromMessage": "Créer une tâche",
+    "createFailed": "Impossible de créer la tâche.",
+    "back": "Retour",
+    "status": "Statut"
   },
   "side": {
     "pins": "Épinglés",

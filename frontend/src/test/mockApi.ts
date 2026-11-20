@@ -35,7 +35,18 @@ const conversation = (id: string, other: string, unread = 0) => ({
   id, type: 'direct', title: null, member_ids: ['me', other], last_message: null, unread_count: unread, last_read_seq: 0,
 })
 
+export const task = (id: string, title: string, status: string, extra: object = {}) => ({
+  id, title, description: '', status, priority: 'normal', position: 0, due_date: null, overdue: false,
+  finished_at: null, creator_id: 'me', assignee_id: 'u1', conversation_id: `tc-${id}`, source_message_id: null,
+  created_at: '2026-01-05T09:00:00Z', ...extra,
+})
+
 export const LOGGED_IN: Routes = {
+  'GET /tasks?assignee_id=u1': {
+    status: 200,
+    body: [task('t1', 'Préparer le rapport', 'pending', { due_date: '2026-01-02', overdue: true }), task('t2', 'Relire', 'in_progress')],
+  },
+  'GET /tasks/counts?assignee_id=u1': { status: 200, body: { pending: 1, in_progress: 1, finished: 4 } },
   'GET /users/me': { status: 200, body: ME },
   'GET /users': { status: 200, body: PEOPLE },
   'GET /conversations': { status: 200, body: [conversation('c1', 'u1'), conversation('c2', 'u2', 3)] },

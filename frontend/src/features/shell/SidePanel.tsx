@@ -2,12 +2,12 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
-
 import { usePins } from '@/features/chat/api'
 import { useFiles } from '@/features/files/api'
 import { FileIcon } from '@/features/files/FileIcon'
+import { STATUSES, useTaskCounts } from '@/features/tasks/api'
 
-import { REMINDERS, TASK_COUNTS, type TaskStatus } from './placeholder'
+import { REMINDERS } from './placeholder'
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -18,11 +18,17 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   )
 }
 
-export function SidePanel({ conversationId }: { conversationId: string | undefined }) {
+interface Props {
+  conversationId: string | undefined
+  personId: string | undefined
+  onOpenBoard: () => void
+}
+
+export function SidePanel({ conversationId, personId, onOpenBoard }: Props) {
   const { t } = useTranslation()
   const pins = usePins(conversationId).data ?? []
   const recentFiles = (useFiles(conversationId).data ?? []).slice(0, 4)
-  const statuses = Object.keys(TASK_COUNTS) as TaskStatus[]
+  const counts = useTaskCounts(personId).data
 
   return (
     <aside className="flex h-full flex-col gap-6 p-4">
@@ -44,14 +50,14 @@ export function SidePanel({ conversationId }: { conversationId: string | undefin
       </Section>
       <Section title={t('side.tasks')}>
         <dl className="grid grid-cols-3 gap-2 text-center text-sm">
-          {statuses.map((s) => (
+          {STATUSES.map((s) => (
             <div key={s} className="rounded-md bg-muted p-2">
               <dt className="text-muted-foreground">{t(`tasks.${s}`)}</dt>
-              <dd className="text-lg font-semibold">{TASK_COUNTS[s]}</dd>
+              <dd className="text-lg font-semibold">{counts?.[s] ?? 0}</dd>
             </div>
           ))}
         </dl>
-        <Button variant="outline">{t('tasks.openBoard')}</Button>
+        <Button variant="outline" onClick={onOpenBoard}>{t('tasks.openBoard')}</Button>
       </Section>
       <Section title={t('side.reminders')}>
         <ul className="text-sm">{REMINDERS.map((r) => <li key={r}>{r}</li>)}</ul>

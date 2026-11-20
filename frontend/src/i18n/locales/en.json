@@ -53,7 +53,25 @@
     "pending": "Pending",
     "in_progress": "In progress",
     "finished": "Finished",
-    "openBoard": "Open board"
+    "openBoard": "Open board",
+    "myTasks": "My tasks",
+    "new": "New task",
+    "create": "Create",
+    "title": "Title",
+    "assignee": "Assigned to",
+    "me": "Me",
+    "dueDate": "Due date",
+    "priorityLabel": "Priority",
+    "priority": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High"
+    },
+    "overdue": "overdue",
+    "fromMessage": "Create a task",
+    "createFailed": "Could not create the task.",
+    "back": "Back",
+    "status": "Status"
   },
   "side": {
     "pins": "Pinned",

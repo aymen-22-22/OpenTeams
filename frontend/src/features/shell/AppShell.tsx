@@ -4,14 +4,19 @@ import { useTranslation } from 'react-i18next'
 
 import { usePeople, type User } from '@/features/auth/api'
 import { useConversations, useDirectConversation, type Message } from '@/features/chat/api'
+import type { Task, TaskInput } from '@/features/tasks/api'
+import { MyTasks } from '@/features/tasks/MyTasks'
+import { TaskForm } from '@/features/tasks/TaskForm'
+import { TaskView } from '@/features/tasks/TaskView'
 import { cn } from '@/lib/utils'
 
-import { ConversationArea } from './ConversationArea'
+import { ConversationArea, type ConversationTab } from './ConversationArea'
 import { PeoplePanel } from './PeoplePanel'
 import { SidePanel } from './SidePanel'
 import { TopBar } from './TopBar'
 
 type Column = 'people' | 'conversation' | 'details'
+type View = { kind: 'person' } | { kind: 'myTasks' } | { kind: 'task'; taskId: string }
 
 const NAV = [
   { id: 'people', Icon: Users },
@@ -26,6 +31,9 @@ export function AppShell({ me }: { me: User }) {
   const conversations = useConversations().data
   const [selectedId, setSelectedId] = useState<string>()
   const [column, setColumn] = useState<Column>('conversation')
+  const [view, setView] = useState<View>({ kind: 'person' })
+  const [tab, setTab] = useState<ConversationTab>('chat')
+  const [taskDraft, setTaskDraft] = useState<Partial<TaskInput> | null>(null)
 
   const peopleById = useMemo(() => new Map((allPeople ?? []).map((p) => [p.id, p])), [allPeople])
   const people = (allPeople ?? []).filter((p) => p.id !== me.id)
@@ -42,36 +50,69 @@ export function AppShell({ me }: { me: User }) {
     return map
   }, [conversations, me.id, person?.id])
 
+  const showPerson = (id: string, nextTab: ConversationTab = 'chat') => {
+    setSelectedId(id)
+    setTab(nextTab)
+    setView({ kind: 'person' })
+    setColumn('conversation')
+  }
+
   const openMessage = (m: Message) => {
     const c = conversations?.find((x) => x.id === m.conversation_id)
     const other = c?.member_ids.find((id) => id !== me.id)
-    if (other) {
-      setSelectedId(other)
-      setColumn('conversation')
-    }
+    if (other) showPerson(other)
   }
-  const visible = (c: Column) => (column === c ? 'flex' : 'hidden')
+
+  const openTask = (task: Task) => {
+    setView({ kind: 'task', taskId: task.id })
+    setColumn('conversation')
+  }
 
   return (
     <div className="flex h-dvh flex-col">
       <TopBar me={me} onOpenMessage={openMessage} />
       <main className="flex flex-1 overflow-hidden">
-        <div className={cn(visible('people'), 'w-full flex-col overflow-y-auto border-e border-border md:flex md:w-72')}>
+        <div className={cn(column === 'people' ? 'flex' : 'hidden', 'w-full flex-col overflow-y-auto border-e border-border md:flex md:w-72')}>
           <PeoplePanel
             people={people}
             unread={unread}
-            selectedId={person?.id}
-            onSelect={(p) => {
-              setSelectedId(p.id)
+            selectedId={view.kind === 'person' ? person?.id : undefined}
+            onSelect={(p) => showPerson(p.id)}
+            onMyTasks={() => {
+              setView({ kind: 'myTasks' })
               setColumn('conversation')
             }}
           />
         </div>
-        <div className={cn(visible('conversation'), 'flex-1 flex-col md:flex')}>
-          {person && <ConversationArea person={person} conversation={conversation} meId={me.id} people={peopleById} />}
+        <div className={cn(column === 'conversation' ? 'flex' : 'hidden', 'min-w-0 flex-1 flex-col md:flex')}>
+          {view.kind === 'task' && (
+            <TaskView key={view.taskId} taskId={view.taskId} meId={me.id} people={peopleById} onBack={() => setView({ kind: 'person' })} />
+          )}
+          {view.kind === 'myTasks' && (
+            <MyTasks meId={me.id} people={peopleById} onOpen={openTask} onNew={() => setTaskDraft({})} />
+          )}
+          {view.kind === 'person' && person && (
+            <ConversationArea
+              person={person}
+              conversation={conversation}
+              meId={me.id}
+              people={peopleById}
+              tab={tab}
+              onTabChange={setTab}
+              onOpenTask={openTask}
+              onNewTask={() => setTaskDraft({ assignee_id: person.id })}
+              onCreateTaskFromMessage={(m) =>
+                setTaskDraft({ title: m.body.slice(0, 200), assignee_id: person.id, source_message_id: m.id })
+              }
+            />
+          )}
         </div>
-        <div className={cn(visible('details'), 'w-full flex-col overflow-y-auto border-s border-border lg:flex lg:w-80')}>
-          <SidePanel conversationId={conversation?.id} />
+        <div className={cn(column === 'details' ? 'flex' : 'hidden', 'w-full flex-col overflow-y-auto border-s border-border lg:flex lg:w-80')}>
+          <SidePanel
+            conversationId={conversation?.id}
+            personId={person?.id}
+            onOpenBoard={() => person && showPerson(person.id, 'tasks')}
+          />
         </div>
       </main>
       <nav aria-label="Navigation" className="flex border-t border-border md:hidden">
@@ -88,6 +129,17 @@ export function AppShell({ me }: { me: User }) {
           </button>
         ))}
       </nav>
+      {taskDraft && (
+        <TaskForm
+          people={people}
+          initial={taskDraft}
+          onCancel={() => setTaskDraft(null)}
+          onCreated={(task) => {
+            setTaskDraft(null)
+            openTask(task)
+          }}
+        />
+      )}
     </div>
   )
 }
