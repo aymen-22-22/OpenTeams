@@ -7,6 +7,7 @@ import { ChatView } from '@/features/chat/ChatView'
 import { FilesTab } from '@/features/files/FilesTab'
 
 import { Button } from '@/components/ui/button'
+import { AIChat } from '@/features/ai/AIChat'
 import type { Task } from '@/features/tasks/api'
 import { useTasks } from '@/features/tasks/api'
 import { KanbanBoard } from '@/features/tasks/KanbanBoard'
@@ -47,14 +48,8 @@ export function ConversationArea(props: Props) {
           ) : null}
         </TabsContent>
 
-        <TabsContent value="ai" className="flex flex-col gap-2">
-          <p role="note" className="rounded-md border border-ai-foreground/30 bg-ai px-3 py-2 text-sm text-ai-foreground">
-            {t('ai.notice', { name: person.display_name })}
-          </p>
-          <div className="me-auto max-w-[75%] rounded-lg bg-ai px-3 py-2 text-ai-foreground">
-            <span className="block text-xs font-semibold">{t('ai.label', { name: person.display_name })}</span>
-            …
-          </div>
+        <TabsContent value="ai" className="flex flex-col overflow-hidden p-0">
+          <AIChat key={person.id} ownerId={person.id} ownerName={person.display_name} isSelf={false} />
         </TabsContent>
 
         <TabsContent value="files">

@@ -2,6 +2,7 @@ import { Info, MessageSquare, Users } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { AssistantView } from '@/features/ai/AssistantView'
 import { usePeople, type User } from '@/features/auth/api'
 import { useConversations, useDirectConversation, type Message } from '@/features/chat/api'
 import type { Task, TaskInput } from '@/features/tasks/api'
@@ -16,7 +17,7 @@ import { SidePanel } from './SidePanel'
 import { TopBar } from './TopBar'
 
 type Column = 'people' | 'conversation' | 'details'
-type View = { kind: 'person' } | { kind: 'myTasks' } | { kind: 'task'; taskId: string }
+type View = { kind: 'person' } | { kind: 'myTasks' } | { kind: 'assistant' } | { kind: 'task'; taskId: string }
 
 const NAV = [
   { id: 'people', Icon: Users },
@@ -78,6 +79,10 @@ export function AppShell({ me }: { me: User }) {
             unread={unread}
             selectedId={view.kind === 'person' ? person?.id : undefined}
             onSelect={(p) => showPerson(p.id)}
+            onAssistant={() => {
+              setView({ kind: 'assistant' })
+              setColumn('conversation')
+            }}
             onMyTasks={() => {
               setView({ kind: 'myTasks' })
               setColumn('conversation')
@@ -88,6 +93,7 @@ export function AppShell({ me }: { me: User }) {
           {view.kind === 'task' && (
             <TaskView key={view.taskId} taskId={view.taskId} meId={me.id} people={peopleById} onBack={() => setView({ kind: 'person' })} />
           )}
+          {view.kind === 'assistant' && <AssistantView me={me} people={peopleById} />}
           {view.kind === 'myTasks' && (
             <MyTasks meId={me.id} people={peopleById} onOpen={openTask} onNew={() => setTaskDraft({})} />
           )}

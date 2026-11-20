@@ -47,7 +47,67 @@
   },
   "ai": {
     "label": "AI of {{name}}",
-    "notice": "You are talking to an AI, not to {{name}}."
+    "notice": "You are talking to an AI, not to {{name}}. It can be wrong and cannot act on your behalf.",
+    "selfNotice": "Your personal assistant. It answers using your own API key.",
+    "placeholder": "Ask {{name}}'s AI…",
+    "thinking": "The AI is thinking…",
+    "unavailable": "This AI is not available right now.",
+    "notAllowed": "{{name}}'s AI is not shared with you.",
+    "errors": {
+      "ai_inactive": "This AI is not active.",
+      "ai_outside_hours": "This AI is not available at this time.",
+      "rate_limited": "Too many questions. Try again shortly.",
+      "ai_budget_exceeded": "This AI's daily budget is used up.",
+      "ai_provider_error": "The AI provider did not answer."
+    },
+    "settings": {
+      "title": "Settings",
+      "active": "Enable my AI",
+      "provider": "Provider",
+      "model": "Model",
+      "apiKey": "API key",
+      "keySaved": "•••••••• saved",
+      "keyHint": "Leave empty to keep the current key. It is encrypted and never shown.",
+      "systemPrompt": "Instructions for my AI",
+      "language": "Language",
+      "tone": "Tone",
+      "length": "Answer length",
+      "hours": "Available hours",
+      "hoursStart": "Start",
+      "hoursEnd": "End",
+      "hoursHint": "(empty = always)",
+      "visibility": "What my AI may use and who may talk to it",
+      "shareTasks": "My tasks",
+      "audience": "Who may talk to my AI",
+      "saved": "Saved.",
+      "saveFailed": "Could not save."
+    },
+    "providers": {
+      "anthropic": "Claude (Anthropic)",
+      "openai": "OpenAI",
+      "qwen": "Qwen",
+      "ollama": "Ollama (local)"
+    },
+    "tones": {
+      "professional": "Professional",
+      "friendly": "Friendly",
+      "concise": "Concise"
+    },
+    "lengths": {
+      "short": "Short",
+      "medium": "Medium",
+      "long": "Long"
+    },
+    "audiences": {
+      "owner_only": "Only me",
+      "everyone": "Everyone",
+      "people": "Some people",
+      "teams": "Some teams"
+    },
+    "log": {
+      "title": "Log",
+      "empty": "Nobody has talked to your AI yet."
+    }
   },
   "tasks": {
     "pending": "Pending",

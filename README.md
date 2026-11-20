@@ -2,7 +2,7 @@
 
 Self-hosted team chat and work platform: chat, files, kanban tasks, calendar, reminders and personal AI. The full specification is in [CLAUDE.md](CLAUDE.md).
 
-**Status:** Phase 3 done: login, roles, presence, and real-time direct chat (replies, edit/delete, read state, typing, pins, search). Files per conversation (Nextcloud or local storage, versions). Kanban tasks with their own task chats. AI and reminders are still placeholders.
+**Status:** Phase 3 done: login, roles, presence, and real-time direct chat (replies, edit/delete, read state, typing, pins, search). Files per conversation (Nextcloud or local storage, versions). Kanban tasks with their own task chats. Personal AI per user (own API key). Reminders are still placeholders.
 
 ## Run everything with Docker
 
@@ -72,6 +72,17 @@ CI (GitHub Actions) runs the same checks, plus `pip-audit` and `npm audit`.
 - The WebSocket `/ws` requires the session cookie and an allowed `Origin` (`ALLOWED_ORIGINS`).
 - Tasks are visible to the members of their task chat (creator, assignee) and to managers/admins.
 - Only members of a conversation can read it, write in it, search it, or receive its events; outsiders get 404.
+
+## Personal AI
+
+Each user can connect their own AI in **My assistant → Settings**: Claude, OpenAI, Qwen, or a local model with Ollama.
+
+- The API key is encrypted in the database (Fernet, `AI_ENCRYPTION_KEY`) and never sent back to the browser.
+- By default the AI shares nothing and only its owner can talk to it. The owner chooses who may talk to it (everyone, some people, some teams), whether it may read their tasks, and its hours.
+- Colleagues talk to it in the **His AI** tab. Every answer is labelled "AI of <name>". The AI can only read and answer; it has no tools, so it never acts by itself.
+- The owner sees every conversation in **My assistant → Log**. Every call is recorded in `ai_audit_log` (model, tokens, cost, duration).
+- Limits: per caller per minute, per owner per hour, and a daily token budget per owner (`AI_*` settings).
+- Ollama and Qwen server addresses are set by the admin (`OLLAMA_URL`, `QWEN_URL`), not by users.
 
 ## Real-time events
 

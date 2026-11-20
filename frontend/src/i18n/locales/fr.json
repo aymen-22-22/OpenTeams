@@ -47,7 +47,67 @@
   },
   "ai": {
     "label": "IA de {{name}}",
-    "notice": "Vous parlez à une IA, pas à {{name}}."
+    "notice": "Vous parlez à une IA, pas à {{name}}. Elle peut se tromper et ne peut rien faire à votre place.",
+    "selfNotice": "Votre assistant personnel. Il répond avec votre propre clé API.",
+    "placeholder": "Demander à l'IA de {{name}}…",
+    "thinking": "L'IA réfléchit…",
+    "unavailable": "Cette IA n'est pas disponible pour le moment.",
+    "notAllowed": "L'IA de {{name}} n'est pas partagée avec vous.",
+    "errors": {
+      "ai_inactive": "Cette IA n'est pas active.",
+      "ai_outside_hours": "Cette IA n'est pas disponible à cette heure.",
+      "rate_limited": "Trop de questions. Réessayez dans un instant.",
+      "ai_budget_exceeded": "Le budget quotidien de cette IA est atteint.",
+      "ai_provider_error": "Le fournisseur d'IA n'a pas répondu."
+    },
+    "settings": {
+      "title": "Réglages",
+      "active": "Activer mon IA",
+      "provider": "Fournisseur",
+      "model": "Modèle",
+      "apiKey": "Clé API",
+      "keySaved": "•••••••• enregistrée",
+      "keyHint": "Laissez vide pour garder la clé actuelle. Elle est chiffrée et ne s'affiche jamais.",
+      "systemPrompt": "Instructions pour mon IA",
+      "language": "Langue",
+      "tone": "Ton",
+      "length": "Longueur des réponses",
+      "hours": "Heures de disponibilité",
+      "hoursStart": "Début",
+      "hoursEnd": "Fin",
+      "hoursHint": "(vide = toujours)",
+      "visibility": "Ce que mon IA peut utiliser et qui peut lui parler",
+      "shareTasks": "Mes tâches",
+      "audience": "Qui peut parler à mon IA",
+      "saved": "Enregistré.",
+      "saveFailed": "Échec de l'enregistrement."
+    },
+    "providers": {
+      "anthropic": "Claude (Anthropic)",
+      "openai": "OpenAI",
+      "qwen": "Qwen",
+      "ollama": "Ollama (local)"
+    },
+    "tones": {
+      "professional": "Professionnel",
+      "friendly": "Amical",
+      "concise": "Concis"
+    },
+    "lengths": {
+      "short": "Courtes",
+      "medium": "Moyennes",
+      "long": "Longues"
+    },
+    "audiences": {
+      "owner_only": "Moi seulement",
+      "everyone": "Tout le monde",
+      "people": "Certaines personnes",
+      "teams": "Certaines équipes"
+    },
+    "log": {
+      "title": "Journal",
+      "empty": "Personne n'a encore parlé à votre IA."
+    }
   },
   "tasks": {
     "pending": "En attente",

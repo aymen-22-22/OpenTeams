@@ -17,14 +17,15 @@ interface Props {
   selectedId: string | undefined
   onSelect: (person: Person) => void
   onMyTasks: () => void
+  onAssistant: () => void
 }
 
-export function PeoplePanel({ people, unread, selectedId, onSelect, onMyTasks }: Props) {
+export function PeoplePanel({ people, unread, selectedId, onSelect, onMyTasks, onAssistant }: Props) {
   const { t } = useTranslation()
 
   return (
     <nav aria-label={t('people.title')} className="flex h-full flex-col gap-2 p-2">
-      <button type="button" className="flex min-h-11 items-center gap-2 rounded-md px-2 text-start font-medium text-accent hover:bg-muted">
+      <button type="button" onClick={onAssistant} className="flex min-h-11 items-center gap-2 rounded-md px-2 text-start font-medium text-accent hover:bg-muted">
         <Bot className="size-5" aria-hidden />
         {t('people.myAssistant')}
       </button>
