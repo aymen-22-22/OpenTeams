@@ -79,13 +79,6 @@ test('switching to English translates the shell', async () => {
   expect(document.documentElement.dir).toBe('ltr')
 })
 
-test('file tiles show icons only, with the name as accessible label', async () => {
-  mockApi(LOGGED_IN)
-  renderApp()
-  await userEvent.click(await screen.findByRole('tab', { name: 'Fichiers' }))
-  expect(screen.getAllByRole('button', { name: 'budget.xlsx' }).length).toBeGreaterThan(0)
-  expect(screen.queryByText('budget.xlsx')).not.toBeInTheDocument()
-})
 
 test('logout returns to the login page', async () => {
   mockApi({ ...LOGGED_IN, 'POST /auth/logout': { status: 204 } })

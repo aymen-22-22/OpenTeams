@@ -2,12 +2,12 @@ import { useTranslation } from 'react-i18next'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-import { FileIcon } from './FileIcon'
 import type { Person } from '@/features/auth/api'
 import type { Conversation } from '@/features/chat/api'
 import { ChatView } from '@/features/chat/ChatView'
+import { FilesTab } from '@/features/files/FilesTab'
 
-import { FILES, TASK_COUNTS, type TaskStatus } from './placeholder'
+import { TASK_COUNTS, type TaskStatus } from './placeholder'
 
 const STATUSES: TaskStatus[] = ['pending', 'in_progress', 'finished']
 
@@ -47,9 +47,7 @@ export function ConversationArea({ person, conversation, meId, people }: Props) 
         </TabsContent>
 
         <TabsContent value="files">
-          <div className="flex flex-wrap gap-2">
-            {FILES.map((f) => <FileIcon key={f.id} file={f} />)}
-          </div>
+          {conversation ? <FilesTab conversationId={conversation.id} /> : null}
         </TabsContent>
 
         <TabsContent value="tasks">

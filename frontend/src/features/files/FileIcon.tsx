@@ -1,6 +1,6 @@
 import { File, FileImage, FileSpreadsheet, FileText, FileType } from 'lucide-react'
 
-import type { ChatFile } from './placeholder'
+import { downloadFile, type ChatFile } from './api'
 
 const ICONS = {
   pdf: { Icon: FileType, color: 'text-red-600' },
@@ -11,13 +11,15 @@ const ICONS = {
 } as const
 
 /** File tile: icon only. The name is exposed via tooltip and aria-label, never as visible text. */
-export function FileIcon({ file }: { file: ChatFile }) {
+export function FileIcon({ file }: { file: Pick<ChatFile, 'id' | 'name' | 'kind' | 'current_version'> }) {
   const { Icon, color } = ICONS[file.kind]
+  const title = file.current_version > 1 ? `${file.name} (v${file.current_version})` : file.name
   return (
     <button
       type="button"
-      title={file.name}
+      title={title}
       aria-label={file.name}
+      onClick={() => void downloadFile(file.id)}
       className="flex size-12 items-center justify-center rounded-md border border-border hover:bg-muted"
     >
       <Icon className={`size-6 ${color}`} aria-hidden />

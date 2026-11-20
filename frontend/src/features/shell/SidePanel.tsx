@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 
 import { usePins } from '@/features/chat/api'
+import { useFiles } from '@/features/files/api'
+import { FileIcon } from '@/features/files/FileIcon'
 
-import { FileIcon } from './FileIcon'
-import { FILES, REMINDERS, TASK_COUNTS, type TaskStatus } from './placeholder'
+import { REMINDERS, TASK_COUNTS, type TaskStatus } from './placeholder'
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -20,6 +21,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 export function SidePanel({ conversationId }: { conversationId: string | undefined }) {
   const { t } = useTranslation()
   const pins = usePins(conversationId).data ?? []
+  const recentFiles = (useFiles(conversationId).data ?? []).slice(0, 4)
   const statuses = Object.keys(TASK_COUNTS) as TaskStatus[]
 
   return (
@@ -34,7 +36,11 @@ export function SidePanel({ conversationId }: { conversationId: string | undefin
         )}
       </Section>
       <Section title={t('side.files')}>
-        <div className="flex flex-wrap gap-2">{FILES.slice(0, 4).map((f) => <FileIcon key={f.id} file={f} />)}</div>
+        {recentFiles.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t('files.empty')}</p>
+        ) : (
+          <div className="flex flex-wrap gap-2">{recentFiles.map((f) => <FileIcon key={f.id} file={f} />)}</div>
+        )}
       </Section>
       <Section title={t('side.tasks')}>
         <dl className="grid grid-cols-3 gap-2 text-center text-sm">

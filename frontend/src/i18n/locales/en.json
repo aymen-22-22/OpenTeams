@@ -67,7 +67,17 @@
     "spreadsheet": "Spreadsheet",
     "document": "Document",
     "image": "Image",
-    "other": "Other"
+    "other": "Other",
+    "upload": "Add files",
+    "dropHint": "or drop them here",
+    "uploading": "Uploads in progress",
+    "empty": "No files yet.",
+    "errors": {
+      "type_not_allowed": "This file type is not allowed.",
+      "too_large": "File is too large.",
+      "rejected": "Empty or rejected file.",
+      "upload_failed": "Upload failed."
+    }
   },
   "nav": {
     "people": "People",

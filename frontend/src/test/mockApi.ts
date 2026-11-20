@@ -42,5 +42,12 @@ export const LOGGED_IN: Routes = {
   'POST /conversations/direct': { status: 200, body: conversation('c1', 'u1') },
   'GET /conversations/c1/messages': { status: 200, body: { items: [message(1, 'Bonjour !'), message(2, 'Salut', 'me')], next_cursor: null } },
   'GET /conversations/c1/pins': { status: 200, body: [] },
+  'GET /conversations/c1/files': {
+    status: 200,
+    body: [
+      { id: 'f1', conversation_id: 'c1', name: 'budget.xlsx', kind: 'spreadsheet', size: 10, current_version: 2, updated_at: '2026-01-05T09:00:00Z' },
+      { id: 'f2', conversation_id: 'c1', name: 'rapport.pdf', kind: 'pdf', size: 10, current_version: 1, updated_at: '2026-01-05T09:00:00Z' },
+    ],
+  },
   'POST /conversations/c1/read': { status: 204 },
 }

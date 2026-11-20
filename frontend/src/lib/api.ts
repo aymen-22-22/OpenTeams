@@ -20,7 +20,7 @@ function readCookie(name: string): string | undefined {
     ?.slice(name.length + 1)
 }
 
-async function csrfToken(): Promise<string> {
+export async function csrfToken(): Promise<string> {
   let token = readCookie('csrf_token')
   if (!token) {
     await fetch(`${BASE}/auth/csrf`, { credentials: 'include' })

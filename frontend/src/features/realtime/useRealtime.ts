@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { ME_KEY, PEOPLE_KEY, type Person, type Presence } from '@/features/auth/api'
 import { keys, upsertMessage, type Message, type MessagesData } from '@/features/chat/api'
 import { clearTyping, markTyping } from '@/features/chat/typing'
+import { filesKey } from '@/features/files/api'
 import { realtime, type ServerEvent } from '@/lib/realtime'
 
 /** Connects the socket while logged in and applies server events to the query cache. */
@@ -42,6 +43,9 @@ export function useRealtime(enabled: boolean) {
         case 'pin.added':
         case 'pin.removed':
           if (conv) void qc.invalidateQueries({ queryKey: keys.pins(conv) })
+          break
+        case 'file.created':
+          if (conv) void qc.invalidateQueries({ queryKey: filesKey(conv) })
           break
         case 'typing':
           if (conv && e.data?.user_id) markTyping(conv, String(e.data.user_id))

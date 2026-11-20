@@ -67,7 +67,17 @@
     "spreadsheet": "جدول بيانات",
     "document": "مستند",
     "image": "صورة",
-    "other": "أخرى"
+    "other": "أخرى",
+    "upload": "إضافة ملفات",
+    "dropHint": "أو اسحبها إلى هنا",
+    "uploading": "جارٍ الرفع",
+    "empty": "لا توجد ملفات.",
+    "errors": {
+      "type_not_allowed": "نوع الملف غير مسموح.",
+      "too_large": "الملف كبير جدًا.",
+      "rejected": "ملف فارغ أو مرفوض.",
+      "upload_failed": "فشل الرفع."
+    }
   },
   "nav": {
     "people": "الأشخاص",
