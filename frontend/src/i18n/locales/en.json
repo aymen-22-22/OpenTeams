@@ -16,7 +16,8 @@
       "away": "Away",
       "offline": "Offline"
     },
-    "empty": "No other people yet."
+    "empty": "No other people yet.",
+    "unread": "{{count}} unread"
   },
   "tabs": {
     "chat": "Chat",
@@ -26,7 +27,23 @@
   },
   "chat": {
     "placeholder": "Write a message…",
-    "send": "Send"
+    "send": "Send",
+    "save": "Save",
+    "cancel": "Cancel",
+    "reply": "Reply",
+    "edit": "Edit",
+    "delete": "Delete",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "pinned": "Pinned",
+    "edited": "edited",
+    "deleted": "Message deleted",
+    "you": "You",
+    "typing": "{{name}} is typing…",
+    "loadOlder": "Load earlier messages",
+    "empty": "No messages yet. Say hello!",
+    "editing": "Editing message",
+    "replyingTo": "Replying to: {{text}}"
   },
   "ai": {
     "label": "AI of {{name}}",
@@ -42,7 +59,8 @@
     "pins": "Pinned",
     "files": "Recent files",
     "tasks": "Tasks",
-    "reminders": "Reminders"
+    "reminders": "Reminders",
+    "noPins": "Nothing pinned"
   },
   "files": {
     "pdf": "PDF",
@@ -64,5 +82,9 @@
     "invalid": "Incorrect email or password.",
     "rateLimited": "Too many attempts. Try again in a few minutes.",
     "failed": "Could not sign in. Please try again."
+  },
+  "search": {
+    "results": "Search results",
+    "noResults": "No results"
   }
 }

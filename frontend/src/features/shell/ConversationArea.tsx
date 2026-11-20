@@ -1,17 +1,24 @@
 import { useTranslation } from 'react-i18next'
 
-import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { cn } from '@/lib/utils'
 
 import { FileIcon } from './FileIcon'
 import type { Person } from '@/features/auth/api'
+import type { Conversation } from '@/features/chat/api'
+import { ChatView } from '@/features/chat/ChatView'
 
-import { FILES, MESSAGES, TASK_COUNTS, type TaskStatus } from './placeholder'
+import { FILES, TASK_COUNTS, type TaskStatus } from './placeholder'
 
 const STATUSES: TaskStatus[] = ['pending', 'in_progress', 'finished']
 
-export function ConversationArea({ person }: { person: Person }) {
+interface Props {
+  person: Person
+  conversation: Conversation | undefined
+  meId: string
+  people: Map<string, Person>
+}
+
+export function ConversationArea({ person, conversation, meId, people }: Props) {
   const { t } = useTranslation()
 
   return (
@@ -25,16 +32,8 @@ export function ConversationArea({ person }: { person: Person }) {
           <TabsTrigger value="tasks">{t('tabs.tasks')}</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="chat" className="flex flex-col gap-2">
-          {MESSAGES.map((m) => (
-            <p key={m.id} className={cn('max-w-[75%] rounded-lg px-3 py-2', m.mine ? 'ms-auto bg-accent text-accent-foreground' : 'me-auto bg-muted')}>
-              {m.text}
-            </p>
-          ))}
-          <form className="mt-auto flex gap-2 pt-4" onSubmit={(e) => e.preventDefault()}>
-            <input aria-label={t('chat.placeholder')} placeholder={t('chat.placeholder')} className="min-h-11 flex-1 rounded-md border border-border bg-background px-3" />
-            <Button type="submit">{t('chat.send')}</Button>
-          </form>
+        <TabsContent value="chat" className="flex flex-col overflow-hidden p-0">
+          {conversation ? <ChatView conversation={conversation} meId={meId} people={people} /> : null}
         </TabsContent>
 
         <TabsContent value="ai" className="flex flex-col gap-2">

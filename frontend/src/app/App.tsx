@@ -2,12 +2,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import { useMe } from '@/features/auth/api'
 import { LoginPage } from '@/features/auth/LoginPage'
-import { usePresenceSocket } from '@/features/presence/usePresenceSocket'
+import { useRealtime } from '@/features/realtime/useRealtime'
 import { AppShell } from '@/features/shell/AppShell'
 
 function AuthGate() {
   const me = useMe()
-  usePresenceSocket(Boolean(me.data))
+  useRealtime(Boolean(me.data))
 
   if (me.isPending) return null
   if (!me.data) return <LoginPage />

@@ -29,9 +29,9 @@ async function csrfToken(): Promise<string> {
   return token ?? ''
 }
 
-export async function api<T>(path: string, options: { method?: string; body?: unknown } = {}): Promise<T> {
+export async function api<T>(path: string, options: { method?: string; body?: unknown; headers?: Record<string, string> } = {}): Promise<T> {
   const method = options.method ?? 'GET'
-  const headers: Record<string, string> = { Accept: 'application/json' }
+  const headers: Record<string, string> = { Accept: 'application/json', ...options.headers }
   if (options.body !== undefined) headers['Content-Type'] = 'application/json'
   if (UNSAFE.has(method)) headers['X-CSRF-Token'] = await csrfToken()
 

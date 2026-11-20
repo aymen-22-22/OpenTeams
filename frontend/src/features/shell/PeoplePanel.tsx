@@ -13,11 +13,12 @@ const DOT: Record<Presence, string> = {
 
 interface Props {
   people: Person[]
+  unread: Map<string, number>
   selectedId: string | undefined
   onSelect: (person: Person) => void
 }
 
-export function PeoplePanel({ people, selectedId, onSelect }: Props) {
+export function PeoplePanel({ people, unread, selectedId, onSelect }: Props) {
   const { t } = useTranslation()
 
   return (
@@ -42,6 +43,12 @@ export function PeoplePanel({ people, selectedId, onSelect }: Props) {
             >
               <span className={cn('size-2.5 shrink-0 rounded-full', DOT[person.presence])} aria-label={t(`people.status.${person.presence}`)} />
               <span className="min-w-0 flex-1 truncate">{person.display_name}</span>
+              {(unread.get(person.id) ?? 0) > 0 && (
+                <span className="shrink-0 rounded-full bg-accent px-2 text-xs font-semibold text-accent-foreground"
+                  aria-label={t('people.unread', { count: unread.get(person.id) })}>
+                  {unread.get(person.id)}
+                </span>
+              )}
               <span className={cn('shrink-0 rounded px-1.5 text-xs', person.ai_active ? 'bg-ai text-ai-foreground' : 'bg-muted text-muted-foreground')}>
                 {t(person.ai_active ? 'people.aiActive' : 'people.aiInactive')}
               </span>

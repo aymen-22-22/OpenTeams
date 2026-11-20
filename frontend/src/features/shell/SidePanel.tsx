@@ -3,8 +3,10 @@ import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
 
+import { usePins } from '@/features/chat/api'
+
 import { FileIcon } from './FileIcon'
-import { FILES, PINS, REMINDERS, TASK_COUNTS, type TaskStatus } from './placeholder'
+import { FILES, REMINDERS, TASK_COUNTS, type TaskStatus } from './placeholder'
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -15,14 +17,21 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   )
 }
 
-export function SidePanel() {
+export function SidePanel({ conversationId }: { conversationId: string | undefined }) {
   const { t } = useTranslation()
+  const pins = usePins(conversationId).data ?? []
   const statuses = Object.keys(TASK_COUNTS) as TaskStatus[]
 
   return (
     <aside className="flex h-full flex-col gap-6 p-4">
       <Section title={t('side.pins')}>
-        <ul className="list-disc ps-5 text-sm">{PINS.map((p) => <li key={p}>{p}</li>)}</ul>
+        {pins.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t('side.noPins')}</p>
+        ) : (
+          <ul className="list-disc ps-5 text-sm">
+            {pins.map((p) => <li key={p.message.id} dir="auto" className="truncate">{p.message.body}</li>)}
+          </ul>
+        )}
       </Section>
       <Section title={t('side.files')}>
         <div className="flex flex-wrap gap-2">{FILES.slice(0, 4).map((f) => <FileIcon key={f.id} file={f} />)}</div>

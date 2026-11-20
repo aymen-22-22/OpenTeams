@@ -1,4 +1,4 @@
-// Placeholder data for parts of the shell not built yet (messages, files, tasks).
+// Placeholder data for parts of the shell not built yet (files, tasks, reminders).
 
 export type FileKind = 'pdf' | 'spreadsheet' | 'document' | 'image' | 'other'
 export type TaskStatus = 'pending' | 'in_progress' | 'finished'
@@ -9,17 +9,6 @@ export interface ChatFile {
   kind: FileKind
 }
 
-export interface Message {
-  id: string
-  mine: boolean
-  text: string
-}
-
-export const MESSAGES: Message[] = [
-  { id: 'm1', mine: false, text: 'Bonjour ! Le rapport est prêt.' },
-  { id: 'm2', mine: true, text: 'Merci, je regarde ça.' },
-]
-
 export const FILES: ChatFile[] = [
   { id: 'f1', name: 'rapport-mensuel.pdf', kind: 'pdf' },
   { id: 'f2', name: 'budget.xlsx', kind: 'spreadsheet' },
@@ -29,7 +18,5 @@ export const FILES: ChatFile[] = [
 ]
 
 export const TASK_COUNTS: Record<TaskStatus, number> = { pending: 3, in_progress: 2, finished: 5 }
-
-export const PINS = ['Réunion lundi 10h', 'Objectifs T4']
 
 export const REMINDERS = ['Envoyer le rapport — vendredi']

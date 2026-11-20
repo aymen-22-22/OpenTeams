@@ -3,12 +3,14 @@ import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
 import { useLogout, type User } from '@/features/auth/api'
+import type { Message } from '@/features/chat/api'
+import { SearchBox } from '@/features/search/SearchBox'
 import { useTheme } from '@/hooks/useTheme'
 import { LANGUAGES } from '@/i18n'
 
 const LANGUAGE_NAMES = { fr: 'Français', en: 'English', ar: 'العربية' } as const
 
-export function TopBar({ me }: { me: User }) {
+export function TopBar({ me, onOpenMessage }: { me: User; onOpenMessage: (m: Message) => void }) {
   const { t, i18n } = useTranslation()
   const { theme, toggle } = useTheme()
   const logout = useLogout()
@@ -16,7 +18,7 @@ export function TopBar({ me }: { me: User }) {
   return (
     <header className="flex items-center gap-2 border-b border-border px-4 py-2">
       <span className="font-semibold text-accent">{t('app.name')}</span>
-      <input type="search" aria-label={t('app.search')} placeholder={t('app.search')} className="ms-4 hidden min-h-11 flex-1 rounded-md border border-border bg-background px-3 md:block" />
+      <SearchBox onOpen={onOpenMessage} />
       <select
         aria-label={t('app.language')}
         value={i18n.language}

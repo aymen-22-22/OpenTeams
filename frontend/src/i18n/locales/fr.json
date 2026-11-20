@@ -16,7 +16,8 @@
       "away": "Absent",
       "offline": "Hors ligne"
     },
-    "empty": "Aucune autre personne pour l'instant."
+    "empty": "Aucune autre personne pour l'instant.",
+    "unread": "{{count}} non lus"
   },
   "tabs": {
     "chat": "Chat",
@@ -26,7 +27,23 @@
   },
   "chat": {
     "placeholder": "Écrire un message…",
-    "send": "Envoyer"
+    "send": "Envoyer",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "reply": "Répondre",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "pin": "Épingler",
+    "unpin": "Désépingler",
+    "pinned": "Épinglé",
+    "edited": "modifié",
+    "deleted": "Message supprimé",
+    "you": "Vous",
+    "typing": "{{name}} écrit…",
+    "loadOlder": "Charger les messages précédents",
+    "empty": "Aucun message. Dites bonjour !",
+    "editing": "Modification du message",
+    "replyingTo": "Réponse à : {{text}}"
   },
   "ai": {
     "label": "IA de {{name}}",
@@ -42,7 +59,8 @@
     "pins": "Épinglés",
     "files": "Fichiers récents",
     "tasks": "Tâches",
-    "reminders": "Rappels"
+    "reminders": "Rappels",
+    "noPins": "Aucun élément épinglé"
   },
   "files": {
     "pdf": "PDF",
@@ -64,5 +82,9 @@
     "invalid": "E-mail ou mot de passe incorrect.",
     "rateLimited": "Trop de tentatives. Réessayez dans quelques minutes.",
     "failed": "Connexion impossible. Réessayez."
+  },
+  "search": {
+    "results": "Résultats de recherche",
+    "noResults": "Aucun résultat"
   }
 }
