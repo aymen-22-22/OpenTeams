@@ -10,6 +10,7 @@ from app.core.logging import setup_logging
 from app.core.settings import get_settings
 from app.files.router import router as files_router
 from app.search.router import router as search_router
+from app.tasks.router import router as tasks_router
 from app.users.router import router as users_router
 
 
@@ -28,6 +29,7 @@ def create_app() -> FastAPI:
         chat_router,
         search_router,
         files_router,
+        tasks_router,
     ):
         app.include_router(router, prefix="/api/v1")
     app.include_router(ws.router)

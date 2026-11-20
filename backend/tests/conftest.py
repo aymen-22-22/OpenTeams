@@ -30,7 +30,7 @@ from app.users.models import Role, User  # noqa: E402
 
 PASSWORD = "correct-horse-battery"
 TABLES = (
-    "file_versions, files, realtime_events, pins, message_reads, messages, "
+    "task_events, tasks, file_versions, files, realtime_events, pins, message_reads, messages, "
     "conversation_members, conversations, audit_log, sessions, team_members, teams, users"
 )
 
