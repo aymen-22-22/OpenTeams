@@ -25,7 +25,10 @@ from app.users import presence  # noqa: E402
 from app.users.models import Role, User  # noqa: E402
 
 PASSWORD = "correct-horse-battery"
-TABLES = "audit_log, sessions, team_members, teams, users"
+TABLES = (
+    "realtime_events, pins, message_reads, messages, conversation_members, conversations, "
+    "audit_log, sessions, team_members, teams, users"
+)
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -124,3 +127,10 @@ async def admin_client() -> AsyncIterator[AsyncClient]:
     await login(c, "admin@example.com")
     yield c
     await c.aclose()
+
+
+async def logged_in(email: str, role: Role = Role.EMPLOYEE) -> tuple[AsyncClient, User]:
+    user = await make_user(email, role)
+    c = await new_client()
+    await login(c, email)
+    return c, user
