@@ -4,13 +4,20 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { useLogout, type User } from '@/features/auth/api'
 import type { Message } from '@/features/chat/api'
+import { NotificationBell } from '@/features/notifications/NotificationBell'
 import { SearchBox } from '@/features/search/SearchBox'
 import { useTheme } from '@/hooks/useTheme'
 import { LANGUAGES } from '@/i18n'
 
 const LANGUAGE_NAMES = { fr: 'Français', en: 'English', ar: 'العربية' } as const
 
-export function TopBar({ me, onOpenMessage }: { me: User; onOpenMessage: (m: Message) => void }) {
+interface Props {
+  me: User
+  onOpenMessage: (m: Message) => void
+  onNavigate: (link: string) => void
+}
+
+export function TopBar({ me, onOpenMessage, onNavigate }: Props) {
   const { t, i18n } = useTranslation()
   const { theme, toggle } = useTheme()
   const logout = useLogout()
@@ -27,6 +34,7 @@ export function TopBar({ me, onOpenMessage }: { me: User; onOpenMessage: (m: Mes
       >
         {LANGUAGES.map((l) => <option key={l} value={l}>{LANGUAGE_NAMES[l]}</option>)}
       </select>
+      <NotificationBell onNavigate={onNavigate} />
       <Button variant="ghost" onClick={toggle} aria-label={t('app.theme')}>
         {theme === 'dark' ? <Sun className="size-5" aria-hidden /> : <Moon className="size-5" aria-hidden />}
       </Button>

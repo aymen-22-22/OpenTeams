@@ -1,14 +1,18 @@
 import { Info, MessageSquare, Users } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { AssistantView } from '@/features/ai/AssistantView'
 import { usePeople, type User } from '@/features/auth/api'
 import { useConversations, useDirectConversation, type Message } from '@/features/chat/api'
+import type { ReminderInput } from '@/features/notifications/api'
+import { PreferencesView } from '@/features/notifications/PreferencesView'
+import { ReminderForm } from '@/features/notifications/ReminderForm'
 import type { Task, TaskInput } from '@/features/tasks/api'
 import { MyTasks } from '@/features/tasks/MyTasks'
 import { TaskForm } from '@/features/tasks/TaskForm'
 import { TaskView } from '@/features/tasks/TaskView'
+import { api } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
 import { ConversationArea, type ConversationTab } from './ConversationArea'
@@ -17,7 +21,7 @@ import { SidePanel } from './SidePanel'
 import { TopBar } from './TopBar'
 
 type Column = 'people' | 'conversation' | 'details'
-type View = { kind: 'person' } | { kind: 'myTasks' } | { kind: 'assistant' } | { kind: 'task'; taskId: string }
+type View = { kind: 'person' } | { kind: 'myTasks' } | { kind: 'assistant' } | { kind: 'preferences' } | { kind: 'task'; taskId: string }
 
 const NAV = [
   { id: 'people', Icon: Users },
@@ -35,6 +39,9 @@ export function AppShell({ me }: { me: User }) {
   const [view, setView] = useState<View>({ kind: 'person' })
   const [tab, setTab] = useState<ConversationTab>('chat')
   const [taskDraft, setTaskDraft] = useState<Partial<TaskInput> | null>(null)
+  const [reminderDraft, setReminderDraft] = useState<Partial<ReminderInput> | null>(null)
+  // A deep link from an email (e.g. /tasks/<id>), opened once the data is loaded.
+  const [pendingLink, setPendingLink] = useState(() => (location.pathname !== '/' ? location.pathname : null))
 
   const peopleById = useMemo(() => new Map((allPeople ?? []).map((p) => [p.id, p])), [allPeople])
   const people = (allPeople ?? []).filter((p) => p.id !== me.id)
@@ -58,20 +65,45 @@ export function AppShell({ me }: { me: User }) {
     setColumn('conversation')
   }
 
-  const openMessage = (m: Message) => {
-    const c = conversations?.find((x) => x.id === m.conversation_id)
-    const other = c?.member_ids.find((id) => id !== me.id)
-    if (other) showPerson(other)
-  }
-
-  const openTask = (task: Task) => {
+  const openTask = (task: Pick<Task, 'id'>) => {
     setView({ kind: 'task', taskId: task.id })
     setColumn('conversation')
   }
 
+  /** Open a conversation: a direct chat shows the person, a task chat shows its task. */
+  const openConversation = async (conversationId: string) => {
+    const c = conversations?.find((x) => x.id === conversationId)
+    if (c?.type === 'direct') {
+      const other = c.member_ids.find((id) => id !== me.id)
+      if (other) showPerson(other)
+      return
+    }
+    const task = (await api<Task[]>('/tasks')).find((x) => x.conversation_id === conversationId)
+    if (task) openTask(task)
+  }
+
+  /** In-app links used by notifications and emails. */
+  const navigate = (link: string) => {
+    const [, kind, id] = link.split('/')
+    if (kind === 'tasks' && id) openTask({ id })
+    else if (kind === 'conversations' && id) void openConversation(id)
+    else if (kind === 'preferences') {
+      setView({ kind: 'preferences' })
+      setColumn('conversation')
+    }
+  }
+
+  useEffect(() => {
+    if (!pendingLink || !conversations) return
+    history.replaceState(null, '', '/')
+    setPendingLink(null) // eslint-disable-line react-hooks/set-state-in-effect -- one-time deep link
+    navigate(pendingLink)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- navigate uses the loaded conversations
+  }, [pendingLink, conversations])
+
   return (
     <div className="flex h-dvh flex-col">
-      <TopBar me={me} onOpenMessage={openMessage} />
+      <TopBar me={me} onOpenMessage={(m: Message) => void openConversation(m.conversation_id)} onNavigate={navigate} />
       <main className="flex flex-1 overflow-hidden">
         <div className={cn(column === 'people' ? 'flex' : 'hidden', 'w-full flex-col overflow-y-auto border-e border-border md:flex md:w-72')}>
           <PeoplePanel
@@ -91,9 +123,11 @@ export function AppShell({ me }: { me: User }) {
         </div>
         <div className={cn(column === 'conversation' ? 'flex' : 'hidden', 'min-w-0 flex-1 flex-col md:flex')}>
           {view.kind === 'task' && (
-            <TaskView key={view.taskId} taskId={view.taskId} meId={me.id} people={peopleById} onBack={() => setView({ kind: 'person' })} />
+            <TaskView key={view.taskId} taskId={view.taskId} meId={me.id} people={peopleById} onBack={() => setView({ kind: 'person' })}
+              onRemind={(id, title) => setReminderDraft({ title, target_type: 'task', target_id: id })} />
           )}
           {view.kind === 'assistant' && <AssistantView me={me} people={peopleById} />}
+          {view.kind === 'preferences' && <PreferencesView />}
           {view.kind === 'myTasks' && (
             <MyTasks meId={me.id} people={peopleById} onOpen={openTask} onNew={() => setTaskDraft({})} />
           )}
@@ -107,6 +141,7 @@ export function AppShell({ me }: { me: User }) {
               onTabChange={setTab}
               onOpenTask={openTask}
               onNewTask={() => setTaskDraft({ assignee_id: person.id })}
+              onRemindMessage={(m) => setReminderDraft({ title: m.body.slice(0, 200), target_type: 'message', target_id: m.id })}
               onCreateTaskFromMessage={(m) =>
                 setTaskDraft({ title: m.body.slice(0, 200), assignee_id: person.id, source_message_id: m.id })
               }
@@ -118,6 +153,7 @@ export function AppShell({ me }: { me: User }) {
             conversationId={conversation?.id}
             personId={person?.id}
             onOpenBoard={() => person && showPerson(person.id, 'tasks')}
+            onNewReminder={() => setReminderDraft({})}
           />
         </div>
       </main>
@@ -135,6 +171,7 @@ export function AppShell({ me }: { me: User }) {
           </button>
         ))}
       </nav>
+      {reminderDraft && <ReminderForm initial={reminderDraft} onDone={() => setReminderDraft(null)} />}
       {taskDraft && (
         <TaskForm
           people={people}

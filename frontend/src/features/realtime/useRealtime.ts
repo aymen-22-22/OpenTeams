@@ -5,6 +5,7 @@ import { ME_KEY, PEOPLE_KEY, type Person, type Presence } from '@/features/auth/
 import { keys, upsertMessage, type Message, type MessagesData } from '@/features/chat/api'
 import { clearTyping, markTyping } from '@/features/chat/typing'
 import { filesKey } from '@/features/files/api'
+import { notificationKeys } from '@/features/notifications/api'
 import { taskKeys } from '@/features/tasks/api'
 import { realtime, type ServerEvent } from '@/lib/realtime'
 
@@ -52,6 +53,10 @@ export function useRealtime(enabled: boolean) {
         case 'task.updated':
         case 'task.moved':
           void qc.invalidateQueries({ queryKey: taskKeys.all })
+          break
+        case 'notification.created':
+          void qc.invalidateQueries({ queryKey: notificationKeys.list })
+          void qc.invalidateQueries({ queryKey: notificationKeys.reminders })
           break
         case 'typing':
           if (conv && e.data?.user_id) markTyping(conv, String(e.data.user_id))

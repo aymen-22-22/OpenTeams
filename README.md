@@ -2,7 +2,7 @@
 
 Self-hosted team chat and work platform: chat, files, kanban tasks, calendar, reminders and personal AI. The full specification is in [CLAUDE.md](CLAUDE.md).
 
-**Status:** Phase 3 done: login, roles, presence, and real-time direct chat (replies, edit/delete, read state, typing, pins, search). Files per conversation (Nextcloud or local storage, versions). Kanban tasks with their own task chats. Personal AI per user (own API key). Reminders are still placeholders.
+**Status:** Phase 3 done: login, roles, presence, and real-time direct chat (replies, edit/delete, read state, typing, pins, search). Files per conversation (Nextcloud or local storage, versions). Kanban tasks with their own task chats. Personal AI per user (own API key). Reminders, notification center and HTML emails.
 
 ## Run everything with Docker
 
@@ -84,6 +84,14 @@ Each user can connect their own AI in **My assistant → Settings**: Claude, Ope
 - Limits: per caller per minute, per owner per hour, and a daily token budget per owner (`AI_*` settings).
 - Ollama and Qwen server addresses are set by the admin (`OLLAMA_URL`, `QWEN_URL`), not by users.
 
+## Notifications, reminders and email
+
+- **Notification center** (bell): new messages, files, task assignments, reminders, overdue tasks. Each user chooses per type: in the app and/or by email (*Notification preferences*).
+- **Reminders**: one-time or recurring (daily, weekly, monthly), optionally attached to a message or task; shown in the side panel.
+- **Emails** are never sent during a request: they go to the `email_outbox` table, and a scheduled job sends them with retries (exponential backoff, 5 attempts). Each email is responsive HTML with a plain-text version, a button that opens the right page (`APP_URL`), and a link to the preferences. Arabic emails are right-to-left.
+- **Scheduled jobs** (APScheduler, inside the API): due reminders (30 s), outbox (20 s), overdue-task nudge (daily 08:30), deletion of real-time events older than 7 days (daily). Run a single API instance, or set `SCHEDULER_ENABLED=false` on extra ones.
+- **Development**: emails arrive in Mailpit at http://localhost:8025. In production set the `SMTP_*` variables.
+
 ## Real-time events
 
 One WebSocket at `/ws`. Stored events have an `id`; reconnect with `/ws?last_event_id=<id>` to get what you missed.
@@ -95,6 +103,7 @@ One WebSocket at `/ws`. Stored events have an `id`; reconnect with `/ws?last_eve
 | `pin.added`, `pin.removed` | pins |
 | `file.created` | a file was uploaded |
 | `task.created`, `task.updated`, `task.moved` | tasks (sent to the task chat members) |
+| `notification.created` | a new notification for this user (not stored as an event) |
 | `presence.changed` | online / away / offline (not stored) |
 | `typing` | someone is typing (not stored; client sends `{"type":"typing","conversation_id":...}`) |
 

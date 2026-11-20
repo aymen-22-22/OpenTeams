@@ -174,5 +174,39 @@
   "search": {
     "results": "Search results",
     "noResults": "No results"
+  },
+  "notifications": {
+    "title": "Notifications ({{count}} unread)",
+    "center": "Notifications",
+    "readAll": "Mark all as read",
+    "empty": "No notifications.",
+    "preferences": "Notification preferences",
+    "type": "Type",
+    "inApp": "In the app",
+    "email": "Email",
+    "types": {
+      "message": "New message",
+      "reminder": "Reminder",
+      "file": "New file",
+      "task": "Task",
+      "approval": "Approval"
+    }
+  },
+  "reminders": {
+    "new": "New reminder",
+    "what": "Reminder",
+    "when": "When",
+    "repeat": "Repeat",
+    "save": "Create reminder",
+    "failed": "Could not create the reminder.",
+    "empty": "No reminders.",
+    "remindMe": "Remind me",
+    "delete": "Delete reminder {{title}}",
+    "recurrence": {
+      "none": "Once",
+      "daily": "Every day",
+      "weekly": "Every week",
+      "monthly": "Every month"
+    }
   }
 }

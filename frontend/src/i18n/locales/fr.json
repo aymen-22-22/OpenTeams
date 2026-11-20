@@ -174,5 +174,39 @@
   "search": {
     "results": "Résultats de recherche",
     "noResults": "Aucun résultat"
+  },
+  "notifications": {
+    "title": "Notifications ({{count}} non lues)",
+    "center": "Notifications",
+    "readAll": "Tout marquer comme lu",
+    "empty": "Aucune notification.",
+    "preferences": "Préférences de notification",
+    "type": "Type",
+    "inApp": "Dans l'application",
+    "email": "E-mail",
+    "types": {
+      "message": "Nouveau message",
+      "reminder": "Rappel",
+      "file": "Nouveau fichier",
+      "task": "Tâche",
+      "approval": "Approbation"
+    }
+  },
+  "reminders": {
+    "new": "Nouveau rappel",
+    "what": "Rappel",
+    "when": "Quand",
+    "repeat": "Répéter",
+    "save": "Créer le rappel",
+    "failed": "Impossible de créer le rappel.",
+    "empty": "Aucun rappel.",
+    "remindMe": "Me le rappeler",
+    "delete": "Supprimer le rappel {{title}}",
+    "recurrence": {
+      "none": "Une fois",
+      "daily": "Chaque jour",
+      "weekly": "Chaque semaine",
+      "monthly": "Chaque mois"
+    }
   }
 }

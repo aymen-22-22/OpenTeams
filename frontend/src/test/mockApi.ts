@@ -42,6 +42,8 @@ export const task = (id: string, title: string, status: string, extra: object = 
 })
 
 export const LOGGED_IN: Routes = {
+  'GET /notifications': { status: 200, body: { items: [], unread: 0 } },
+  'GET /reminders': { status: 200, body: [] },
   'GET /tasks?assignee_id=u1': {
     status: 200,
     body: [task('t1', 'Préparer le rapport', 'pending', { due_date: '2026-01-02', overdue: true }), task('t2', 'Relire', 'in_progress')],

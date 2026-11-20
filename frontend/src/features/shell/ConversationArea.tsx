@@ -24,6 +24,7 @@ interface Props {
   onOpenTask: (task: Task) => void
   onNewTask: () => void
   onCreateTaskFromMessage: (message: Message) => void
+  onRemindMessage: (message: Message) => void
 }
 
 export function ConversationArea(props: Props) {
@@ -44,7 +45,7 @@ export function ConversationArea(props: Props) {
 
         <TabsContent value="chat" className="flex flex-col overflow-hidden p-0">
           {conversation ? (
-            <ChatView conversation={conversation} meId={meId} people={people} onCreateTask={props.onCreateTaskFromMessage} />
+            <ChatView conversation={conversation} meId={meId} people={people} onCreateTask={props.onCreateTaskFromMessage} onRemind={props.onRemindMessage} />
           ) : null}
         </TabsContent>
 

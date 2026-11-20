@@ -1,4 +1,4 @@
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, BellPlus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
@@ -14,10 +14,11 @@ interface Props {
   meId: string
   people: Map<string, Person>
   onBack: () => void
+  onRemind: (taskId: string, title: string) => void
 }
 
 /** A task with its own chat and files, separate from the general conversation. */
-export function TaskView({ taskId, meId, people, onBack }: Props) {
+export function TaskView({ taskId, meId, people, onBack, onRemind }: Props) {
   const { t } = useTranslation()
   const task = useTask(taskId).data
   const conversation = useTaskConversation(task?.conversation_id).data
@@ -38,6 +39,9 @@ export function TaskView({ taskId, meId, people, onBack }: Props) {
             {task.overdue && <span className="font-semibold text-red-600"> · {t('tasks.overdue')}</span>}
           </span>
         </div>
+        <Button variant="ghost" onClick={() => onRemind(task.id, task.title)} aria-label={t('reminders.remindMe')}>
+          <BellPlus className="size-5" aria-hidden />
+        </Button>
         <select aria-label={t('tasks.status')} value={task.status}
           onChange={(e) => move.mutate({ id: task.id, status: e.target.value as TaskStatus, after_id: null })}
           className="min-h-11 rounded-md border border-border bg-background px-2">
