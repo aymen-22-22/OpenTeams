@@ -53,9 +53,11 @@ export function useRealtime(enabled: boolean) {
         case 'task.updated':
         case 'task.moved':
           void qc.invalidateQueries({ queryKey: taskKeys.all })
+          void qc.invalidateQueries({ queryKey: ['calendar'] }) // due / finished task events
           break
         case 'notification.created':
           void qc.invalidateQueries({ queryKey: notificationKeys.list })
+          void qc.invalidateQueries({ queryKey: ['calendar'] }) // e.g. invited to a meeting
           void qc.invalidateQueries({ queryKey: notificationKeys.reminders })
           break
         case 'typing':

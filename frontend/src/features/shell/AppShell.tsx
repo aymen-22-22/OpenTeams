@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { AssistantView } from '@/features/ai/AssistantView'
+import { CalendarView } from '@/features/calendar/CalendarView'
+import { MeetingForm } from '@/features/calendar/MeetingForm'
 import { usePeople, type User } from '@/features/auth/api'
 import { useConversations, useDirectConversation, type Message } from '@/features/chat/api'
 import type { ReminderInput } from '@/features/notifications/api'
@@ -25,6 +27,7 @@ import { TopBar } from './TopBar'
 type Column = 'people' | 'conversation' | 'details'
 type View = { kind: 'person' } | { kind: 'myTasks' } | { kind: 'assistant' } | { kind: 'preferences' }
   | { kind: 'playbooks' }
+  | { kind: 'calendar' }
   | { kind: 'report'; runId: string } | { kind: 'task'; taskId: string }
 
 const NAV = [
@@ -43,6 +46,7 @@ export function AppShell({ me }: { me: User }) {
   const [view, setView] = useState<View>({ kind: 'person' })
   const [tab, setTab] = useState<ConversationTab>('chat')
   const [taskDraft, setTaskDraft] = useState<Partial<TaskInput> | null>(null)
+  const [meetingChat, setMeetingChat] = useState<string | null>(null)
   const [reminderDraft, setReminderDraft] = useState<Partial<ReminderInput> | null>(null)
   // A deep link from an email (e.g. /tasks/<id>), opened once the data is loaded.
   const [pendingLink, setPendingLink] = useState(() => (location.pathname !== '/' ? location.pathname : null))
@@ -98,6 +102,7 @@ export function AppShell({ me }: { me: User }) {
     else if (kind === 'conversations' && id) void openConversation(id)
     else if (kind === 'reports' && id) show({ kind: 'report', runId: id })
     else if (kind === 'playbooks') show({ kind: 'playbooks' })
+    else if (kind === 'calendar') show({ kind: 'calendar' })
     else if (kind === 'preferences') show({ kind: 'preferences' })
   }
 
@@ -120,6 +125,7 @@ export function AppShell({ me }: { me: User }) {
             selectedId={view.kind === 'person' ? person?.id : undefined}
             onSelect={(p) => showPerson(p.id)}
             onPlaybooks={() => show({ kind: 'playbooks' })}
+            onCalendar={() => show({ kind: 'calendar' })}
             onAssistant={() => {
               setView({ kind: 'assistant' })
               setColumn('conversation')
@@ -137,6 +143,10 @@ export function AppShell({ me }: { me: User }) {
           )}
           {view.kind === 'assistant' && <AssistantView me={me} people={peopleById} />}
           {view.kind === 'preferences' && <PreferencesView />}
+          {view.kind === 'calendar' && (
+            <CalendarView me={me} people={peopleById} onOpenTask={(id) => openTask({ id })}
+              onRemind={(e) => setReminderDraft({ title: e.title, target_type: 'event', target_id: e.id })} />
+          )}
           {view.kind === 'playbooks' && (
             <PlaybooksView me={me} people={peopleById} onOpenRun={(runId) => show({ kind: 'report', runId })} />
           )}
@@ -154,6 +164,7 @@ export function AppShell({ me }: { me: User }) {
               onTabChange={setTab}
               onOpenTask={openTask}
               onNewTask={() => setTaskDraft({ assignee_id: person.id })}
+              onScheduleMeeting={setMeetingChat}
               onRemindMessage={(m) => setReminderDraft({ title: m.body.slice(0, 200), target_type: 'message', target_id: m.id })}
               onCreateTaskFromMessage={(m) =>
                 setTaskDraft({ title: m.body.slice(0, 200), assignee_id: person.id, source_message_id: m.id })
@@ -184,6 +195,7 @@ export function AppShell({ me }: { me: User }) {
           </button>
         ))}
       </nav>
+      {meetingChat && <MeetingForm people={people} conversationId={meetingChat} onDone={() => setMeetingChat(null)} />}
       {reminderDraft && <ReminderForm initial={reminderDraft} onDone={() => setReminderDraft(null)} />}
       {taskDraft && (
         <TaskForm

@@ -190,7 +190,8 @@
       "file": "New file",
       "task": "Task",
       "approval": "Approval",
-      "report": "Report"
+      "report": "Report",
+      "event": "Meeting"
     }
   },
   "reminders": {
@@ -277,6 +278,48 @@
     "triggers": {
       "schedule": "scheduled",
       "manual": "manual"
+    }
+  },
+  "calendar": {
+    "title": "Calendar",
+    "today": "Today",
+    "previous": "Previous",
+    "next": "Next",
+    "view": "View",
+    "whose": "Calendar of",
+    "mine": "My calendar",
+    "everything": "Everything I can see",
+    "team": "Team {{name}}",
+    "newMeeting": "New meeting",
+    "editMeeting": "Edit meeting",
+    "schedule": "Schedule a meeting",
+    "fromChatHint": "Members of this conversation will be invited.",
+    "subscribe": "Subscribe (iCal)",
+    "feedHint": "Add this private link to Outlook, Google Calendar or your phone. Do not share it: a new link replaces the old one.",
+    "feedUrl": "Private iCal link",
+    "date": "Date",
+    "allDay": "All day",
+    "from": "From",
+    "to": "To",
+    "attendees": "Attendees",
+    "description": "Description",
+    "saveFailed": "Could not save the meeting.",
+    "openTask": "Open task",
+    "close": "Close",
+    "more": "+{{count}} more",
+    "legend": "Legend",
+    "modes": {
+      "month": "Month",
+      "week": "Week",
+      "day": "Day"
+    },
+    "types": {
+      "meeting": "Meeting",
+      "day_off": "Day off",
+      "milestone": "Milestone",
+      "project_finished": "Project finished",
+      "task_due": "Task due",
+      "task_finished": "Task finished"
     }
   }
 }

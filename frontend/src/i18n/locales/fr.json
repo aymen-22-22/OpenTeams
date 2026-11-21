@@ -190,7 +190,8 @@
       "file": "Nouveau fichier",
       "task": "Tâche",
       "approval": "Approbation",
-      "report": "Rapport"
+      "report": "Rapport",
+      "event": "Réunion"
     }
   },
   "reminders": {
@@ -277,6 +278,48 @@
     "triggers": {
       "schedule": "planifié",
       "manual": "manuel"
+    }
+  },
+  "calendar": {
+    "title": "Calendrier",
+    "today": "Aujourd'hui",
+    "previous": "Précédent",
+    "next": "Suivant",
+    "view": "Vue",
+    "whose": "Calendrier de",
+    "mine": "Mon calendrier",
+    "everything": "Tout ce que je vois",
+    "team": "Équipe {{name}}",
+    "newMeeting": "Nouvelle réunion",
+    "editMeeting": "Modifier la réunion",
+    "schedule": "Planifier une réunion",
+    "fromChatHint": "Les membres de cette conversation seront invités.",
+    "subscribe": "S'abonner (iCal)",
+    "feedHint": "Ajoutez ce lien privé dans Outlook, Google Agenda ou votre téléphone. Ne le partagez pas : un nouveau lien remplace l'ancien.",
+    "feedUrl": "Lien iCal privé",
+    "date": "Date",
+    "allDay": "Toute la journée",
+    "from": "De",
+    "to": "À",
+    "attendees": "Participants",
+    "description": "Description",
+    "saveFailed": "Impossible d'enregistrer la réunion.",
+    "openTask": "Ouvrir la tâche",
+    "close": "Fermer",
+    "more": "+{{count}} autres",
+    "legend": "Légende",
+    "modes": {
+      "month": "Mois",
+      "week": "Semaine",
+      "day": "Jour"
+    },
+    "types": {
+      "meeting": "Réunion",
+      "day_off": "Congé",
+      "milestone": "Jalon",
+      "project_finished": "Projet terminé",
+      "task_due": "Échéance de tâche",
+      "task_finished": "Tâche terminée"
     }
   }
 }

@@ -190,7 +190,8 @@
       "file": "ملف جديد",
       "task": "مهمة",
       "approval": "موافقة",
-      "report": "تقرير"
+      "report": "تقرير",
+      "event": "اجتماع"
     }
   },
   "reminders": {
@@ -277,6 +278,48 @@
     "triggers": {
       "schedule": "مجدول",
       "manual": "يدوي"
+    }
+  },
+  "calendar": {
+    "title": "التقويم",
+    "today": "اليوم",
+    "previous": "السابق",
+    "next": "التالي",
+    "view": "العرض",
+    "whose": "تقويم",
+    "mine": "تقويمي",
+    "everything": "كل ما أراه",
+    "team": "فريق {{name}}",
+    "newMeeting": "اجتماع جديد",
+    "editMeeting": "تعديل الاجتماع",
+    "schedule": "جدولة اجتماع",
+    "fromChatHint": "ستتم دعوة أعضاء هذه المحادثة.",
+    "subscribe": "الاشتراك (iCal)",
+    "feedHint": "أضف هذا الرابط الخاص إلى Outlook أو تقويم Google أو هاتفك. لا تشاركه: الرابط الجديد يحل محل القديم.",
+    "feedUrl": "رابط iCal الخاص",
+    "date": "التاريخ",
+    "allDay": "طوال اليوم",
+    "from": "من",
+    "to": "إلى",
+    "attendees": "المشاركون",
+    "description": "الوصف",
+    "saveFailed": "تعذّر حفظ الاجتماع.",
+    "openTask": "فتح المهمة",
+    "close": "إغلاق",
+    "more": "+{{count}} أخرى",
+    "legend": "مفتاح الألوان",
+    "modes": {
+      "month": "شهر",
+      "week": "أسبوع",
+      "day": "يوم"
+    },
+    "types": {
+      "meeting": "اجتماع",
+      "day_off": "إجازة",
+      "milestone": "مرحلة",
+      "project_finished": "مشروع منتهٍ",
+      "task_due": "استحقاق مهمة",
+      "task_finished": "مهمة منتهية"
     }
   }
 }

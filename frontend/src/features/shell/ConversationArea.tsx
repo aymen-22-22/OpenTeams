@@ -1,3 +1,4 @@
+import { CalendarPlus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -25,6 +26,7 @@ interface Props {
   onNewTask: () => void
   onCreateTaskFromMessage: (message: Message) => void
   onRemindMessage: (message: Message) => void
+  onScheduleMeeting: (conversationId: string) => void
 }
 
 export function ConversationArea(props: Props) {
@@ -34,7 +36,15 @@ export function ConversationArea(props: Props) {
 
   return (
     <section aria-label={person.display_name} className="flex h-full flex-col">
-      <header className="border-b border-border px-4 py-3 font-semibold">{person.display_name}</header>
+      <header className="flex items-center gap-2 border-b border-border px-4 py-2">
+        <span className="flex-1 font-semibold">{person.display_name}</span>
+        {conversation && (
+          <Button variant="ghost" onClick={() => props.onScheduleMeeting(conversation.id)}>
+            <CalendarPlus className="size-4" aria-hidden />
+            <span className="hidden sm:inline">{t('calendar.schedule')}</span>
+          </Button>
+        )}
+      </header>
       <Tabs value={tab} onValueChange={(v) => onTabChange(v as ConversationTab)} className="flex flex-1 flex-col overflow-hidden">
         <TabsList>
           <TabsTrigger value="chat">{t('tabs.chat')}</TabsTrigger>

@@ -1,4 +1,4 @@
-import { Bot, KanbanSquare, Workflow } from 'lucide-react'
+import { Bot, CalendarDays, KanbanSquare, Workflow } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/lib/utils'
@@ -19,9 +19,10 @@ interface Props {
   onMyTasks: () => void
   onAssistant: () => void
   onPlaybooks: () => void
+  onCalendar: () => void
 }
 
-export function PeoplePanel({ people, unread, selectedId, onSelect, onMyTasks, onAssistant, onPlaybooks }: Props) {
+export function PeoplePanel({ people, unread, selectedId, onSelect, onMyTasks, onAssistant, onPlaybooks, onCalendar }: Props) {
   const { t } = useTranslation()
 
   return (
@@ -33,6 +34,10 @@ export function PeoplePanel({ people, unread, selectedId, onSelect, onMyTasks, o
       <button type="button" onClick={onMyTasks} className="flex min-h-11 items-center gap-2 rounded-md px-2 text-start font-medium hover:bg-muted">
         <KanbanSquare className="size-5" aria-hidden />
         {t('tasks.myTasks')}
+      </button>
+      <button type="button" onClick={onCalendar} className="flex min-h-11 items-center gap-2 rounded-md px-2 text-start font-medium hover:bg-muted">
+        <CalendarDays className="size-5" aria-hidden />
+        {t('calendar.title')}
       </button>
       <button type="button" onClick={onPlaybooks} className="flex min-h-11 items-center gap-2 rounded-md px-2 text-start font-medium hover:bg-muted">
         <Workflow className="size-5" aria-hidden />

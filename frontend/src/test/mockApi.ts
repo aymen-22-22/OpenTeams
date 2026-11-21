@@ -3,11 +3,13 @@ import { vi } from 'vitest'
 type Route = { status: number; body?: unknown }
 export type Routes = Record<string, Route | (() => Route)>
 
-/** Mock fetch by "METHOD /path" (path after /api/v1). Unknown routes return 404. */
+/** Mock fetch by "METHOD /path" (path after /api/v1); a key ending in * matches a prefix. Unknown routes return 404. */
 export function mockApi(routes: Routes) {
   const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const path = String(input).replace('/api/v1', '')
-    const entry = routes[`${init?.method ?? 'GET'} ${path}`]
+    const key = `${init?.method ?? 'GET'} ${path}`
+    const prefix = Object.keys(routes).find((k) => k.endsWith('*') && key.startsWith(k.slice(0, -1)))
+    const entry = routes[key] ?? (prefix ? routes[prefix] : undefined)
     const route = typeof entry === 'function' ? entry() : (entry ?? { status: 404 })
     return new Response(route.body === undefined ? null : JSON.stringify(route.body), {
       status: route.status,

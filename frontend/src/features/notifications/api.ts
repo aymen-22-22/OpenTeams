@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { api } from '@/lib/api'
 
-export const NOTIFICATION_TYPES = ['message', 'reminder', 'file', 'task', 'approval', 'report'] as const
+export const NOTIFICATION_TYPES = ['message', 'reminder', 'file', 'task', 'approval', 'report', 'event'] as const
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number]
 export type Recurrence = 'none' | 'daily' | 'weekly' | 'monthly'
 export type TargetType = 'message' | 'file' | 'task' | 'event'

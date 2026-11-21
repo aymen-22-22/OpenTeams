@@ -2,7 +2,7 @@
 
 Self-hosted team chat and work platform: chat, files, kanban tasks, calendar, reminders and personal AI. The full specification is in [CLAUDE.md](CLAUDE.md).
 
-**Status:** Phase 3 done: login, roles, presence, and real-time direct chat (replies, edit/delete, read state, typing, pins, search). Files per conversation (Nextcloud or local storage, versions). Kanban tasks with their own task chats. Personal AI per user (own API key). Reminders, notification center and HTML emails. Playbooks (automatic reports).
+**Status:** Phase 3 done: login, roles, presence, and real-time direct chat (replies, edit/delete, read state, typing, pins, search). Files per conversation (Nextcloud or local storage, versions). Kanban tasks with their own task chats. Personal AI per user (own API key). Reminders, notification center and HTML emails. Playbooks (automatic reports). Calendar with iCal feed.
 
 ## Run everything with Docker
 
@@ -107,6 +107,15 @@ Open **Playbooks** in the left panel. A playbook builds a report on a schedule (
 - **AI (optional)**: "Written by my AI" uses the owner's personal AI (their key, budget and audit log) to rewrite the report from the data, which is marked as untrusted. Without a configured AI, the plain report is sent.
 - **Run history**: every run keeps its period, counts, reports, recipients, tokens, cost, duration and attempts. Failed runs are retried after 5 and 10 minutes; after 3 attempts the owner is notified.
 - **Preview** builds the reports without sending; **Run now** runs immediately.
+
+## Calendar
+
+Open **Calendar** in the left panel: month, week and day views, for me, for everything I can see, for one person, or for one team.
+
+- **Automatic events** come from tasks: a due date shows as an all-day "task due" event, a finished task as a "task finished" event. They are computed when the calendar is read, so they always match the tasks (and follow the same visibility rule as the board).
+- **Meetings** are created from the calendar or from a chat (*Schedule a meeting* invites the conversation's members). They are private to the organizer and attendees; attendees get a notification. Only the organizer can edit or delete a meeting. You can set a reminder on a meeting.
+- **iCal feed**: *Subscribe (iCal)* creates a private link to add in Outlook, Google Calendar or a phone. The link is the only credential (stored hashed in the database); creating a new one disables the old one. It covers 60 days back and one year ahead.
+- Leave, project milestones and finished projects will appear here in Phase 10.
 
 ## Real-time events
 
