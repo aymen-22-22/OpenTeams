@@ -4,6 +4,7 @@ from datetime import datetime
 
 from sqlalchemy import (
     BigInteger,
+    Boolean,
     Computed,
     DateTime,
     Enum,
@@ -41,6 +42,12 @@ class Conversation(Base):
     title: Mapped[str | None] = mapped_column(String(200))
     # For direct conversations: the two user ids sorted and joined, so each pair has one chat.
     direct_key: Mapped[str | None] = mapped_column(String(80), unique=True)
+    # Channels only
+    description: Mapped[str] = mapped_column(Text, default="")
+    is_private: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL")
+    )
 
 
 class ConversationMember(Base):

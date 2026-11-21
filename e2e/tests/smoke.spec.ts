@@ -87,3 +87,28 @@ test('open a task chat: messages there stay out of the general chat', async ({ b
   await openPerson(member, ADMIN.name)
   await expect(member.getByText(text)).toHaveCount(0) // not in the general conversation
 })
+
+test('channel: create, join, and an @mention notifies the person', async ({ browser }) => {
+  const admin = await loginAs(browser, ADMIN.email)
+  const member = await loginAs(browser, MEMBER.email)
+  const name = `canal-${unique()}`
+  await admin.getByRole('button', { name: 'Parcourir les canaux' }).click()
+  await admin.getByRole('button', { name: 'Nouveau canal' }).click()
+  await admin.getByRole('dialog').getByLabel('Nom du canal').fill(name)
+  await admin.getByRole('dialog').getByRole('button', { name: 'Créer' }).click()
+  await expect(admin.getByRole('heading', { name })).toBeVisible()
+
+  await member.getByRole('button', { name: 'Parcourir les canaux' }).click()
+  await member.locator('li', { hasText: name }).getByRole('button', { name: 'Rejoindre' }).click()
+  await expect(member.getByRole('heading', { name })).toBeVisible()
+
+  const box = admin.getByLabel('Écrire un message…')
+  await admin.reload()
+  await admin.getByRole('navigation', { name: 'Personnes' }).getByRole('button', { name: new RegExp(name) }).click()
+  await box.fill('Point rapide @E2E Member peux-tu regarder ?')
+  await box.press('Enter')
+  await expect(member.getByText('@E2E Member')).toBeVisible()
+  await expect(member.getByRole('button', { name: /Notifications \(\d+ non lues\)/ })).toBeVisible()
+  await member.getByRole('button', { name: /Notifications/ }).click()
+  await expect(member.getByRole('dialog', { name: 'Notifications' }).getByText(`E2E Admin · #${name}`)).toBeVisible()
+})

@@ -20,6 +20,7 @@ DEFAULT_EMAIL = {
     NotificationType.APPROVAL,
     NotificationType.REPORT,
     NotificationType.EVENT,
+    NotificationType.MENTION,
 }
 
 

@@ -43,7 +43,9 @@
     "loadOlder": "تحميل الرسائل السابقة",
     "empty": "لا توجد رسائل بعد. قل مرحبًا!",
     "editing": "تعديل الرسالة",
-    "replyingTo": "رد على: {{text}}"
+    "replyingTo": "رد على: {{text}}",
+    "mentionSomeone": "الإشارة إلى شخص",
+    "everyone": "جميع الأعضاء"
   },
   "ai": {
     "label": "الذكاء الاصطناعي لـ {{name}}",
@@ -191,7 +193,8 @@
       "task": "مهمة",
       "approval": "موافقة",
       "report": "تقرير",
-      "event": "اجتماع"
+      "event": "اجتماع",
+      "mention": "إشارة"
     }
   },
   "reminders": {
@@ -408,5 +411,27 @@
     "daysLate_many": "متأخرة {{count}} يومًا",
     "daysLate_other": "متأخرة {{count}} يوم",
     "ratio": "{{done}} منتهية من {{planned}} مخططة"
+  },
+  "channels": {
+    "title": "القنوات",
+    "browse": "تصفّح القنوات",
+    "new": "قناة جديدة",
+    "name": "اسم القناة",
+    "namePlaceholder": "مثال: general، support",
+    "private": "قناة خاصة (بالدعوة فقط)",
+    "invite": "دعوة",
+    "taken": "توجد قناة بهذا الاسم.",
+    "failed": "تعذّر إنشاء القناة.",
+    "members_zero": "{{count}} عضو",
+    "members_one": "عضو واحد",
+    "members_two": "عضوان",
+    "members_few": "{{count}} أعضاء",
+    "members_many": "{{count}} عضوًا",
+    "members_other": "{{count}} عضو",
+    "join": "انضمام",
+    "leave": "مغادرة",
+    "open": "فتح",
+    "joinHint": "انضم إلى هذه القناة لقراءة الرسائل وكتابتها.",
+    "empty": "لا توجد قنوات بعد."
   }
 }

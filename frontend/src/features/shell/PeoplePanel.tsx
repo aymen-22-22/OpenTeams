@@ -1,9 +1,10 @@
-import { Bot, CalendarDays, ClipboardCheck, FolderKanban, Gauge, KanbanSquare, Workflow } from 'lucide-react'
+import { Bot, CalendarDays, Hash, Lock, Plus, ClipboardCheck, FolderKanban, Gauge, KanbanSquare, Workflow } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/lib/utils'
 
 import type { Person, Presence } from '@/features/auth/api'
+import type { Channel } from '@/features/channels/api'
 
 const DOT: Record<Presence, string> = {
   online: 'bg-green-500',
@@ -29,11 +30,15 @@ interface Props {
   unread: Map<string, number>
   selectedId: string | undefined
   isManager: boolean
+  channels: Channel[]
+  selectedChannelId: string | undefined
+  onOpenChannel: (id: string) => void
+  onBrowseChannels: () => void
   onSelect: (person: Person) => void
   onOpen: (page: Page) => void
 }
 
-export function PeoplePanel({ people, unread, selectedId, isManager, onSelect, onOpen }: Props) {
+export function PeoplePanel({ people, unread, selectedId, isManager, channels, selectedChannelId, onOpenChannel, onBrowseChannels, onSelect, onOpen }: Props) {
   const { t } = useTranslation()
 
   return (
@@ -48,6 +53,32 @@ export function PeoplePanel({ people, unread, selectedId, isManager, onSelect, o
             </button>
           </li>
         ))}
+      </ul>
+
+      <div className="flex items-center justify-between px-2 pt-2">
+        <h2 className="text-xs font-semibold uppercase text-muted-foreground">{t('channels.title')}</h2>
+        <button type="button" onClick={onBrowseChannels} aria-label={t('channels.browse')} title={t('channels.browse')}
+          className="flex size-11 items-center justify-center rounded-md text-muted-foreground hover:bg-muted">
+          <Plus className="size-4" aria-hidden />
+        </button>
+      </div>
+      <ul className="flex flex-col gap-1">
+        {channels.filter((c) => c.joined).map((c) => {
+          const Icon = c.is_private ? Lock : Hash
+          const count = unread.get(c.id) ?? 0
+          return (
+            <li key={c.id}>
+              <button type="button" onClick={() => onOpenChannel(c.id)} aria-current={c.id === selectedChannelId}
+                className={cn('flex min-h-11 w-full items-center gap-2 rounded-md px-2 text-start hover:bg-muted', c.id === selectedChannelId && 'bg-muted', count > 0 && 'font-semibold')}>
+                <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                <span dir="auto" className="min-w-0 flex-1 truncate">{c.name}</span>
+                {count > 0 && (
+                  <span className="shrink-0 rounded-full bg-accent px-2 text-xs font-semibold text-accent-foreground" aria-label={t('people.unread', { count })}>{count}</span>
+                )}
+              </button>
+            </li>
+          )
+        })}
       </ul>
 
       <h2 className="px-2 pt-2 text-xs font-semibold uppercase text-muted-foreground">{t('people.title')}</h2>

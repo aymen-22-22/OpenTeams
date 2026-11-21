@@ -4,6 +4,10 @@ import { useTranslation } from 'react-i18next'
 
 import { AssistantView } from '@/features/ai/AssistantView'
 import { CalendarView } from '@/features/calendar/CalendarView'
+import { useChannels } from '@/features/channels/api'
+import { BrowseChannels } from '@/features/channels/BrowseChannels'
+import { ChannelForm } from '@/features/channels/ChannelForm'
+import { ChannelView } from '@/features/channels/ChannelView'
 import { MeetingForm } from '@/features/calendar/MeetingForm'
 import { usePeople, type User } from '@/features/auth/api'
 import { useConversations, useDirectConversation, type Message } from '@/features/chat/api'
@@ -34,6 +38,8 @@ type View = { kind: 'person' } | { kind: 'myTasks' } | { kind: 'assistant' } | {
   | { kind: 'requests' }
   | { kind: 'projects'; projectId?: string }
   | { kind: 'dashboard' }
+  | { kind: 'channel'; channelId: string }
+  | { kind: 'channels' }
   | { kind: 'report'; runId: string } | { kind: 'task'; taskId: string }
 
 const NAV = [
@@ -52,6 +58,8 @@ export function AppShell({ me }: { me: User }) {
   const [view, setView] = useState<View>({ kind: 'person' })
   const [tab, setTab] = useState<ConversationTab>('chat')
   const [taskDraft, setTaskDraft] = useState<Partial<TaskInput> | null>(null)
+  const channels = useChannels().data ?? []
+  const [creatingChannel, setCreatingChannel] = useState(false)
   const [meetingChat, setMeetingChat] = useState<string | null>(null)
   const [reminderDraft, setReminderDraft] = useState<Partial<ReminderInput> | null>(null)
   // A deep link from an email (e.g. /tasks/<id>), opened once the data is loaded.
@@ -68,6 +76,7 @@ export function AppShell({ me }: { me: User }) {
     for (const c of conversations ?? []) {
       const other = c.type === 'direct' ? c.member_ids.find((id) => id !== me.id) : undefined
       if (other && other !== person?.id) map.set(other, c.unread_count)
+      if (c.type === 'channel') map.set(c.id, c.unread_count) // channel badges are keyed by channel id
     }
     return map
   }, [conversations, me.id, person?.id])
@@ -92,6 +101,10 @@ export function AppShell({ me }: { me: User }) {
   /** Open a conversation: a direct chat shows the person, a task chat shows its task. */
   const openConversation = async (conversationId: string) => {
     const c = conversations?.find((x) => x.id === conversationId)
+    if (c?.type === 'channel') {
+      show({ kind: 'channel', channelId: c.id })
+      return
+    }
     if (c?.type === 'direct') {
       const other = c.member_ids.find((id) => id !== me.id)
       if (other) showPerson(other)
@@ -134,6 +147,10 @@ export function AppShell({ me }: { me: User }) {
             selectedId={view.kind === 'person' ? person?.id : undefined}
             onSelect={(p) => showPerson(p.id)}
             isManager={me.role !== 'employee'}
+            channels={channels}
+            selectedChannelId={view.kind === 'channel' ? view.channelId : undefined}
+            onOpenChannel={(id) => show({ kind: 'channel', channelId: id })}
+            onBrowseChannels={() => show({ kind: 'channels' })}
             onOpen={(page: Page) => show({ kind: page })}
           />
         </div>
@@ -148,6 +165,14 @@ export function AppShell({ me }: { me: User }) {
             <CalendarView me={me} people={peopleById} onOpenTask={(id) => openTask({ id })}
               onOpenProject={(id) => show({ kind: 'projects', projectId: id })}
               onRemind={(e) => setReminderDraft({ title: e.title, target_type: 'event', target_id: e.id })} />
+          )}
+          {view.kind === 'channel' && (
+            <ChannelView key={view.channelId} channelId={view.channelId} meId={me.id} people={peopleById}
+              onCreateTask={(m) => setTaskDraft({ title: m.body.slice(0, 200), source_message_id: m.id })}
+              onRemind={(m) => setReminderDraft({ title: m.body.slice(0, 200), target_type: 'message', target_id: m.id })} />
+          )}
+          {view.kind === 'channels' && (
+            <BrowseChannels onOpen={(id) => show({ kind: 'channel', channelId: id })} onNew={() => setCreatingChannel(true)} />
           )}
           {view.kind === 'requests' && <RequestsView me={me} people={peopleById} />}
           {view.kind === 'projects' && (
@@ -182,8 +207,8 @@ export function AppShell({ me }: { me: User }) {
         </div>
         <div className={cn(column === 'details' ? 'flex' : 'hidden', 'w-full flex-col overflow-y-auto border-s border-border lg:flex lg:w-80')}>
           <SidePanel
-            conversationId={conversation?.id}
-            personId={person?.id}
+            conversationId={view.kind === 'channel' ? view.channelId : conversation?.id}
+            personId={view.kind === 'channel' ? undefined : person?.id}
             onOpenBoard={() => person && showPerson(person.id, 'tasks')}
             onNewReminder={() => setReminderDraft({})}
           />
@@ -203,6 +228,12 @@ export function AppShell({ me }: { me: User }) {
           </button>
         ))}
       </nav>
+      {creatingChannel && (
+        <ChannelForm people={people} onDone={(c) => {
+          setCreatingChannel(false)
+          if (c) show({ kind: 'channel', channelId: c.id })
+        }} />
+      )}
       {meetingChat && <MeetingForm people={people} conversationId={meetingChat} onDone={() => setMeetingChat(null)} />}
       {reminderDraft && <ReminderForm initial={reminderDraft} onDone={() => setReminderDraft(null)} />}
       {taskDraft && (

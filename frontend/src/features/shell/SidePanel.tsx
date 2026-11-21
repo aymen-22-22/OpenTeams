@@ -52,17 +52,19 @@ export function SidePanel({ conversationId, personId, onOpenBoard, onNewReminder
           <div className="flex flex-wrap gap-2">{recentFiles.map((f) => <FileIcon key={f.id} file={f} />)}</div>
         )}
       </Section>
-      <Section title={t('side.tasks')}>
-        <dl className="grid grid-cols-3 gap-2 text-center text-sm">
-          {STATUSES.map((s) => (
-            <div key={s} className="rounded-md bg-muted p-2">
-              <dt className="text-muted-foreground">{t(`tasks.${s}`)}</dt>
-              <dd className="text-lg font-semibold">{counts?.[s] ?? 0}</dd>
-            </div>
-          ))}
-        </dl>
-        <Button variant="outline" onClick={onOpenBoard}>{t('tasks.openBoard')}</Button>
-      </Section>
+      {personId && (
+        <Section title={t('side.tasks')}>
+          <dl className="grid grid-cols-3 gap-2 text-center text-sm">
+            {STATUSES.map((s) => (
+              <div key={s} className="rounded-md bg-muted p-2">
+                <dt className="text-muted-foreground">{t(`tasks.${s}`)}</dt>
+                <dd className="text-lg font-semibold">{counts?.[s] ?? 0}</dd>
+              </div>
+            ))}
+          </dl>
+          <Button variant="outline" onClick={onOpenBoard}>{t('tasks.openBoard')}</Button>
+        </Section>
+      )}
       <Section title={t('side.reminders')}>
         {reminders.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t('reminders.empty')}</p>

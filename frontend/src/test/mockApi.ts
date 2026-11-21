@@ -44,6 +44,7 @@ export const task = (id: string, title: string, status: string, extra: object = 
 })
 
 export const LOGGED_IN: Routes = {
+  'GET /channels': { status: 200, body: [] },
   'GET /notifications': { status: 200, body: { items: [], unread: 0 } },
   'GET /reminders': { status: 200, body: [] },
   'GET /tasks?assignee_id=u1': {

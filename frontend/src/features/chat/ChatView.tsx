@@ -17,6 +17,7 @@ import {
   type Conversation,
   type Message,
 } from './api'
+import { EVERYONE, mentionQuery } from './mentions'
 import { MessageItem } from './MessageItem'
 import { useTypingUser } from './typing'
 
@@ -44,6 +45,9 @@ export function ChatView({ conversation, meId, people, onCreateTask, onRemind }:
   const [draft, setDraft] = useState('')
   const [replyTo, setReplyTo] = useState<Message | null>(null)
   const [editing, setEditing] = useState<Message | null>(null)
+  const [caret, setCaret] = useState(0)
+  const [pick, setPick] = useState(0)
+  const textRef = useRef<HTMLTextAreaElement>(null)
   const lastTypingSent = useRef(0)
   const lastReadSent = useRef(conversation.last_read_seq)
   const listRef = useRef<HTMLOListElement>(null)
@@ -65,6 +69,27 @@ export function ChatView({ conversation, meId, people, onCreateTask, onRemind }:
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run when a new message arrives
   }, [lastSeq])
+
+  // Names that can be @mentioned here: the other members (and @channel in channels).
+  const memberNames = conversation.member_ids
+    .filter((id) => id !== meId)
+    .map((id) => people.get(id)?.display_name)
+    .filter((n): n is string => Boolean(n))
+  const mention = mentionQuery(draft, caret)
+  const suggestions = mention
+    ? [...memberNames, ...(conversation.type === 'channel' ? [EVERYONE] : [])]
+        .filter((n) => n.toLowerCase().startsWith(mention.query.toLowerCase()))
+        .slice(0, 6)
+    : []
+  const insertMention = (name: string) => {
+    if (!mention) return
+    const next = `${draft.slice(0, mention.start)}@${name} ${draft.slice(caret)}`
+    const pos = mention.start + name.length + 2
+    setDraft(next)
+    setCaret(pos)
+    setPick(0)
+    requestAnimationFrame(() => textRef.current?.setSelectionRange(pos, pos))
+  }
 
   const nameOf = (id: string | null) => (id === meId ? t('chat.you') : (people.get(id ?? '')?.display_name ?? '?'))
 
@@ -112,6 +137,8 @@ export function ChatView({ conversation, meId, people, onCreateTask, onRemind }:
             key={m.id}
             message={m}
             mine={m.author_id === meId}
+            mentionNames={memberNames}
+            myName={people.get(meId)?.display_name ?? ''}
             authorName={nameOf(m.author_id)}
             replyTo={m.reply_to_id ? byId.get(m.reply_to_id) : undefined}
             pinned={pinnedIds.has(m.id)}
@@ -143,14 +170,48 @@ export function ChatView({ conversation, meId, people, onCreateTask, onRemind }:
             </button>
           </div>
         )}
+        {suggestions.length > 0 && (
+          <ul id="mention-list" role="listbox" aria-label={t('chat.mentionSomeone')} className="flex flex-col rounded-md border border-border bg-background shadow">
+            {suggestions.map((name, i) => (
+              <li key={name} role="option" aria-selected={i === pick}>
+                <button type="button" onMouseDown={(e) => { e.preventDefault(); insertMention(name) }}
+                  className={`min-h-11 w-full px-3 text-start text-sm ${i === pick ? 'bg-muted' : ''}`}>
+                  <bdi>@{name}</bdi>{name === EVERYONE && ` — ${t('chat.everyone')}`}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
         <div className="flex gap-2">
           <textarea
             aria-label={t('chat.placeholder')}
             placeholder={t('chat.placeholder')}
             value={draft}
             rows={1}
-            onChange={(e) => onDraftChange(e.target.value)}
+            ref={textRef}
+            role="combobox"
+            aria-expanded={suggestions.length > 0}
+            aria-controls="mention-list"
+            aria-autocomplete="list"
+            onChange={(e) => {
+              onDraftChange(e.target.value)
+              setCaret(e.target.selectionStart)
+              setPick(0)
+            }}
+            onSelect={(e) => setCaret(e.currentTarget.selectionStart)}
             onKeyDown={(e) => {
+              if (suggestions.length > 0) {
+                if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                  e.preventDefault()
+                  setPick((i) => (i + (e.key === 'ArrowDown' ? 1 : suggestions.length - 1)) % suggestions.length)
+                  return
+                }
+                if (e.key === 'Enter' || e.key === 'Tab') {
+                  e.preventDefault()
+                  insertMention(suggestions[pick] ?? suggestions[0])
+                  return
+                }
+              }
               if (e.key === 'Enter' && !e.shiftKey) onSubmit(e)
               if (e.key === 'Escape') reset()
             }}

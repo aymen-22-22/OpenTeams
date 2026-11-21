@@ -8,6 +8,7 @@ from app.ai.router import router as ai_router
 from app.api import health, metrics, ws
 from app.auth.router import router as auth_router
 from app.calendar.router import router as calendar_router
+from app.chat.channels import router as channels_router
 from app.chat.router import router as chat_router
 from app.core.csrf import register_csrf
 from app.core.errors import register_error_handlers
@@ -57,6 +58,7 @@ def create_app() -> FastAPI:
         users_router,
         admin_router,
         chat_router,
+        channels_router,
         search_router,
         files_router,
         tasks_router,

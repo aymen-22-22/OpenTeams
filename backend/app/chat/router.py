@@ -8,6 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from app.auth.deps import DB, CurrentUser
 from app.chat.access import require_conversation, require_message
 from app.chat.events import commit_and_publish
+from app.chat.mentions import mentioned_ids
 from app.chat.models import (
     Conversation,
     ConversationMember,
@@ -28,8 +29,8 @@ from app.chat.schemas import (
 )
 from app.core import clock
 from app.core.errors import AppError
-from app.reminders.models import NotificationType
-from app.reminders.notify import notify_members, push
+from app.reminders.models import Notification, NotificationType
+from app.reminders.notify import notify, push
 from app.users.models import User
 
 router = APIRouter(tags=["chat"])
@@ -186,13 +187,44 @@ async def send_message(
         raise AppError("idempotency_conflict", "Duplicate message", 409) from exc
     await db.refresh(message)
     out = MessageOut.of(message)
-    created = await notify_members(
-        db, conversation_id, user.id, NotificationType.MESSAGE, user.display_name, body.body[:200]
-    )
+    created = await notify_for_message(db, conversation, user, body.body)
     await commit_and_publish(db, conversation_id, "message.created", out.model_dump(mode="json"))
     await push(db, created)
     response.status_code = 201
     return out
+
+
+async def notify_for_message(
+    db: DB, conversation: Conversation, author: User, body: str
+) -> list[Notification | None]:
+    """Mentioned people get a mention; in direct and task chats the others get a message notice.
+
+    Plain channel messages notify nobody (unread badges are enough), so channels stay quiet.
+    """
+    rows = await db.execute(
+        select(User.id, User.display_name)
+        .join(ConversationMember, ConversationMember.user_id == User.id)
+        .where(ConversationMember.conversation_id == conversation.id, User.id != author.id)
+    )
+    others = {uid: name for uid, name in rows.all()}
+    mentioned = mentioned_ids(body, others)
+    link = f"/conversations/{conversation.id}"
+    title = (
+        f"{author.display_name} · #{conversation.title}"
+        if conversation.title
+        else author.display_name
+    )
+    created = [
+        await notify(db, uid, NotificationType.MENTION, title, body[:200], link)
+        for uid in mentioned
+    ]
+    if conversation.type != ConversationType.CHANNEL:
+        created += [
+            await notify(db, uid, NotificationType.MESSAGE, author.display_name, body[:200], link)
+            for uid in others
+            if uid not in mentioned
+        ]
+    return created
 
 
 async def _own_live_message(db: DB, message_id: uuid.UUID, user: User) -> Message:

@@ -36,6 +36,7 @@ class NotificationType(enum.StrEnum):
     APPROVAL = "approval"
     REPORT = "report"
     EVENT = "event"
+    MENTION = "mention"
 
 
 class Recurrence(enum.StrEnum):

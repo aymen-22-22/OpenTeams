@@ -43,7 +43,9 @@
     "loadOlder": "Load earlier messages",
     "empty": "No messages yet. Say hello!",
     "editing": "Editing message",
-    "replyingTo": "Replying to: {{text}}"
+    "replyingTo": "Replying to: {{text}}",
+    "mentionSomeone": "Mention someone",
+    "everyone": "all members"
   },
   "ai": {
     "label": "AI of {{name}}",
@@ -191,7 +193,8 @@
       "task": "Task",
       "approval": "Approval",
       "report": "Report",
-      "event": "Meeting"
+      "event": "Meeting",
+      "mention": "Mention"
     }
   },
   "reminders": {
@@ -404,5 +407,23 @@
     "daysLate_one": "{{count}} day late",
     "daysLate_other": "{{count}} days late",
     "ratio": "{{done}} finished of {{planned}} planned"
+  },
+  "channels": {
+    "title": "Channels",
+    "browse": "Browse channels",
+    "new": "New channel",
+    "name": "Channel name",
+    "namePlaceholder": "e.g. general, support",
+    "private": "Private channel (invitation only)",
+    "invite": "Invite",
+    "taken": "A channel with this name already exists.",
+    "failed": "Could not create the channel.",
+    "members_one": "{{count}} member",
+    "members_other": "{{count}} members",
+    "join": "Join",
+    "leave": "Leave",
+    "open": "Open",
+    "joinHint": "Join this channel to read and write messages.",
+    "empty": "No channels yet."
   }
 }

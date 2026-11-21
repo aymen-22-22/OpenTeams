@@ -43,7 +43,9 @@
     "loadOlder": "Charger les messages précédents",
     "empty": "Aucun message. Dites bonjour !",
     "editing": "Modification du message",
-    "replyingTo": "Réponse à : {{text}}"
+    "replyingTo": "Réponse à : {{text}}",
+    "mentionSomeone": "Mentionner quelqu'un",
+    "everyone": "tous les membres"
   },
   "ai": {
     "label": "IA de {{name}}",
@@ -191,7 +193,8 @@
       "task": "Tâche",
       "approval": "Approbation",
       "report": "Rapport",
-      "event": "Réunion"
+      "event": "Réunion",
+      "mention": "Mention"
     }
   },
   "reminders": {
@@ -404,5 +407,23 @@
     "daysLate_one": "{{count}} jour de retard",
     "daysLate_other": "{{count}} jours de retard",
     "ratio": "{{done}} terminées sur {{planned}} prévues"
+  },
+  "channels": {
+    "title": "Canaux",
+    "browse": "Parcourir les canaux",
+    "new": "Nouveau canal",
+    "name": "Nom du canal",
+    "namePlaceholder": "ex. general, support",
+    "private": "Canal privé (sur invitation)",
+    "invite": "Inviter",
+    "taken": "Un canal porte déjà ce nom.",
+    "failed": "Impossible de créer le canal.",
+    "members_one": "{{count}} membre",
+    "members_other": "{{count}} membres",
+    "join": "Rejoindre",
+    "leave": "Quitter",
+    "open": "Ouvrir",
+    "joinHint": "Rejoignez ce canal pour lire et écrire les messages.",
+    "empty": "Aucun canal pour l'instant."
   }
 }

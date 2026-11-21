@@ -90,6 +90,11 @@ Each user can connect their own AI in **My assistant → Settings**: Claude, Ope
 - Limits: per caller per minute, per owner per hour, and a daily token budget per owner (`AI_*` settings).
 - Ollama and Qwen server addresses are set by the admin (`OLLAMA_URL`, `QWEN_URL`), not by users.
 
+## Channels and @mentions
+
+- **Channels** (left panel, *Channels* section, **+** to browse or create): public channels can be browsed and joined by anyone; private channels are invitation-only and invisible to others. The creator or an admin manages name, description and members. Channels have their own messages, files, pins and search, like any conversation.
+- **@mentions**: type `@` in the message box to pick a member (`@channel` notifies everyone in a channel). The mentioned person gets a *Mention* notification (in the app and by email by default); mentions of you are highlighted. Plain channel messages notify nobody (the unread badge is enough), so busy channels stay quiet. In direct and task chats a mention replaces the usual message notification.
+
 ## Notifications, reminders and email
 
 - **Notification center** (bell): new messages, files, task assignments, reminders, overdue tasks. Each user chooses per type: in the app and/or by email (*Notification preferences*).

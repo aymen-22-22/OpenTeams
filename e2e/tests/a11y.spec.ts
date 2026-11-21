@@ -24,7 +24,7 @@ for (const lang of ['fr', 'ar'] as const) {
       await expect(page.locator('html')).toHaveAttribute('dir', 'rtl')
     }
     await scan(page, `${lang} shell`)
-    for (const name of { fr: ['Calendrier', 'Mes tâches', 'Projets', 'Demandes'], ar: ['التقويم', 'مهامي', 'المشاريع', 'الطلبات'] }[lang]) {
+    for (const name of { fr: ['Calendrier', 'Mes tâches', 'Projets', 'Demandes', 'Parcourir les canaux'], ar: ['التقويم', 'مهامي', 'المشاريع', 'الطلبات', 'تصفّح القنوات'] }[lang]) {
       await page.getByRole('navigation').getByRole('button', { name, exact: true }).click()
       await page.waitForTimeout(300)
       await scan(page, `${lang} ${name}`)

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 
 import type { Message } from './api'
+import { renderMentions } from './mentions'
 
 interface Props {
   message: Message
@@ -17,6 +18,8 @@ interface Props {
   onTogglePin: () => void
   onCreateTask?: () => void
   onRemind?: () => void
+  mentionNames?: string[]
+  myName?: string
 }
 
 function ActionButton({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) {
@@ -28,7 +31,7 @@ function ActionButton({ label, onClick, children }: { label: string; onClick: ()
   )
 }
 
-export function MessageItem({ message, mine, authorName, replyTo, pinned, ...actions }: Props) {
+export function MessageItem({ message, mine, authorName, replyTo, pinned, mentionNames = [], myName = '', ...actions }: Props) {
   const { t, i18n } = useTranslation()
   const time = new Intl.DateTimeFormat(i18n.language, { hour: '2-digit', minute: '2-digit' }).format(
     new Date(message.created_at),
@@ -50,7 +53,7 @@ export function MessageItem({ message, mine, authorName, replyTo, pinned, ...act
         {message.deleted ? (
           <em className="opacity-70">{t('chat.deleted')}</em>
         ) : (
-          <p dir="auto" className="whitespace-pre-wrap break-words">{message.body}</p>
+          <p dir="auto" className="whitespace-pre-wrap break-words">{renderMentions(message.body, [...mentionNames, myName].filter(Boolean), myName)}</p>
         )}
       </div>
       {!message.deleted && (
