@@ -20,6 +20,7 @@ class TaskOut(BaseModel):
     assignee_id: uuid.UUID | None
     conversation_id: uuid.UUID
     source_message_id: uuid.UUID | None
+    project_id: uuid.UUID | None
     created_at: datetime
 
     @classmethod
@@ -43,6 +44,7 @@ class TaskOut(BaseModel):
             assignee_id=task.assignee_id,
             conversation_id=task.conversation_id,
             source_message_id=task.source_message_id,
+            project_id=task.project_id,
             created_at=task.created_at,
         )
 
@@ -54,6 +56,7 @@ class TaskCreate(BaseModel):
     due_date: date | None = None
     priority: Priority = Priority.NORMAL
     source_message_id: uuid.UUID | None = None
+    project_id: uuid.UUID | None = None
 
 
 class TaskUpdate(BaseModel):
@@ -62,6 +65,7 @@ class TaskUpdate(BaseModel):
     assignee_id: uuid.UUID | None = None
     due_date: date | None = None
     priority: Priority | None = None
+    project_id: uuid.UUID | None = None
 
 
 class TaskMove(BaseModel):

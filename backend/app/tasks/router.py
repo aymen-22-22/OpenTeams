@@ -11,6 +11,7 @@ from app.chat.events import commit_and_publish
 from app.chat.models import Conversation, ConversationMember, ConversationType
 from app.core import clock
 from app.core.errors import AppError
+from app.projects.access import require_project
 from app.reminders.models import NotificationType
 from app.reminders.notify import notify, push
 from app.tasks.access import require_task, visible_tasks
@@ -102,6 +103,8 @@ async def create_task(body: TaskCreate, user: CurrentUser, db: DB) -> TaskOut:
     assignee = await _active_user(db, body.assignee_id) if body.assignee_id else user
     if body.source_message_id is not None:
         await require_message(db, body.source_message_id, user.id)  # must see the message
+    if body.project_id is not None:
+        await require_project(db, body.project_id, user)  # must see the project
 
     conversation = Conversation(type=ConversationType.TASK, title=body.title)
     db.add(conversation)
@@ -119,6 +122,7 @@ async def create_task(body: TaskCreate, user: CurrentUser, db: DB) -> TaskOut:
         assignee_id=assignee.id,
         conversation_id=conversation.id,
         source_message_id=body.source_message_id,
+        project_id=body.project_id,
         position=(top - STEP) if top is not None else 0.0,  # new tasks go on top
     )
     db.add(task)
@@ -140,6 +144,8 @@ async def update_task(task_id: uuid.UUID, body: TaskUpdate, user: CurrentUser, d
             raise AppError("invalid_assignee", "A task must have an assignee", 422)
         await _active_user(db, changes["assignee_id"])
         await _add_member(db, task.conversation_id, changes["assignee_id"])
+    if changes.get("project_id") is not None:
+        await require_project(db, changes["project_id"], user)
     for field in ("title", "priority"):
         if field in changes and changes[field] is None:
             raise AppError("invalid_value", f"{field} cannot be empty", 422)

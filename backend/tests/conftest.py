@@ -31,6 +31,7 @@ from app.users.models import Role, User  # noqa: E402
 
 PASSWORD = "correct-horse-battery"
 TABLES = (
+    "request_steps, requests, project_milestones, project_members, projects, "
     "calendar_event_attendees, calendar_events, playbook_runs, playbooks, "
     "email_outbox, notifications, notification_preferences, reminders, "
     "ai_audit_log, ai_messages, ai_conversations, ai_profiles, "

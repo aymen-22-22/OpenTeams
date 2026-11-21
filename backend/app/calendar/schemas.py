@@ -17,6 +17,7 @@ class EventOut(BaseModel):
     all_day: bool
     user_ids: list[uuid.UUID]  # assignee or attendees
     task_id: uuid.UUID | None = None
+    project_id: uuid.UUID | None = None
     creator_id: uuid.UUID | None = None
     description: str = ""
     conversation_id: uuid.UUID | None = None

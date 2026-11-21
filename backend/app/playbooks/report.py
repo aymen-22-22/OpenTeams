@@ -26,6 +26,7 @@ LABELS: dict[str, dict[str, Any]] = {
         "pending": "En attente",
         "overdue": "En retard",
         "per_person": "Par personne",
+        "per_project": "Par projet",
         "mine": "Vos tâches ouvertes",
         "team": "Équipe",
         "none": "Rien à signaler.",
@@ -44,6 +45,7 @@ LABELS: dict[str, dict[str, Any]] = {
         "pending": "Pending",
         "overdue": "Overdue",
         "per_person": "Per person",
+        "per_project": "Per project",
         "mine": "Your open tasks",
         "team": "Team",
         "none": "Nothing to report.",
@@ -62,6 +64,7 @@ LABELS: dict[str, dict[str, Any]] = {
         "pending": "قيد الانتظار",
         "overdue": "متأخرة",
         "per_person": "حسب الشخص",
+        "per_project": "حسب المشروع",
         "mine": "مهامك المفتوحة",
         "team": "الفريق",
         "none": "لا شيء للإبلاغ عنه.",
@@ -119,6 +122,7 @@ def render(
     end: datetime,
     lang: str,
     personal: bool = False,
+    projects: dict[uuid.UUID, str] | None = None,
 ) -> str:
     L = LABELS.get(lang, LABELS["fr"])
     lines = [L["title"][p.kind.value], f"{L['period']}: {start.date()} → {end.date()}", ""]
@@ -146,6 +150,19 @@ def render(
                 f"{L[k]} {c.get(k, 0)}" for k in ("finished", "in_progress", "overdue")
             )
             lines.append(f"- {who}: {parts}")
+        by_project: dict[str, dict[str, int]] = {}
+        for key in ("finished", "in_progress", "pending", "overdue"):
+            for t in getattr(data, key):
+                if t.project_id and projects and t.project_id in projects:
+                    c = by_project.setdefault(projects[t.project_id], {})
+                    c[key] = c.get(key, 0) + 1
+        if by_project:
+            lines += ["", L["per_project"]]
+            for name, c in sorted(by_project.items()):
+                parts = ", ".join(
+                    f"{L[k]} {c.get(k, 0)}" for k in ("finished", "in_progress", "overdue")
+                )
+                lines.append(f"- {name}: {parts}")
     return "\n".join(lines).strip()
 
 

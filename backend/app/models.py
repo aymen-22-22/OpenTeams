@@ -8,7 +8,9 @@ from app.chat.events import RealtimeEvent
 from app.chat.models import Conversation, ConversationMember, Message, MessageRead, Pin
 from app.files.models import File, FileVersion
 from app.playbooks.models import Playbook, PlaybookRun
+from app.projects.models import Milestone, Project, ProjectMember
 from app.reminders.models import EmailOutbox, Notification, NotificationPreference, Reminder
+from app.requests.models import Request, RequestStep
 from app.tasks.models import Task, TaskEvent
 from app.users.models import Team, TeamMember, User
 
@@ -19,6 +21,8 @@ __all__ = [
     "Notification",
     "NotificationPreference",
     "Reminder",
+    "Request",
+    "RequestStep",
     "AIAuditLog",
     "AIConversation",
     "AIMessage",
@@ -29,9 +33,12 @@ __all__ = [
     "File",
     "FileVersion",
     "Message",
+    "Milestone",
     "MessageRead",
     "Pin",
     "Playbook",
+    "Project",
+    "ProjectMember",
     "PlaybookRun",
     "RealtimeEvent",
     "Session",

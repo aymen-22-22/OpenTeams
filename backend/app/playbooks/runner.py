@@ -14,6 +14,7 @@ from app.playbooks import report
 from app.playbooks.ai import owner_ai_ready, rewrite
 from app.playbooks.models import Playbook, PlaybookKind, PlaybookRun, RunStatus
 from app.playbooks.schedule import period
+from app.projects.access import visible_projects
 from app.reminders.models import Notification, NotificationType
 from app.reminders.notify import notify, push
 from app.users.models import User
@@ -37,6 +38,7 @@ async def build(db: AsyncSession, run: PlaybookRun, p: Playbook, now: datetime, 
     today = now.astimezone(ZoneInfo(get_settings().timezone)).date()
     scope = [uuid.UUID(s) for s in p.scope_user_ids]
     names = await _names(db)
+    projects = {pr.id: pr.name for pr in await db.scalars(visible_projects(owner))}
     team = await report.collect(db, owner, scope, run.period_start, run.period_end, today)
     ai_profile = await owner_ai_ready(db, owner, now) if p.use_ai else None
 
@@ -55,7 +57,9 @@ async def build(db: AsyncSession, run: PlaybookRun, p: Playbook, now: datetime, 
             if personal
             else team
         )
-        text = report.render(p, data, names, run.period_start, run.period_end, lang, personal)
+        text = report.render(
+            p, data, names, run.period_start, run.period_end, lang, personal, projects
+        )
         if ai_profile is not None:
             if text not in rewritten:
                 result = await rewrite(

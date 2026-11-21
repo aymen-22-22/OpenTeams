@@ -43,6 +43,10 @@ class CalendarEvent(Base):
     conversation_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("conversations.id", ondelete="SET NULL")
     )
+    # Day-off events come from an approved leave request.
+    request_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("requests.id", ondelete="CASCADE")
+    )
 
 
 class EventAttendee(Base):
