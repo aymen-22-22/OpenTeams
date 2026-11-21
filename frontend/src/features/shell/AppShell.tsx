@@ -23,12 +23,14 @@ import type { Task, TaskInput } from '@/features/tasks/api'
 import { MyTasks } from '@/features/tasks/MyTasks'
 import { TaskForm } from '@/features/tasks/TaskForm'
 import { TaskView } from '@/features/tasks/TaskView'
+import { EmptyState } from '@/components/ui/empty-state'
 import { api } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
 import { ConversationArea, type ConversationTab } from './ConversationArea'
 import { PeoplePanel, type Page } from './PeoplePanel'
 import { SidePanel } from './SidePanel'
+import { Logo } from './Logo'
 import { TopBar } from './TopBar'
 
 type Column = 'people' | 'conversation' | 'details'
@@ -41,6 +43,10 @@ type View = { kind: 'person' } | { kind: 'myTasks' } | { kind: 'assistant' } | {
   | { kind: 'channel'; channelId: string }
   | { kind: 'channels' }
   | { kind: 'report'; runId: string } | { kind: 'task'; taskId: string }
+
+const PAGE_KINDS = new Set<string>(['assistant', 'myTasks', 'calendar', 'projects', 'requests', 'playbooks', 'dashboard'])
+/** Conversations show the side panel (pins, files, tasks, reminders); full pages use the whole width. */
+const SIDE_PANEL_VIEWS = new Set<string>(['person', 'channel'])
 
 const NAV = [
   { id: 'people', Icon: Users },
@@ -136,15 +142,22 @@ export function AppShell({ me }: { me: User }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- navigate uses the loaded conversations
   }, [pendingLink, conversations])
 
+  // Re-key the main column on view change so each view fades in.
+  const viewKey = view.kind === 'person' ? `person:${person?.id}` : JSON.stringify(view)
+
   return (
-    <div className="flex h-dvh flex-col">
-      <TopBar me={me} onOpenMessage={(m: Message) => void openConversation(m.conversation_id)} onNavigate={navigate} />
-      <main className="flex flex-1 overflow-hidden">
-        <div className={cn(column === 'people' ? 'flex' : 'hidden', 'w-full flex-col overflow-y-auto border-e border-border md:flex md:w-72')}>
+    <div className="flex h-dvh flex-col bg-background">
+      <div className="flex min-h-0 flex-1">
+        {/* Sidebar: brand, pages, channels, people */}
+        <div className={cn(column === 'people' ? 'flex' : 'hidden', 'w-full shrink-0 flex-col overflow-y-auto border-e border-border bg-sidebar md:flex md:w-72')}>
+          <div className="sticky top-0 z-10 flex h-14 shrink-0 items-center bg-sidebar/95 px-5 backdrop-blur">
+            <Logo />
+          </div>
           <PeoplePanel
             people={people}
             unread={unread}
             selectedId={view.kind === 'person' ? person?.id : undefined}
+            activePage={PAGE_KINDS.has(view.kind) ? (view.kind as Page) : undefined}
             onSelect={(p) => showPerson(p.id)}
             isManager={me.role !== 'employee'}
             channels={channels}
@@ -154,74 +167,87 @@ export function AppShell({ me }: { me: User }) {
             onOpen={(page: Page) => show({ kind: page })}
           />
         </div>
-        <div className={cn(column === 'conversation' ? 'flex' : 'hidden', 'min-w-0 flex-1 flex-col md:flex')}>
-          {view.kind === 'task' && (
-            <TaskView key={view.taskId} taskId={view.taskId} meId={me.id} people={peopleById} onBack={() => setView({ kind: 'person' })}
-              onRemind={(id, title) => setReminderDraft({ title, target_type: 'task', target_id: id })} />
-          )}
-          {view.kind === 'assistant' && <AssistantView me={me} people={peopleById} />}
-          {view.kind === 'preferences' && <PreferencesView />}
-          {view.kind === 'calendar' && (
-            <CalendarView me={me} people={peopleById} onOpenTask={(id) => openTask({ id })}
-              onOpenProject={(id) => show({ kind: 'projects', projectId: id })}
-              onRemind={(e) => setReminderDraft({ title: e.title, target_type: 'event', target_id: e.id })} />
-          )}
-          {view.kind === 'channel' && (
-            <ChannelView key={view.channelId} channelId={view.channelId} meId={me.id} people={peopleById}
-              onCreateTask={(m) => setTaskDraft({ title: m.body.slice(0, 200), source_message_id: m.id })}
-              onRemind={(m) => setReminderDraft({ title: m.body.slice(0, 200), target_type: 'message', target_id: m.id })} />
-          )}
-          {view.kind === 'channels' && (
-            <BrowseChannels onOpen={(id) => show({ kind: 'channel', channelId: id })} onNew={() => setCreatingChannel(true)} />
-          )}
-          {view.kind === 'requests' && <RequestsView me={me} people={peopleById} />}
-          {view.kind === 'projects' && (
-            <ProjectsView key={view.projectId ?? 'list'} me={me} people={peopleById} initialId={view.projectId}
-              onOpenTask={openTask} onNewTask={(projectId) => setTaskDraft({ project_id: projectId })} />
-          )}
-          {view.kind === 'dashboard' && <DashboardView onOpenTask={(id) => openTask({ id })} />}
-          {view.kind === 'playbooks' && (
-            <PlaybooksView me={me} people={peopleById} onOpenRun={(runId) => show({ kind: 'report', runId })} />
-          )}
-          {view.kind === 'report' && <ReportView key={view.runId} runId={view.runId} people={peopleById} />}
-          {view.kind === 'myTasks' && (
-            <MyTasks meId={me.id} people={peopleById} onOpen={openTask} onNew={() => setTaskDraft({})} />
-          )}
-          {view.kind === 'person' && person && (
-            <ConversationArea
-              person={person}
-              conversation={conversation}
-              meId={me.id}
-              people={peopleById}
-              tab={tab}
-              onTabChange={setTab}
-              onOpenTask={openTask}
-              onNewTask={() => setTaskDraft({ assignee_id: person.id })}
-              onScheduleMeeting={setMeetingChat}
-              onRemindMessage={(m) => setReminderDraft({ title: m.body.slice(0, 200), target_type: 'message', target_id: m.id })}
-              onCreateTaskFromMessage={(m) =>
-                setTaskDraft({ title: m.body.slice(0, 200), assignee_id: person.id, source_message_id: m.id })
-              }
-            />
-          )}
+
+        <div className={cn(column === 'people' ? 'hidden' : 'flex', 'min-w-0 flex-1 flex-col md:flex')}>
+          <TopBar me={me} onOpenMessage={(m: Message) => void openConversation(m.conversation_id)} onNavigate={navigate} />
+          <main className="flex min-h-0 flex-1">
+            <div key={viewKey} className={cn(column === 'conversation' ? 'flex' : 'hidden', 'min-w-0 flex-1 animate-fade-in flex-col md:flex')}>
+              {view.kind === 'task' && (
+                <TaskView key={view.taskId} taskId={view.taskId} meId={me.id} people={peopleById} onBack={() => setView({ kind: 'person' })}
+                  onRemind={(id, title) => setReminderDraft({ title, target_type: 'task', target_id: id })} />
+              )}
+              {view.kind === 'assistant' && <AssistantView me={me} people={peopleById} />}
+              {view.kind === 'preferences' && <PreferencesView />}
+              {view.kind === 'calendar' && (
+                <CalendarView me={me} people={peopleById} onOpenTask={(id) => openTask({ id })}
+                  onOpenProject={(id) => show({ kind: 'projects', projectId: id })}
+                  onRemind={(e) => setReminderDraft({ title: e.title, target_type: 'event', target_id: e.id })} />
+              )}
+              {view.kind === 'channel' && (
+                <ChannelView key={view.channelId} channelId={view.channelId} meId={me.id} people={peopleById}
+                  onCreateTask={(m) => setTaskDraft({ title: m.body.slice(0, 200), source_message_id: m.id })}
+                  onRemind={(m) => setReminderDraft({ title: m.body.slice(0, 200), target_type: 'message', target_id: m.id })} />
+              )}
+              {view.kind === 'channels' && (
+                <BrowseChannels onOpen={(id) => show({ kind: 'channel', channelId: id })} onNew={() => setCreatingChannel(true)} />
+              )}
+              {view.kind === 'requests' && <RequestsView me={me} people={peopleById} />}
+              {view.kind === 'projects' && (
+                <ProjectsView key={view.projectId ?? 'list'} me={me} people={peopleById} initialId={view.projectId}
+                  onOpenTask={openTask} onNewTask={(projectId) => setTaskDraft({ project_id: projectId })} />
+              )}
+              {view.kind === 'dashboard' && <DashboardView onOpenTask={(id) => openTask({ id })} />}
+              {view.kind === 'playbooks' && (
+                <PlaybooksView me={me} people={peopleById} onOpenRun={(runId) => show({ kind: 'report', runId })} />
+              )}
+              {view.kind === 'report' && <ReportView key={view.runId} runId={view.runId} people={peopleById} />}
+              {view.kind === 'myTasks' && (
+                <MyTasks meId={me.id} people={peopleById} onOpen={openTask} onNew={() => setTaskDraft({})} />
+              )}
+              {view.kind === 'person' && person && (
+                <ConversationArea
+                  person={person}
+                  conversation={conversation}
+                  meId={me.id}
+                  people={peopleById}
+                  tab={tab}
+                  onTabChange={setTab}
+                  onOpenTask={openTask}
+                  onNewTask={() => setTaskDraft({ assignee_id: person.id })}
+                  onScheduleMeeting={setMeetingChat}
+                  onRemindMessage={(m) => setReminderDraft({ title: m.body.slice(0, 200), target_type: 'message', target_id: m.id })}
+                  onCreateTaskFromMessage={(m) =>
+                    setTaskDraft({ title: m.body.slice(0, 200), assignee_id: person.id, source_message_id: m.id })
+                  }
+                />
+              )}
+              {view.kind === 'person' && !person && (
+                <EmptyState icon={Users} title={t('people.empty')} className="m-auto" />
+              )}
+            </div>
+            {SIDE_PANEL_VIEWS.has(view.kind) && (
+              <div className={cn(column === 'details' ? 'flex' : 'hidden', 'w-full shrink-0 flex-col overflow-y-auto border-s border-border bg-sidebar lg:flex lg:w-80')}>
+                <SidePanel
+                  conversationId={view.kind === 'channel' ? view.channelId : conversation?.id}
+                  personId={view.kind === 'channel' ? undefined : person?.id}
+                  onOpenBoard={() => person && showPerson(person.id, 'tasks')}
+                  onNewReminder={() => setReminderDraft({})}
+                />
+              </div>
+            )}
+          </main>
         </div>
-        <div className={cn(column === 'details' ? 'flex' : 'hidden', 'w-full flex-col overflow-y-auto border-s border-border lg:flex lg:w-80')}>
-          <SidePanel
-            conversationId={view.kind === 'channel' ? view.channelId : conversation?.id}
-            personId={view.kind === 'channel' ? undefined : person?.id}
-            onOpenBoard={() => person && showPerson(person.id, 'tasks')}
-            onNewReminder={() => setReminderDraft({})}
-          />
-        </div>
-      </main>
-      <nav aria-label="Navigation" className="flex border-t border-border md:hidden">
+      </div>
+
+      {/* Mobile: one column at a time */}
+      <nav aria-label="Navigation" className="flex border-t border-border bg-background pb-[env(safe-area-inset-bottom)] md:hidden">
         {NAV.map(({ id, Icon }) => (
           <button
             key={id}
             type="button"
             onClick={() => setColumn(id)}
             aria-current={column === id}
-            className={cn('flex min-h-14 flex-1 flex-col items-center justify-center text-xs', column === id ? 'text-accent' : 'text-muted-foreground')}
+            className={cn('flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors', column === id ? 'text-accent' : 'text-muted-foreground')}
           >
             <Icon className="size-5" aria-hidden />
             {t(`nav.${id}`)}

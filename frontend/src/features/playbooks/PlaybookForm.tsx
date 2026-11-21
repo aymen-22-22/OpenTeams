@@ -6,10 +6,10 @@ import type { Person } from '@/features/auth/api'
 
 import { KINDS, useSavePlaybook, type Frequency, type Kind, type Playbook, type PlaybookInput } from './api'
 
-const field = 'min-h-11 rounded-md border border-border bg-background px-3'
+const field = 'field'
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
-  return <label className="flex flex-col gap-1 text-sm">{label}{children}</label>
+  return <label className="flex flex-col gap-1.5 text-sm font-medium">{label}{children}</label>
 }
 
 function Check({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
@@ -25,7 +25,7 @@ function PeoplePicker({ legend, people, value, onChange }: {
   legend: string; people: Person[]; value: string[]; onChange: (ids: string[]) => void
 }) {
   return (
-    <fieldset className="flex flex-col rounded-md border border-border p-3">
+    <fieldset className="flex flex-col rounded-xl border border-border bg-background p-4 shadow-xs">
       <legend className="px-1 text-sm font-semibold">{legend}</legend>
       {people.map((p) => (
         <Check key={p.id} label={p.display_name} checked={value.includes(p.id)}
@@ -69,7 +69,7 @@ export function PlaybookForm({ playbook, initial, people, canSendToOthers, onSav
         <Check label={t('playbooks.enabled')} checked={form.enabled} onChange={(enabled) => set({ enabled })} />
       </div>
 
-      <fieldset className="grid gap-3 rounded-md border border-border p-3 sm:grid-cols-3">
+      <fieldset className="grid gap-3 rounded-xl border border-border bg-background p-4 shadow-xs sm:grid-cols-3">
         <legend className="px-1 text-sm font-semibold">{t('playbooks.schedule')}</legend>
         <Field label={t('playbooks.frequency')}>
           <select value={form.frequency} onChange={(e) => set({ frequency: e.target.value as Frequency })} className={field}>
@@ -98,7 +98,7 @@ export function PlaybookForm({ playbook, initial, people, canSendToOthers, onSav
         <PeoplePicker legend={t('playbooks.recipients')} people={people} value={form.recipient_ids} onChange={(recipient_ids) => set({ recipient_ids })} />
       )}
 
-      <fieldset className="flex flex-col rounded-md border border-border p-3">
+      <fieldset className="flex flex-col rounded-xl border border-border bg-background p-4 shadow-xs">
         <legend className="px-1 text-sm font-semibold">{t('playbooks.delivery')}</legend>
         <Check label={t('playbooks.inApp')} checked={form.deliver_in_app} onChange={(deliver_in_app) => set({ deliver_in_app })} />
         <Check label={t('playbooks.email')} checked={form.deliver_email} onChange={(deliver_email) => set({ deliver_email })} />
@@ -111,7 +111,7 @@ export function PlaybookForm({ playbook, initial, people, canSendToOthers, onSav
         </Field>
       )}
 
-      {save.isError && <p role="alert" className="text-sm text-red-600">{t('playbooks.saveFailed')}</p>}
+      {save.isError && <p role="alert" className="text-sm text-danger">{t('playbooks.saveFailed')}</p>}
       <Button type="submit" className="self-start" disabled={save.isPending}>{t('chat.save')}</Button>
     </form>
   )

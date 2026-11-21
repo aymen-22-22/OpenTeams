@@ -152,6 +152,14 @@ One WebSocket at `/ws`. Stored events have an `id`; reconnect with `/ws?last_eve
 | `presence.changed` | online / away / offline (not stored) |
 | `typing` | someone is typing (not stored; client sends `{"type":"typing","conversation_id":...}`) |
 
+## Design
+
+- **Design tokens** in `frontend/src/index.css`: neutral surfaces (`background`, `sidebar`, `muted`), one accent (teal `#0F766E`, change `--accent` to rebrand), semantic colours (success, warning, danger), AI purple, soft shadows. Light and dark themes; every text/background pair meets WCAG AA.
+- **Fonts**: Inter (Latin) and IBM Plex Sans Arabic, self-hosted through `@fontsource` (no external CDN; fonts are never inlined, so the strict CSP keeps working).
+- **Components** in `frontend/src/components/ui`: Button, Avatar (initials + presence), Modal (animated, Escape, focus return), Badge, EmptyState, Skeleton, Tabs; shared `.field`, `.card`, `.page` classes.
+- **Motion**: short fades and scale-ins (150–250 ms) for views, messages, dialogs and menus; all disabled when the system asks for reduced motion.
+- **Shortcuts**: Ctrl/⌘ K focuses the search.
+
 ## Layout
 
 - `backend/app/core`: settings, database, logging, error format

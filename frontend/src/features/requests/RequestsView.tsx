@@ -1,4 +1,6 @@
+import { ClipboardCheck } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
+import { EmptyState } from '@/components/ui/empty-state'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
@@ -8,7 +10,7 @@ import { cn } from '@/lib/utils'
 
 import { useApprovers, useRequestAction, useRequests, useSubmitRequest, type AppRequest, type Box, type LeaveType, type RequestKind } from './api'
 
-const field = 'min-h-11 rounded-md border border-border bg-background px-3'
+const field = 'field'
 
 export const REQUEST_STATUS_COLOR = {
   pending: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200',
@@ -43,32 +45,32 @@ function RequestForm({ onDone }: { onDone: () => void }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex max-w-lg flex-col gap-3 rounded-md border border-border p-4">
+    <form onSubmit={onSubmit} className="flex max-w-lg flex-col gap-3 rounded-xl border border-border bg-background p-5 shadow-xs">
       <h3 className="font-semibold">{t('requests.new')}</h3>
       <div className="grid gap-3 sm:grid-cols-2">
-        <label className="flex flex-col gap-1 text-sm">{t('requests.kind')}
+        <label className="flex flex-col gap-1.5 text-sm font-medium">{t('requests.kind')}
           <select value={kind} onChange={(e) => setKind(e.target.value as RequestKind)} className={field}>
             {(['leave', 'equipment', 'expense', 'other'] as const).map((k) => <option key={k} value={k}>{t(`requests.kinds.${k}`)}</option>)}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-sm">{t('requests.approver')}
+        <label className="flex flex-col gap-1.5 text-sm font-medium">{t('requests.approver')}
           <select required value={approver || approvers[0]?.id || ''} onChange={(e) => setApprover(e.target.value)} className={field}>
             {approvers.map((a) => <option key={a.id} value={a.id}>{a.display_name}</option>)}
           </select>
         </label>
       </div>
-      <label className="flex flex-col gap-1 text-sm">{t('tasks.title')}
+      <label className="flex flex-col gap-1.5 text-sm font-medium">{t('tasks.title')}
         <input required maxLength={200} value={title} onChange={(e) => setTitle(e.target.value)} className={field} dir="auto" />
       </label>
       {kind === 'leave' && (
         <div className="grid gap-3 sm:grid-cols-3">
-          <label className="flex flex-col gap-1 text-sm">{t('requests.from')}
+          <label className="flex flex-col gap-1.5 text-sm font-medium">{t('requests.from')}
             <input type="date" required value={start} onChange={(e) => setStart(e.target.value)} className={field} />
           </label>
-          <label className="flex flex-col gap-1 text-sm">{t('requests.to')}
+          <label className="flex flex-col gap-1.5 text-sm font-medium">{t('requests.to')}
             <input type="date" required min={start} value={end} onChange={(e) => setEnd(e.target.value)} className={field} />
           </label>
-          <label className="flex flex-col gap-1 text-sm">{t('requests.leaveType')}
+          <label className="flex flex-col gap-1.5 text-sm font-medium">{t('requests.leaveType')}
             <select value={leaveType} onChange={(e) => setLeaveType(e.target.value as LeaveType)} className={field}>
               {(['paid', 'unpaid', 'sick', 'other'] as const).map((l) => <option key={l} value={l}>{t(`requests.leaveTypes.${l}`)}</option>)}
             </select>
@@ -76,15 +78,15 @@ function RequestForm({ onDone }: { onDone: () => void }) {
         </div>
       )}
       {kind === 'expense' && (
-        <label className="flex flex-col gap-1 text-sm">{t('requests.amount')}
+        <label className="flex flex-col gap-1.5 text-sm font-medium">{t('requests.amount')}
           <input type="number" required min="0.01" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} className={field} dir="ltr" />
         </label>
       )}
-      <label className="flex flex-col gap-1 text-sm">{t('requests.comment')}
+      <label className="flex flex-col gap-1.5 text-sm font-medium">{t('requests.comment')}
         <textarea rows={2} value={comment} onChange={(e) => setComment(e.target.value)} className={`${field} py-2`} dir="auto" />
       </label>
       {approvers.length === 0 && <p className="text-sm text-muted-foreground">{t('requests.noApprover')}</p>}
-      {submit.isError && <p role="alert" className="text-sm text-red-600">{t('requests.failed')}</p>}
+      {submit.isError && <p role="alert" className="text-sm text-danger">{t('requests.failed')}</p>}
       <div className="flex justify-end gap-2">
         <Button type="button" variant="ghost" onClick={onDone}>{t('chat.cancel')}</Button>
         <Button type="submit" disabled={submit.isPending || approvers.length === 0}>{t('requests.submit')}</Button>
@@ -102,7 +104,7 @@ function RequestCard({ request, box, people }: { request: AppRequest; box: Box; 
   const name = (id: string | null) => people.get(id ?? '')?.display_name ?? '?'
 
   return (
-    <li className="flex flex-col gap-2 rounded-md border border-border p-3">
+    <li className="flex flex-col gap-2 rounded-xl border border-border bg-background p-4 shadow-xs">
       <div className="flex flex-wrap items-center gap-2">
         <span dir="auto" className="font-medium">{request.title}</span>
         <span className="text-xs text-muted-foreground">{t(`requests.kinds.${request.kind}`)}</span>
@@ -133,7 +135,7 @@ function RequestCard({ request, box, people }: { request: AppRequest; box: Box; 
 function RequestList({ box, people }: { box: Box; people: Map<string, Person> }) {
   const { t } = useTranslation()
   const list = useRequests(box).data ?? []
-  if (list.length === 0) return <p className="text-sm text-muted-foreground">{t('requests.empty')}</p>
+  if (list.length === 0) return <EmptyState icon={ClipboardCheck} title={t('requests.empty')} hint={t('requests.emptyHint')} />
   return <ul className="flex flex-col gap-2">{list.map((r) => <RequestCard key={r.id} request={r} box={box} people={people} />)}</ul>
 }
 
@@ -142,9 +144,10 @@ export function RequestsView({ me, people }: { me: User; people: Map<string, Per
   const [creating, setCreating] = useState(false)
   const approver = me.role !== 'employee'
   return (
-    <section aria-label={t('requests.title')} className="flex h-full flex-col gap-4 overflow-y-auto p-4">
+    <section aria-label={t('requests.title')} className="h-full overflow-y-auto">
+      <div className="page flex animate-fade-in flex-col gap-5">
       <header className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">{t('requests.title')}</h2>
+        <h2 className="page-title">{t('requests.title')}</h2>
         {!creating && <Button onClick={() => setCreating(true)}>{t('requests.new')}</Button>}
       </header>
       {creating && <RequestForm onDone={() => setCreating(false)} />}
@@ -156,6 +159,7 @@ export function RequestsView({ me, people }: { me: User; people: Map<string, Per
         {approver && <TabsContent value="to_approve"><RequestList box="to_approve" people={people} /></TabsContent>}
         <TabsContent value="mine"><RequestList box="mine" people={people} /></TabsContent>
       </Tabs>
+      </div>
     </section>
   )
 }

@@ -83,7 +83,8 @@ test('switching to English translates the shell', async () => {
 test('logout returns to the login page', async () => {
   mockApi({ ...LOGGED_IN, 'POST /auth/logout': { status: 204 } })
   renderApp()
-  await userEvent.click(await screen.findByRole('button', { name: 'Se déconnecter' }))
+  await userEvent.click(await screen.findByRole('button', { name: 'Compte de Moi' }))
+  await userEvent.click(screen.getByRole('menuitem', { name: 'Se déconnecter' }))
   expect(await screen.findByRole('button', { name: 'Se connecter' })).toBeInTheDocument()
 })
 

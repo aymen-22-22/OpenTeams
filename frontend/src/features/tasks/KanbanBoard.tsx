@@ -12,6 +12,8 @@ import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrate
 import { useTranslation } from 'react-i18next'
 
 import type { Person } from '@/features/auth/api'
+import { STATUS_DOT } from '@/features/shell/SidePanel'
+import { cn } from '@/lib/utils'
 
 import { STATUSES, useMoveTask, type Task, type TaskStatus } from './api'
 import { TaskCard } from './TaskCard'
@@ -20,13 +22,20 @@ function Column({ status, tasks, children }: { status: TaskStatus; tasks: Task[]
   const { t } = useTranslation()
   const { setNodeRef, isOver } = useDroppable({ id: status })
   return (
-    <section aria-label={t(`tasks.${status}`)} className="flex min-w-0 flex-col gap-2 rounded-lg bg-muted p-2">
-      <h3 className="flex items-center justify-between px-1 text-sm font-semibold">
+    <section aria-label={t(`tasks.${status}`)}
+      className={cn('flex min-w-0 flex-col gap-2 rounded-2xl bg-sidebar p-2.5 ring-1 ring-border transition-[box-shadow,background-color] duration-150', isOver && 'bg-accent-soft/50 ring-2 ring-accent')}>
+      <h3 className="flex items-center gap-2 px-1.5 pt-0.5 pb-1 text-sm font-semibold">
+        <span className={cn('size-2 rounded-full', STATUS_DOT[status])} aria-hidden />
         {t(`tasks.${status}`)}
-        <span className="text-muted-foreground">{tasks.length}</span>
+        <span className="ms-auto rounded-full bg-background px-2 text-xs font-medium text-muted-foreground tabular-nums ring-1 ring-border">{tasks.length}</span>
       </h3>
-      <ol ref={setNodeRef} className={`flex min-h-24 flex-col gap-2 rounded-md ${isOver ? 'ring-2 ring-accent' : ''}`}>
+      <ol ref={setNodeRef} className="flex min-h-28 flex-col gap-2">
         {children}
+        {tasks.length === 0 && (
+          <li aria-hidden className="flex min-h-24 items-center justify-center rounded-xl border-2 border-dashed border-border text-xs text-muted-foreground">
+            {t('tasks.dropHere')}
+          </li>
+        )}
       </ol>
     </section>
   )
@@ -69,7 +78,7 @@ export function KanbanBoard({ tasks, people, onOpen }: Props) {
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={onDragEnd}>
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid items-start gap-4 md:grid-cols-3">
         {STATUSES.map((status) => {
           const column = tasks.filter((t) => t.status === status)
           return (

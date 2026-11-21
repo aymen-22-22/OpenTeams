@@ -4,7 +4,10 @@
     "language": "Langue",
     "theme": "Basculer le thème",
     "search": "Rechercher",
-    "logout": "Se déconnecter"
+    "logout": "Se déconnecter",
+    "account": "Compte de {{name}}",
+    "accountMenu": "Menu du compte",
+    "searchShortcut": "Ctrl K"
   },
   "people": {
     "title": "Personnes",
@@ -45,7 +48,10 @@
     "editing": "Modification du message",
     "replyingTo": "Réponse à : {{text}}",
     "mentionSomeone": "Mentionner quelqu'un",
-    "everyone": "tous les membres"
+    "everyone": "tous les membres",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "emptyHint": "Écrivez le premier message ci-dessous."
   },
   "ai": {
     "label": "IA de {{name}}",
@@ -109,7 +115,9 @@
     "log": {
       "title": "Journal",
       "empty": "Personne n'a encore parlé à votre IA."
-    }
+    },
+    "notConfigured": "Votre assistant n'est pas actif",
+    "notConfiguredHint": "Ouvrez l'onglet Réglages pour connecter votre clé API et l'activer."
   },
   "tasks": {
     "pending": "En attente",
@@ -133,7 +141,9 @@
     "fromMessage": "Créer une tâche",
     "createFailed": "Impossible de créer la tâche.",
     "back": "Retour",
-    "status": "Statut"
+    "status": "Statut",
+    "myTasksHint": "Toutes les tâches qui vous sont assignées, dans toutes les conversations.",
+    "dropHere": "Glissez une tâche ici"
   },
   "side": {
     "pins": "Épinglés",
@@ -171,7 +181,14 @@
     "submit": "Se connecter",
     "invalid": "E-mail ou mot de passe incorrect.",
     "rateLimited": "Trop de tentatives. Réessayez dans quelques minutes.",
-    "failed": "Connexion impossible. Réessayez."
+    "failed": "Connexion impossible. Réessayez.",
+    "tagline": "Votre équipe, au même endroit.",
+    "pitch": "Messages, fichiers, tâches et calendrier sur vos propres serveurs : la fin des boîtes mail débordantes.",
+    "f1": "Discussions en temps réel et canaux d'équipe",
+    "f2": "Tâches en kanban avec une discussion par tâche",
+    "f3": "Rappels, rapports et assistant IA personnel",
+    "welcome": "Bon retour",
+    "emailPlaceholder": "nom@entreprise.com"
   },
   "search": {
     "results": "Résultats de recherche",
@@ -365,7 +382,8 @@
       "approved": "Approuvée",
       "rejected": "Refusée",
       "cancelled": "Annulée"
-    }
+    },
+    "emptyHint": "Congés, matériel ou notes de frais : créez une demande en un clic."
   },
   "projects": {
     "title": "Projets",
@@ -388,7 +406,8 @@
       "active": "En cours",
       "on_hold": "En pause",
       "finished": "Terminé"
-    }
+    },
+    "emptyHint": "Regroupez des tâches, des jalons et des fichiers autour d'un objectif."
   },
   "dashboard": {
     "title": "Tableau de bord",

@@ -2,50 +2,259 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Design tokens. Accent is teal #0F766E (configurable), AI bubbles use a purple tint. */
+/*
+ * Design tokens. Calm neutral greys, one accent (teal #0F766E, configurable), AI in purple.
+ * "background" is the main surface; "sidebar" and "muted" are the quieter layers around it.
+ * Every text/background pair below meets WCAG AA contrast (4.5:1).
+ */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
-  --muted: #f5f5f5;
-  --muted-foreground: #525252;
-  --border: #e5e5e5;
+  --foreground: #101718;
+  --sidebar: #f5f7f7;
+  --muted: #eef1f1;
+  --muted-foreground: #576163;
+  --border: #e2e7e7;
+  --border-strong: #cdd4d5;
   --accent: #0f766e;
+  --accent-hover: #115e59;
   --accent-foreground: #ffffff;
-  --ai: #f3e8ff;
-  --ai-foreground: #581c87;
+  --accent-soft: #e6f6f4;
+  --accent-soft-foreground: #0d5f58;
+  --danger: #b91c1c;
+  --danger-soft: #fdeeee;
+  --warning: #a14c06;
+  --warning-soft: #fdf3e2;
+  --success: #15803d;
+  --success-soft: #e9f7ee;
+  --ai: #f4efff;
+  --ai-foreground: #5b21b6;
+  --ai-border: #ddd3fb;
+  --shadow-color: 190 20% 20%;
+  color-scheme: light;
 }
 
 .dark {
-  --background: #0a0a0a;
-  --foreground: #fafafa;
-  --muted: #171717;
-  --muted-foreground: #a3a3a3;
-  --border: #262626;
-  --accent: #14b8a6;
+  --background: #0f1415;
+  --foreground: #e7ecec;
+  --sidebar: #0b1011;
+  --muted: #1a2223;
+  --muted-foreground: #9ba6a7;
+  --border: #212b2c;
+  --border-strong: #2e3a3b;
+  --accent: #2dd4bf;
+  --accent-hover: #5eead4;
   --accent-foreground: #042f2e;
-  --ai: #2e1065;
-  --ai-foreground: #e9d5ff;
+  --accent-soft: #11302d;
+  --accent-soft-foreground: #7ee7d6;
+  --danger: #f87171;
+  --danger-soft: #3a1414;
+  --warning: #fbbf24;
+  --warning-soft: #33250b;
+  --success: #4ade80;
+  --success-soft: #0f2b19;
+  --ai: #1f1733;
+  --ai-foreground: #d9c2ff;
+  --ai-border: #3b2b5e;
+  --shadow-color: 190 30% 2%;
+  color-scheme: dark;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-sidebar: var(--sidebar);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
   --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-soft-foreground: var(--accent-soft-foreground);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
   --color-ai: var(--ai);
   --color-ai-foreground: var(--ai-foreground);
+  --color-ai-border: var(--ai-border);
+
+  --font-sans: "Inter Variable", "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+
+  --shadow-xs: 0 1px 2px hsl(var(--shadow-color) / 0.06);
+  --shadow-sm: 0 1px 3px hsl(var(--shadow-color) / 0.08), 0 1px 2px hsl(var(--shadow-color) / 0.04);
+  --shadow-md: 0 4px 12px -2px hsl(var(--shadow-color) / 0.1), 0 2px 4px -2px hsl(var(--shadow-color) / 0.06);
+  --shadow-lg: 0 16px 40px -8px hsl(var(--shadow-color) / 0.18), 0 4px 12px -4px hsl(var(--shadow-color) / 0.08);
+
+  --ease-out-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Short, subtle motion. All of it is switched off for "reduce motion" (see below). */
+  --animate-fade-in: fade-in 180ms var(--ease-out-soft) both;
+  --animate-fade-up: fade-up 220ms var(--ease-out-soft) both;
+  --animate-scale-in: scale-in 180ms var(--ease-out-soft) both;
+  --animate-pop: pop 140ms var(--ease-out-soft) both;
+  --animate-typing: typing 1.2s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.4s ease-in-out infinite;
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scale-in {
+    from { opacity: 0; transform: translateY(4px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes pop {
+    from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes typing {
+    0%, 60%, 100% { opacity: 0.25; transform: translateY(0); }
+    30% { opacity: 1; transform: translateY(-2px); }
+  }
+  @keyframes shimmer {
+    0%, 100% { opacity: 0.55; }
+    50% { opacity: 1; }
+  }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: system-ui, "Segoe UI", "Noto Sans Arabic", sans-serif;
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01"; /* Inter: open digits, single-storey a */
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  /* Arabic: Plex first (better shapes for mixed text) and a little more line height. */
+  html[lang="ar"] body {
+    font-family: "IBM Plex Sans Arabic", "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.65;
+  }
+
+  h1, h2, h3 {
+    letter-spacing: -0.011em;
+  }
+  html[lang="ar"] :is(h1, h2, h3) {
+    letter-spacing: 0;
+  }
+
+  ::selection {
+    background: var(--accent-soft);
+    color: var(--accent-soft-foreground);
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  /* Discreet scrollbars */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--muted-foreground);
+    opacity: 0.85;
+  }
 }
 
-*:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+/* People who ask for less motion get none. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer components {
+  /* Inputs, selects and textareas share one look. */
+  .field {
+    min-height: 2.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-strong);
+    background: var(--background);
+    padding-inline: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+    box-shadow: var(--shadow-xs);
+    transition: border-color 150ms, box-shadow 150ms, background-color 150ms;
+  }
+  .field:hover {
+    border-color: color-mix(in oklab, var(--border-strong), var(--foreground) 15%);
+  }
+  .field:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 22%, transparent);
+  }
+  .field:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  select.field {
+    padding-inline-end: 2rem;
+  }
+  textarea.field {
+    padding-block: 0.5rem;
+  }
+
+  /* Small uppercase section titles (sidebar, side panel). */
+  .section-title {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+  html[lang="ar"] .section-title {
+    letter-spacing: 0;
+    font-size: 0.75rem;
+  }
+
+  /* Page content: comfortable width and padding for full-page views. */
+  .page {
+    margin-inline: auto;
+    width: 100%;
+    max-width: 72rem;
+    padding: 1.5rem;
+  }
+  .page-title {
+    font-size: 1.375rem;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+  }
+  html[lang="ar"] .page-title {
+    letter-spacing: 0;
+  }
+
+  .card {
+    border-radius: 0.75rem;
+    border: 1px solid var(--border);
+    background: var(--background);
+    box-shadow: var(--shadow-xs);
+  }
 }

@@ -10,7 +10,7 @@ test('login: wrong password is refused, right password opens the app', async ({ 
   await expect(page.getByRole('alert')).toHaveText('E-mail ou mot de passe incorrect.')
   await page.getByLabel('Mot de passe').fill(PASSWORD)
   await page.getByRole('button', { name: 'Se connecter' }).click()
-  await expect(page.getByRole('button', { name: 'Se déconnecter' })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Compte de/ })).toBeVisible()
 })
 
 test('send a message: the other person receives it live', async ({ browser }) => {

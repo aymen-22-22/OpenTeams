@@ -1,9 +1,10 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { Upload } from 'lucide-react'
+import { FolderOpen, Upload } from 'lucide-react'
 import { useRef, useState, type DragEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/ui/empty-state'
 import { ApiError } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
@@ -62,7 +63,7 @@ export function FilesTab({ conversationId }: { conversationId: string }) {
       }}
       onDragLeave={() => setDragging(false)}
       onDrop={onDrop}
-      className={cn('flex min-h-full flex-col gap-4 rounded-md border-2 border-dashed border-transparent p-2', dragging && 'border-accent bg-muted')}
+      className={cn('flex min-h-full flex-col gap-5 rounded-2xl border-2 border-dashed border-transparent p-3 transition-colors duration-150', dragging && 'border-accent bg-accent-soft/50')}
     >
       <div className="flex items-center gap-3">
         <Button onClick={() => inputRef.current?.click()}>
@@ -80,14 +81,14 @@ export function FilesTab({ conversationId }: { conversationId: string }) {
       {uploads.length > 0 && (
         <ul className="flex flex-col gap-2" aria-label={t('files.uploading')}>
           {uploads.map((u) => (
-            <li key={u.id} className="flex flex-col gap-1 text-sm">
+            <li key={u.id} className="flex flex-col gap-1.5 text-sm font-medium">
               <span dir="auto" className="truncate">{u.name}</span>
               {u.errorCode ? (
-                <span role="alert" className="text-red-600">
+                <span role="alert" className="text-danger">
                   {t(`files.errors.${KNOWN_ERRORS.has(u.errorCode) ? u.errorCode : 'upload_failed'}`)}
                 </span>
               ) : (
-                <progress value={u.progress} max={1} aria-label={u.name} className="h-2 w-full accent-[var(--accent)]" />
+                <progress value={u.progress} max={1} aria-label={u.name} className="h-1.5 w-full overflow-hidden rounded-full accent-[var(--accent)] [&::-webkit-progress-bar]:bg-muted [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-accent [&::-webkit-progress-value]:transition-all" />
               )}
             </li>
           ))}
@@ -95,7 +96,7 @@ export function FilesTab({ conversationId }: { conversationId: string }) {
       )}
 
       {files.length === 0 && uploads.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t('files.empty')}</p>
+        <EmptyState icon={FolderOpen} title={t('files.empty')} hint={t('files.dropHint')} />
       ) : (
         <div className="flex flex-wrap gap-2">
           {files.map((f) => <FileIcon key={f.id} file={f} />)}

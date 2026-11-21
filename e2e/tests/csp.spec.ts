@@ -20,10 +20,10 @@ test('the app works under the production Content-Security-Policy', async ({ page
   await page.getByLabel('E-mail').fill(ADMIN.email)
   await page.getByLabel('Mot de passe').fill(PASSWORD)
   await page.getByRole('button', { name: 'Se connecter' }).click()
-  await expect(page.getByRole('button', { name: 'Se déconnecter' })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Compte de/ })).toBeVisible()
   for (const name of ['Calendrier', 'Mes tâches', 'Projets', 'Demandes', 'Playbooks', 'Mon assistant']) {
     await page.getByRole('navigation').getByRole('button', { name, exact: true }).click()
   }
   await page.getByLabel('Langue').selectOption('ar')
-  expect(violations).toEqual([])
+  expect(violations.map((v) => v.slice(0, 300))).toEqual([])
 })

@@ -9,6 +9,10 @@ const proxy = { '/api': api, '/ws': { target: api, ws: true } }
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  build: {
+    // Never inline fonts as data: URLs: the production CSP only allows fonts from our own origin.
+    assetsInlineLimit: (file) => (/\.(woff2?|ttf|otf)$/.test(file) ? false : undefined),
+  },
   resolve: { alias: { '@': path.resolve(import.meta.dirname, 'src') } },
   server: { host: true, proxy },
   // `vite preview` serves the production build (used by the end-to-end tests).

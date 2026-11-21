@@ -2,10 +2,11 @@ import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
+import { Modal, ModalActions } from '@/components/ui/modal'
 
 import { useCreateReminder, type Recurrence, type ReminderInput } from './api'
 
-const field = 'min-h-11 rounded-md border border-border bg-background px-3'
+const field = 'field'
 
 /** Local "YYYY-MM-DDTHH:mm" for <input type="datetime-local">, one hour from now. */
 function inOneHour(): string {
@@ -41,31 +42,28 @@ export function ReminderForm({ initial, onDone }: Props) {
   }
 
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="reminder-title"
-      className="fixed inset-0 z-30 flex items-center justify-center bg-black/40 p-4"
-      onKeyDown={(e) => e.key === 'Escape' && onDone()}>
-      <form onSubmit={onSubmit} className="flex w-full max-w-sm flex-col gap-3 rounded-lg bg-background p-5 shadow-xl">
-        <h2 id="reminder-title" className="text-lg font-semibold">{t('reminders.new')}</h2>
-        <label className="flex flex-col gap-1 text-sm">
+    <Modal title={t('reminders.new')} onClose={onDone}>
+      <form onSubmit={onSubmit} className="flex flex-col gap-4">
+        <label className="flex flex-col gap-1.5 text-sm font-medium">
           {t('reminders.what')}
           <input required autoFocus maxLength={200} value={title} onChange={(e) => setTitle(e.target.value)} className={field} dir="auto" />
         </label>
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="flex flex-col gap-1.5 text-sm font-medium">
           {t('reminders.when')}
           <input type="datetime-local" required value={when} onChange={(e) => setWhen(e.target.value)} className={field} />
         </label>
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="flex flex-col gap-1.5 text-sm font-medium">
           {t('reminders.repeat')}
           <select value={recurrence} onChange={(e) => setRecurrence(e.target.value as Recurrence)} className={field}>
             {(['none', 'daily', 'weekly', 'monthly'] as const).map((r) => <option key={r} value={r}>{t(`reminders.recurrence.${r}`)}</option>)}
           </select>
         </label>
-        {create.isError && <p role="alert" className="text-sm text-red-600">{t('reminders.failed')}</p>}
-        <div className="flex justify-end gap-2">
+        {create.isError && <p role="alert" className="text-sm text-danger">{t('reminders.failed')}</p>}
+        <ModalActions>
           <Button type="button" variant="ghost" onClick={onDone}>{t('chat.cancel')}</Button>
           <Button type="submit" disabled={create.isPending}>{t('reminders.save')}</Button>
-        </div>
+        </ModalActions>
       </form>
-    </div>
+    </Modal>
   )
 }

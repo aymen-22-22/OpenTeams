@@ -6,12 +6,12 @@ import type { Person } from '@/features/auth/api'
 
 import { useSaveAIProfile, useTeams, type AIProfile, type AIProfileInput, type Audience, type Provider } from './api'
 
-const field = 'min-h-11 rounded-md border border-border bg-background px-3'
+const field = 'field'
 const PROVIDERS: Provider[] = ['anthropic', 'openai', 'qwen', 'ollama']
 const AUDIENCES: Audience[] = ['owner_only', 'everyone', 'people', 'teams']
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
-  return <label className="flex flex-col gap-1 text-sm">{label}{children}</label>
+  return <label className="flex flex-col gap-1.5 text-sm font-medium">{label}{children}</label>
 }
 
 /** The editable part of a profile (server-computed fields removed). */
@@ -89,7 +89,7 @@ export function AISettings({ profile, people }: { profile: AIProfile; people: Pe
         </Field>
       </div>
 
-      <fieldset className="flex flex-col gap-2 rounded-md border border-border p-3">
+      <fieldset className="flex flex-col gap-2 rounded-xl border border-border bg-background p-4 shadow-xs">
         <legend className="px-1 text-sm font-semibold">{t('ai.settings.hours')}</legend>
         <div className="flex items-center gap-2 text-sm">
           <input type="number" min={0} max={23} aria-label={t('ai.settings.hoursStart')} value={form.hours_start ?? ''}
@@ -101,7 +101,7 @@ export function AISettings({ profile, people }: { profile: AIProfile; people: Pe
         </div>
       </fieldset>
 
-      <fieldset className="flex flex-col gap-2 rounded-md border border-border p-3">
+      <fieldset className="flex flex-col gap-2 rounded-xl border border-border bg-background p-4 shadow-xs">
         <legend className="px-1 text-sm font-semibold">{t('ai.settings.visibility')}</legend>
         <label className="flex min-h-11 items-center gap-2 text-sm">
           <input type="checkbox" checked={form.share_tasks} onChange={(e) => set({ share_tasks: e.target.checked })} className="size-5" />
@@ -129,7 +129,7 @@ export function AISettings({ profile, people }: { profile: AIProfile; people: Pe
       </fieldset>
 
       {save.isSuccess && <p role="status" className="text-sm text-accent">{t('ai.settings.saved')}</p>}
-      {save.isError && <p role="alert" className="text-sm text-red-600">{t('ai.settings.saveFailed')}</p>}
+      {save.isError && <p role="alert" className="text-sm text-danger">{t('ai.settings.saveFailed')}</p>}
       <Button type="submit" className="self-start" disabled={save.isPending}>{t('chat.save')}</Button>
     </form>
   )

@@ -1,6 +1,8 @@
 import { ArrowLeft, BellPlus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import { Avatar } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { Person } from '@/features/auth/api'
@@ -27,24 +29,28 @@ export function TaskView({ taskId, meId, people, onBack, onRemind }: Props) {
   if (!task) return null
   return (
     <section aria-label={task.title} className="flex h-full flex-col">
-      <header className="flex items-center gap-2 border-b border-border px-2 py-2">
-        <Button variant="ghost" onClick={onBack} aria-label={t('tasks.back')}>
+      <header className="flex items-center gap-2 px-2 pt-2 pb-1 sm:px-4">
+        <Button variant="ghost" size="icon" onClick={onBack} aria-label={t('tasks.back')}>
           <ArrowLeft className="size-5 rtl:-scale-x-100" aria-hidden />
         </Button>
-        <div className="flex min-w-0 flex-1 flex-col">
-          <h2 dir="auto" className="truncate font-semibold">{task.title}</h2>
-          <span className="text-xs text-muted-foreground">
-            {people.get(task.assignee_id ?? '')?.display_name}
-            {task.due_date && ` · ${task.due_date}`}
-            {task.overdue && <span className="font-semibold text-red-600"> · {t('tasks.overdue')}</span>}
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <h2 dir="auto" className="truncate text-[15px] font-semibold">{task.title}</h2>
+          <span className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+            {task.assignee_id && people.get(task.assignee_id) && (
+              <span className="flex items-center gap-1.5">
+                <Avatar name={people.get(task.assignee_id)!.display_name} id={task.assignee_id} size="xs" />
+                {people.get(task.assignee_id)!.display_name}
+              </span>
+            )}
+            {task.due_date && <Badge tone={task.overdue ? 'danger' : 'neutral'}>{task.due_date}{task.overdue && ` · ${t('tasks.overdue')}`}</Badge>}
           </span>
         </div>
-        <Button variant="ghost" onClick={() => onRemind(task.id, task.title)} aria-label={t('reminders.remindMe')}>
+        <Button variant="ghost" size="icon" onClick={() => onRemind(task.id, task.title)} aria-label={t('reminders.remindMe')} title={t('reminders.remindMe')}>
           <BellPlus className="size-5" aria-hidden />
         </Button>
         <select aria-label={t('tasks.status')} value={task.status}
           onChange={(e) => move.mutate({ id: task.id, status: e.target.value as TaskStatus, after_id: null })}
-          className="min-h-11 rounded-md border border-border bg-background px-2">
+          className="field">
           {STATUSES.map((s) => <option key={s} value={s}>{t(`tasks.${s}`)}</option>)}
         </select>
       </header>

@@ -7,6 +7,7 @@ import type { Conversation, Message } from '@/features/chat/api'
 import { ChatView } from '@/features/chat/ChatView'
 import { FilesTab } from '@/features/files/FilesTab'
 
+import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { AIChat } from '@/features/ai/AIChat'
 import type { Task } from '@/features/tasks/api'
@@ -36,8 +37,15 @@ export function ConversationArea(props: Props) {
 
   return (
     <section aria-label={person.display_name} className="flex h-full flex-col">
-      <header className="flex items-center gap-2 border-b border-border px-4 py-2">
-        <span className="flex-1 font-semibold">{person.display_name}</span>
+      <header className="flex items-center gap-3 px-4 pt-3 pb-1 sm:px-6">
+        <Avatar name={person.display_name} id={person.id} size="md" presence={person.presence} />
+        <div className="min-w-0 flex-1">
+          <h2 className="truncate text-[15px] font-semibold">{person.display_name}</h2>
+          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            {t(`people.status.${person.presence}`)}
+            {person.ai_active && <><span aria-hidden>·</span><span className="text-ai-foreground">{t('people.aiActive')}</span></>}
+          </p>
+        </div>
         {conversation && (
           <Button variant="ghost" onClick={() => props.onScheduleMeeting(conversation.id)}>
             <CalendarPlus className="size-4" aria-hidden />

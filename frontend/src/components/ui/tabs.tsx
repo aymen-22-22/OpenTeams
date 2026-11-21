@@ -11,15 +11,16 @@ export function Tabs(props: ComponentProps<typeof TabsPrimitive.Root>) {
 }
 
 export function TabsList({ className, ...props }: ComponentProps<typeof TabsPrimitive.List>) {
-  return <TabsPrimitive.List className={cn('flex gap-1 border-b border-border px-2', className)} {...props} />
+  return <TabsPrimitive.List className={cn('flex gap-1 border-b border-border px-3', className)} {...props} />
 }
 
 export function TabsTrigger({ className, ...props }: ComponentProps<typeof TabsPrimitive.Trigger>) {
   return (
     <TabsPrimitive.Trigger
       className={cn(
-        'min-h-11 border-b-2 border-transparent px-3 text-sm text-muted-foreground',
-        'data-[state=active]:border-accent data-[state=active]:text-foreground',
+        'relative min-h-11 px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground',
+        'after:absolute after:inset-x-2 after:-bottom-px after:h-0.5 after:rounded-full after:bg-accent after:opacity-0 after:transition-opacity',
+        'data-[state=active]:text-foreground data-[state=active]:after:opacity-100',
         className,
       )}
       {...props}
@@ -28,5 +29,5 @@ export function TabsTrigger({ className, ...props }: ComponentProps<typeof TabsP
 }
 
 export function TabsContent({ className, ...props }: ComponentProps<typeof TabsPrimitive.Content>) {
-  return <TabsPrimitive.Content className={cn('flex-1 overflow-y-auto p-4', className)} {...props} />
+  return <TabsPrimitive.Content className={cn('flex-1 animate-fade-in overflow-y-auto p-4 focus-visible:outline-none', className)} {...props} />
 }

@@ -1,4 +1,5 @@
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, FolderKanban } from 'lucide-react'
+import { EmptyState } from '@/components/ui/empty-state'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -10,7 +11,7 @@ import { cn } from '@/lib/utils'
 
 import { useMilestones, useProject, useProjects, useSaveProject, type ProjectInput, type ProjectStatus } from './api'
 
-const field = 'min-h-11 rounded-md border border-border bg-background px-3'
+const field = 'field'
 const STATUS_COLOR = {
   active: 'bg-accent text-accent-foreground',
   on_hold: 'bg-amber-100 text-amber-800',
@@ -27,27 +28,27 @@ function ProjectForm({ initial, id, people, onDone }: { initial: ProjectInput; i
     save.mutate({ id, input: form }, { onSuccess: (p) => onDone(p.id) })
   }
   return (
-    <form onSubmit={onSubmit} className="flex max-w-lg flex-col gap-3 rounded-md border border-border p-4">
-      <label className="flex flex-col gap-1 text-sm">{t('projects.name')}
+    <form onSubmit={onSubmit} className="flex max-w-lg flex-col gap-3 rounded-xl border border-border bg-background p-5 shadow-xs">
+      <label className="flex flex-col gap-1.5 text-sm font-medium">{t('projects.name')}
         <input required maxLength={160} value={form.name} onChange={(e) => set({ name: e.target.value })} className={field} dir="auto" />
       </label>
-      <label className="flex flex-col gap-1 text-sm">{t('calendar.description')}
+      <label className="flex flex-col gap-1.5 text-sm font-medium">{t('calendar.description')}
         <textarea rows={2} value={form.description} onChange={(e) => set({ description: e.target.value })} className={`${field} py-2`} dir="auto" />
       </label>
       <div className="grid gap-3 sm:grid-cols-3">
-        <label className="flex flex-col gap-1 text-sm">{t('projects.status')}
+        <label className="flex flex-col gap-1.5 text-sm font-medium">{t('projects.status')}
           <select value={form.status} onChange={(e) => set({ status: e.target.value as ProjectStatus })} className={field}>
             {(['active', 'on_hold', 'finished'] as const).map((s) => <option key={s} value={s}>{t(`projects.statuses.${s}`)}</option>)}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-sm">{t('projects.start')}
+        <label className="flex flex-col gap-1.5 text-sm font-medium">{t('projects.start')}
           <input type="date" value={form.start_date ?? ''} onChange={(e) => set({ start_date: e.target.value || null })} className={field} />
         </label>
-        <label className="flex flex-col gap-1 text-sm">{t('projects.due')}
+        <label className="flex flex-col gap-1.5 text-sm font-medium">{t('projects.due')}
           <input type="date" value={form.due_date ?? ''} onChange={(e) => set({ due_date: e.target.value || null })} className={field} />
         </label>
       </div>
-      <fieldset className="flex flex-col rounded-md border border-border p-3">
+      <fieldset className="flex flex-col rounded-xl border border-border bg-background p-4 shadow-xs">
         <legend className="px-1 text-sm font-semibold">{t('projects.members')}</legend>
         {people.map((p) => (
           <label key={p.id} className="flex min-h-11 items-center gap-2 text-sm">
@@ -57,7 +58,7 @@ function ProjectForm({ initial, id, people, onDone }: { initial: ProjectInput; i
           </label>
         ))}
       </fieldset>
-      {save.isError && <p role="alert" className="text-sm text-red-600">{t('projects.failed')}</p>}
+      {save.isError && <p role="alert" className="text-sm text-danger">{t('projects.failed')}</p>}
       <Button type="submit" className="self-start" disabled={save.isPending}>{t('chat.save')}</Button>
     </form>
   )
@@ -80,7 +81,7 @@ function ProjectDetailView({ id, people, onBack, onOpenTask, onNewTask }: {
     <div className="flex flex-col gap-5">
       <header className="flex flex-wrap items-center gap-2">
         <Button variant="ghost" onClick={onBack} aria-label={t('tasks.back')}><ArrowLeft className="size-5 rtl:-scale-x-100" aria-hidden /></Button>
-        <h2 dir="auto" className="text-lg font-semibold">{project.name}</h2>
+        <h2 dir="auto" className="page-title">{project.name}</h2>
         <span className={cn('rounded px-2 py-0.5 text-xs', STATUS_COLOR[project.status])}>{t(`projects.statuses.${project.status}`)}</span>
         {project.due_date && <span className="text-sm text-muted-foreground">{t('projects.due')} {fmt(project.due_date)}</span>}
         <div className="ms-auto flex gap-2">
@@ -161,26 +162,27 @@ export function ProjectsView({ me, people, initialId, onOpenTask, onNewTask }: P
   const others = [...people.values()].filter((p) => p.id !== me.id)
 
   return (
-    <section aria-label={t('projects.title')} className="flex h-full flex-col gap-4 overflow-y-auto p-4">
+    <section aria-label={t('projects.title')} className="h-full overflow-y-auto">
+      <div className="page flex animate-fade-in flex-col gap-5">
       {selected && selected !== 'new' ? (
         <ProjectDetailView id={selected} people={people} onBack={() => setSelected(null)} onOpenTask={onOpenTask} onNewTask={onNewTask} />
       ) : (
         <>
           <header className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">{t('projects.title')}</h2>
+            <h2 className="page-title">{t('projects.title')}</h2>
             <Button onClick={() => setSelected('new')}>{t('projects.new')}</Button>
           </header>
           {selected === 'new' && (
             <ProjectForm initial={{ name: '', description: '', status: 'active', start_date: null, due_date: null, member_ids: [] }}
               people={others} onDone={(id) => setSelected(id)} />
           )}
-          {projects.length === 0 && selected !== 'new' && <p className="text-sm text-muted-foreground">{t('projects.empty')}</p>}
+          {projects.length === 0 && selected !== 'new' && <EmptyState icon={FolderKanban} title={t('projects.empty')} hint={t('projects.emptyHint')} />}
           <ul className="grid gap-2 md:grid-cols-2">
             {projects.map((p) => {
               const total = p.counts.pending + p.counts.in_progress + p.counts.finished
               return (
                 <li key={p.id}>
-                  <button type="button" onClick={() => setSelected(p.id)} className="flex w-full flex-col gap-2 rounded-md border border-border p-3 text-start hover:bg-muted">
+                  <button type="button" onClick={() => setSelected(p.id)} className="flex w-full flex-col gap-2 rounded-xl border border-border bg-background p-4 text-start shadow-xs transition-[box-shadow,border-color,transform] duration-150 hover:-translate-y-px hover:border-border-strong hover:shadow-md">
                     <span className="flex items-center gap-2">
                       <span dir="auto" className="flex-1 truncate font-medium">{p.name}</span>
                       <span className={cn('rounded px-2 py-0.5 text-xs', STATUS_COLOR[p.status])}>{t(`projects.statuses.${p.status}`)}</span>
@@ -196,6 +198,7 @@ export function ProjectsView({ me, people, initialId, onOpenTask, onNewTask }: P
           </ul>
         </>
       )}
+      </div>
     </section>
   )
 }

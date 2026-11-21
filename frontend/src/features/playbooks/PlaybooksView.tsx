@@ -1,4 +1,6 @@
+import { History, Workflow } from 'lucide-react'
 import { useState } from 'react'
+import { EmptyState } from '@/components/ui/empty-state'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
@@ -19,7 +21,7 @@ function RunHistory({ playbookId, onOpenRun }: { playbookId: string; onOpenRun: 
   const { t, i18n } = useTranslation()
   const runs = useRuns(playbookId).data ?? []
   const fmt = new Intl.DateTimeFormat(i18n.language, { dateStyle: 'short', timeStyle: 'short' })
-  if (runs.length === 0) return <p className="text-sm text-muted-foreground">{t('playbooks.noRuns')}</p>
+  if (runs.length === 0) return <EmptyState icon={History} title={t('playbooks.noRuns')} className="py-6" />
   return (
     <table className="w-full text-sm">
       <thead>
@@ -97,16 +99,17 @@ export function PlaybooksView({ me, people, onOpenRun }: Props) {
   const fmt = new Intl.DateTimeFormat(i18n.language, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 
   return (
-    <section aria-label={t('playbooks.title')} className="flex h-full flex-col gap-4 overflow-y-auto p-4">
+    <section aria-label={t('playbooks.title')} className="h-full overflow-y-auto">
+      <div className="page flex animate-fade-in flex-col gap-5">
       <header className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">{t('playbooks.title')}</h2>
+        <h2 className="page-title">{t('playbooks.title')}</h2>
         <Button onClick={() => setSelected('new')}>{t('playbooks.new')}</Button>
       </header>
       <ul className="flex flex-col gap-2">
         {playbooks.map((p) => (
           <li key={p.id}>
             <button type="button" onClick={() => setSelected(p.id)} aria-current={p.id === selected}
-              className={cn('flex min-h-11 w-full items-center gap-3 rounded-md border border-border px-3 py-2 text-start hover:bg-muted', p.id === selected && 'bg-muted')}>
+              className={cn('flex min-h-11 w-full items-center gap-3 rounded-xl border border-border bg-background px-4 py-3 text-start shadow-xs transition-[box-shadow,border-color] duration-150 hover:border-border-strong hover:shadow-md', p.id === selected && 'bg-muted')}>
               <span className="flex min-w-0 flex-1 flex-col">
                 <span dir="auto" className="truncate font-medium">{p.name}</span>
                 <span className="text-xs text-muted-foreground">
@@ -119,12 +122,13 @@ export function PlaybooksView({ me, people, onOpenRun }: Props) {
           </li>
         ))}
       </ul>
-      {playbooks.length === 0 && selected !== 'new' && <p className="text-sm text-muted-foreground">{t('playbooks.empty')}</p>}
+      {playbooks.length === 0 && selected !== 'new' && <EmptyState icon={Workflow} title={t('playbooks.empty')} />}
       {selected === 'new' && (
         <PlaybookForm initial={{ ...DEFAULT_PLAYBOOK, name: t('playbooks.kinds.weekly_report') }} people={everyone}
           canSendToOthers={me.role !== 'employee'} onSaved={(p) => setSelected(p.id)} />
       )}
       {current && <PlaybookDetail playbook={current} me={me} people={everyone} onOpenRun={onOpenRun} onDeleted={() => setSelected(null)} />}
+      </div>
     </section>
   )
 }

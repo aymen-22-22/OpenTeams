@@ -1,3 +1,4 @@
+import { Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
@@ -18,12 +19,17 @@ export function MyTasks({ meId, people, onOpen, onNew }: Props) {
   const { t } = useTranslation()
   const tasks = useTasks(meId).data ?? []
   return (
-    <section aria-label={t('tasks.myTasks')} className="flex h-full flex-col gap-3 overflow-y-auto p-4">
-      <header className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">{t('tasks.myTasks')}</h2>
-        <Button onClick={onNew}>{t('tasks.new')}</Button>
+    <section aria-label={t('tasks.myTasks')} className="h-full overflow-y-auto">
+      <div className="page flex flex-col gap-5">
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="page-title">{t('tasks.myTasks')}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{t('tasks.myTasksHint')}</p>
+        </div>
+        <Button onClick={onNew}><Plus className="size-4" aria-hidden />{t('tasks.new')}</Button>
       </header>
       <KanbanBoard tasks={tasks} people={people} onOpen={onOpen} />
+      </div>
     </section>
   )
 }

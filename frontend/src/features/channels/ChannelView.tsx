@@ -30,9 +30,9 @@ export function ChannelView({ channelId, meId, people, onCreateTask, onRemind }:
 
   return (
     <section aria-label={`#${channel.name}`} className="flex h-full flex-col">
-      <header className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-2">
+      <header className="flex flex-wrap items-center gap-2 px-4 pt-3 pb-2 sm:px-6">
         <Icon className="size-4 text-muted-foreground" aria-hidden />
-        <h2 dir="auto" className="font-semibold">{channel.name}</h2>
+        <h2 dir="auto" className="text-[15px] font-semibold">{channel.name}</h2>
         <span className="text-xs text-muted-foreground">{t('channels.members', { count: channel.member_count })}</span>
         {channel.description && <span dir="auto" className="hidden truncate text-sm text-muted-foreground md:inline">· {channel.description}</span>}
         <div className="ms-auto">

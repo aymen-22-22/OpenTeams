@@ -13,7 +13,7 @@ export async function loginAs(browser: Browser, email: string): Promise<Page> {
   await page.getByLabel('E-mail').fill(email)
   await page.getByLabel('Mot de passe').fill(PASSWORD)
   await page.getByRole('button', { name: 'Se connecter' }).click()
-  await expect(page.getByRole('button', { name: 'Se déconnecter' })).toBeVisible()
+  await expect(page.getByRole('button', { name: /Compte de/ })).toBeVisible()
   return page
 }
 

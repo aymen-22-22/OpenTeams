@@ -1,4 +1,6 @@
+import { PartyPopper } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
+import { EmptyState } from '@/components/ui/empty-state'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -51,16 +53,17 @@ export function DashboardView({ onOpenTask }: { onOpenTask: (taskId: string) => 
   const rows = data ? [...data.people.filter((p) => p.pending + p.in_progress + p.planned + p.finished > 0)] : []
 
   return (
-    <section aria-label={t('dashboard.title')} className="flex h-full flex-col gap-4 overflow-y-auto p-4">
+    <section aria-label={t('dashboard.title')} className="h-full overflow-y-auto">
+      <div className="page flex animate-fade-in flex-col gap-5">
       <header className="flex flex-wrap items-center gap-2">
-        <h2 className="me-auto text-lg font-semibold">{t('dashboard.title')}</h2>
+        <h2 className="page-title me-auto">{t('dashboard.title')}</h2>
         <select aria-label={t('dashboard.period')} value={period} onChange={(e) => setPeriod(e.target.value as 'week' | 'month')}
-          className="min-h-11 rounded-md border border-border bg-background px-2">
+          className="field">
           <option value="week">{t('dashboard.week')}</option>
           <option value="month">{t('dashboard.month')}</option>
         </select>
         <select aria-label={t('dashboard.team')} value={team} onChange={(e) => setTeam(e.target.value)}
-          className="min-h-11 rounded-md border border-border bg-background px-2">
+          className="field">
           <option value="">{t('dashboard.everyone')}</option>
           {teams.map((tm) => <option key={tm.id} value={tm.id}>{tm.name}</option>)}
         </select>
@@ -68,7 +71,7 @@ export function DashboardView({ onOpenTask }: { onOpenTask: (taskId: string) => 
       {data && (
         <>
           <p className="text-sm text-muted-foreground">{fmt(data.period_start)} → {fmt(data.period_end)}</p>
-          <div className="overflow-x-auto">
+          <div className="card overflow-x-auto px-4 py-1">
             <table className="w-full min-w-[36rem] text-sm">
               <thead>
                 <tr className="text-muted-foreground">
@@ -86,7 +89,7 @@ export function DashboardView({ onOpenTask }: { onOpenTask: (taskId: string) => 
                     <td className="py-2">{r.display_name}</td>
                     <td className="text-center tabular-nums">{r.pending}</td>
                     <td className="text-center tabular-nums">{r.in_progress}</td>
-                    <td className={cn('text-center tabular-nums', r.overdue > 0 && 'font-semibold text-red-600')}>{r.overdue}</td>
+                    <td className={cn('text-center tabular-nums', r.overdue > 0 && 'font-semibold text-danger')}>{r.overdue}</td>
                     <td><div className="flex justify-center"><Ratio done={r.finished_planned} planned={r.planned} /></div></td>
                     <td className="text-center tabular-nums">{r.finished}</td>
                   </tr>
@@ -96,7 +99,7 @@ export function DashboardView({ onOpenTask }: { onOpenTask: (taskId: string) => 
           </div>
           <section className="flex flex-col gap-2">
             <h3 className="font-semibold">{t('dashboard.delays')}</h3>
-            {data.delays.length === 0 ? <p className="text-sm text-muted-foreground">{t('dashboard.noDelays')}</p> : (
+            {data.delays.length === 0 ? <EmptyState icon={PartyPopper} title={t('dashboard.noDelays')} className="py-6" /> : (
               <ul className="flex flex-col gap-1">
                 {data.delays.map((d) => (
                   <li key={d.task_id}>
@@ -104,7 +107,7 @@ export function DashboardView({ onOpenTask }: { onOpenTask: (taskId: string) => 
                       className="flex min-h-11 w-full items-center gap-2 rounded-md border border-border px-3 text-start text-sm hover:bg-muted">
                       <span dir="auto" className="flex-1 truncate">{d.title}</span>
                       <span className="text-muted-foreground">{names.get(d.assignee_id ?? '') ?? ''}</span>
-                      <span className="font-semibold text-red-600">{t('dashboard.daysLate', { count: d.days_late })}</span>
+                      <span className="font-semibold text-danger">{t('dashboard.daysLate', { count: d.days_late })}</span>
                     </button>
                   </li>
                 ))}
@@ -113,6 +116,7 @@ export function DashboardView({ onOpenTask }: { onOpenTask: (taskId: string) => 
           </section>
         </>
       )}
+      </div>
     </section>
   )
 }

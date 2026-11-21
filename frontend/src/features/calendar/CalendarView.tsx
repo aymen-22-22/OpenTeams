@@ -1,8 +1,9 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Clock } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
+import { Modal, ModalActions } from '@/components/ui/modal'
 import { useTeams } from '@/features/ai/api'
 import type { Person, User } from '@/features/auth/api'
 import { cn, textDirection } from '@/lib/utils'
@@ -43,26 +44,23 @@ function EventDetails({ event, me, people, onClose, onEdit, onOpenTask, onOpenPr
   const mine = event.type === 'meeting' && event.creator_id === me.id
 
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="event-title"
-      className="fixed inset-0 z-30 flex items-center justify-center bg-black/40 p-4" onKeyDown={(e) => e.key === 'Escape' && onClose()}>
-      <div className="flex w-full max-w-sm flex-col gap-3 rounded-lg bg-background p-5 shadow-xl">
-        <span className={cn('self-start rounded px-2 py-0.5 text-xs', EVENT_COLOR[event.type])}>{t(`calendar.types.${event.type}`)}</span>
-        <h2 id="event-title" dir="auto" className="text-lg font-semibold">{event.title}</h2>
-        <p className="text-sm">{when}</p>
+    <Modal title={event.title} onClose={onClose} size="sm">
+      <div className="flex flex-col gap-3">
+        <span className={cn('self-start rounded-full px-2.5 py-0.5 text-xs font-medium', EVENT_COLOR[event.type])}>{t(`calendar.types.${event.type}`)}</span>
+        <p className="flex items-center gap-2 text-sm"><Clock className="size-4 text-muted-foreground" aria-hidden />{when}</p>
         {event.user_ids.length > 0 && (
           <p className="text-sm text-muted-foreground">{event.user_ids.map((id) => people.get(id)?.display_name ?? '?').join(', ')}</p>
         )}
         {event.description && <p dir="auto" className="whitespace-pre-wrap text-sm">{event.description}</p>}
-        <div className="flex flex-wrap justify-end gap-2">
+        <ModalActions>
           {event.project_id && <Button variant="outline" onClick={() => onOpenProject(event.project_id!)}>{t('calendar.openProject')}</Button>}
           {event.task_id && <Button variant="outline" onClick={() => onOpenTask(event.task_id!)}>{t('calendar.openTask')}</Button>}
           {event.type === 'meeting' && <Button variant="outline" onClick={() => onRemind(event)}>{t('reminders.remindMe')}</Button>}
           {mine && <Button variant="outline" onClick={onEdit}>{t('chat.edit')}</Button>}
           {mine && <Button variant="ghost" onClick={() => remove.mutate(event.id, { onSuccess: onClose })}>{t('chat.delete')}</Button>}
-          <Button onClick={onClose}>{t('calendar.close')}</Button>
-        </div>
+        </ModalActions>
       </div>
-    </div>
+    </Modal>
   )
 }
 
@@ -97,9 +95,10 @@ export function CalendarView({ me, people, onOpenTask, onOpenProject, onRemind }
   const filterValue = filter.kind === 'me' || filter.kind === 'all' ? filter.kind : `${filter.kind}:${filter.id}`
 
   return (
-    <section aria-label={t('calendar.title')} className="flex h-full flex-col gap-3 overflow-y-auto p-4">
+    <section aria-label={t('calendar.title')} className="h-full overflow-y-auto">
+      <div className="page flex animate-fade-in flex-col gap-5">
       <header className="flex flex-wrap items-center gap-2">
-        <h2 className="me-2 text-lg font-semibold">{t('calendar.title')}</h2>
+        <h2 className="page-title me-2">{t('calendar.title')}</h2>
         <Button variant="outline" onClick={() => setAnchor(startOfDay(new Date()))}>{t('calendar.today')}</Button>
         <Button variant="ghost" aria-label={t('calendar.previous')} onClick={() => setAnchor(shift(anchor, mode, -1))}>
           <ChevronLeft className="size-5 rtl:-scale-x-100" aria-hidden />
@@ -110,10 +109,10 @@ export function CalendarView({ me, people, onOpenTask, onOpenProject, onRemind }
         <span className="font-medium capitalize">{title}</span>
         <div className="ms-auto flex flex-wrap gap-2">
           <select aria-label={t('calendar.view')} value={mode} onChange={(e) => setMode(e.target.value as CalendarMode)}
-            className="min-h-11 rounded-md border border-border bg-background px-2">
+            className="field">
             {(['month', 'week', 'day'] as const).map((m) => <option key={m} value={m}>{t(`calendar.modes.${m}`)}</option>)}
           </select>
-          <select aria-label={t('calendar.whose')} value={filterValue} className="min-h-11 rounded-md border border-border bg-background px-2"
+          <select aria-label={t('calendar.whose')} value={filterValue} className="field"
             onChange={(e) => {
               const [kind, id] = e.target.value.split(':')
               setFilter(kind === 'user' || kind === 'team' ? { kind, id } : { kind: kind as 'me' | 'all' })
@@ -132,7 +131,7 @@ export function CalendarView({ me, people, onOpenTask, onOpenProject, onRemind }
         <div className="flex flex-col gap-1 rounded-md border border-border bg-muted p-3 text-sm">
           <span>{t('calendar.feedHint')}</span>
           <input readOnly value={feed.data.url} aria-label={t('calendar.feedUrl')} dir="ltr"
-            onFocus={(e) => e.target.select()} className="min-h-11 rounded-md border border-border bg-background px-2 font-mono text-xs" />
+            onFocus={(e) => e.target.select()} className="field font-mono text-xs" />
         </div>
       )}
 
@@ -170,7 +169,7 @@ export function CalendarView({ me, people, onOpenTask, onOpenProject, onRemind }
             const list = byDay.get(key) ?? []
             return (
               <section key={key} aria-label={new Intl.DateTimeFormat(i18n.language, { dateStyle: 'full' }).format(d)}
-                className="flex flex-col gap-1 rounded-md border border-border p-2">
+                className="flex flex-col gap-1 rounded-xl border border-border bg-background p-2.5 shadow-xs">
                 <h3 className={cn('text-sm font-semibold', key === today && 'text-accent')}>
                   {new Intl.DateTimeFormat(i18n.language, { weekday: 'long', day: 'numeric', month: 'short' }).format(d)}
                 </h3>
@@ -196,6 +195,7 @@ export function CalendarView({ me, people, onOpenTask, onOpenProject, onRemind }
           onRemind={(e) => { setOpen(null); onRemind(e) }} />
       )}
       {form && <MeetingForm people={others} event={form.event} date={form.date} onDone={() => setForm(null)} />}
+      </div>
     </section>
   )
 }

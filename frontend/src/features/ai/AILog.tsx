@@ -1,4 +1,6 @@
+import { ScrollText } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { EmptyState } from '@/components/ui/empty-state'
 
 import type { Person } from '@/features/auth/api'
 
@@ -9,7 +11,7 @@ import { AIBubble } from './AIBubble'
 export function AILog({ people, ownerName }: { people: Map<string, Person>; ownerName: string }) {
   const { t } = useTranslation()
   const threads = useAILog().data ?? []
-  if (threads.length === 0) return <p className="text-sm text-muted-foreground">{t('ai.log.empty')}</p>
+  if (threads.length === 0) return <EmptyState icon={ScrollText} title={t('ai.log.empty')} />
   return (
     <div className="flex flex-col gap-6">
       {threads.map((thread) => (

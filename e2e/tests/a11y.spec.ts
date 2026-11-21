@@ -5,6 +5,7 @@ import { ADMIN, loginAs } from './helpers'
 
 /** Fail on serious and critical WCAG 2.1 A/AA problems. */
 async function scan(page: Page, label: string) {
+  await page.emulateMedia({ reducedMotion: 'reduce' }) // check the final colours, not a fade in progress
   const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
   const blocking = results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical')
   const summary = blocking.map((v) => `${v.id}: ${v.help} (${v.nodes.length}) e.g. ${v.nodes[0]?.target.join(' ')}`)

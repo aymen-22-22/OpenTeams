@@ -4,7 +4,10 @@
     "language": "Language",
     "theme": "Toggle theme",
     "search": "Search",
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "account": "{{name}}'s account",
+    "accountMenu": "Account menu",
+    "searchShortcut": "Ctrl K"
   },
   "people": {
     "title": "People",
@@ -45,7 +48,10 @@
     "editing": "Editing message",
     "replyingTo": "Replying to: {{text}}",
     "mentionSomeone": "Mention someone",
-    "everyone": "all members"
+    "everyone": "all members",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "emptyHint": "Write the first message below."
   },
   "ai": {
     "label": "AI of {{name}}",
@@ -109,7 +115,9 @@
     "log": {
       "title": "Log",
       "empty": "Nobody has talked to your AI yet."
-    }
+    },
+    "notConfigured": "Your assistant is not active",
+    "notConfiguredHint": "Open the Settings tab to connect your API key and switch it on."
   },
   "tasks": {
     "pending": "Pending",
@@ -133,7 +141,9 @@
     "fromMessage": "Create a task",
     "createFailed": "Could not create the task.",
     "back": "Back",
-    "status": "Status"
+    "status": "Status",
+    "myTasksHint": "Every task assigned to you, across all conversations.",
+    "dropHere": "Drop a task here"
   },
   "side": {
     "pins": "Pinned",
@@ -171,7 +181,14 @@
     "submit": "Sign in",
     "invalid": "Incorrect email or password.",
     "rateLimited": "Too many attempts. Try again in a few minutes.",
-    "failed": "Could not sign in. Please try again."
+    "failed": "Could not sign in. Please try again.",
+    "tagline": "Your team, in one place.",
+    "pitch": "Messages, files, tasks and calendar on your own servers: the end of overflowing inboxes.",
+    "f1": "Real-time chat and team channels",
+    "f2": "Kanban tasks with a chat for every task",
+    "f3": "Reminders, reports and a personal AI assistant",
+    "welcome": "Welcome back",
+    "emailPlaceholder": "name@company.com"
   },
   "search": {
     "results": "Search results",
@@ -365,7 +382,8 @@
       "approved": "Approved",
       "rejected": "Rejected",
       "cancelled": "Cancelled"
-    }
+    },
+    "emptyHint": "Leave, equipment or expenses: create a request in one click."
   },
   "projects": {
     "title": "Projects",
@@ -388,7 +406,8 @@
       "active": "Active",
       "on_hold": "On hold",
       "finished": "Finished"
-    }
+    },
+    "emptyHint": "Group tasks, milestones and files around a goal."
   },
   "dashboard": {
     "title": "Dashboard",

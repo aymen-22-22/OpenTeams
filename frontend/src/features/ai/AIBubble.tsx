@@ -18,8 +18,8 @@ export function AIBubble({ message, ownerName }: { message: AIMessage; ownerName
         </span>
       )}
       <p dir="auto" className={cn(
-        'whitespace-pre-wrap break-words rounded-lg px-3 py-2',
-        isAI ? 'border border-ai-foreground/20 bg-ai text-ai-foreground' : 'bg-accent text-accent-foreground',
+        'whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2 text-[15px] leading-relaxed',
+        isAI ? 'rounded-ss-md border border-ai-border bg-ai text-ai-foreground shadow-xs' : 'rounded-se-md bg-accent text-accent-foreground shadow-xs',
       )}>
         {message.content}
       </p>

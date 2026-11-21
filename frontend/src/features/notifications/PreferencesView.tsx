@@ -48,9 +48,11 @@ export function PreferencesView() {
   const { t } = useTranslation()
   const prefs = usePreferences().data
   return (
-    <section aria-label={t('notifications.preferences')} className="flex h-full flex-col gap-4 overflow-y-auto p-4">
-      <h2 className="text-lg font-semibold">{t('notifications.preferences')}</h2>
+    <section aria-label={t('notifications.preferences')} className="h-full overflow-y-auto">
+      <div className="page flex animate-fade-in flex-col gap-5">
+      <h2 className="page-title">{t('notifications.preferences')}</h2>
       {prefs && <PreferencesForm initial={prefs} />}
+      </div>
     </section>
   )
 }

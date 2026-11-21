@@ -20,9 +20,10 @@ export function ReportView({ runId, people }: { runId: string; people: Map<strin
   const waiting = is_owner && run.status === 'awaiting_approval'
 
   return (
-    <section aria-label={playbook_name} className="flex h-full flex-col gap-4 overflow-y-auto p-4">
+    <section aria-label={playbook_name} className="h-full overflow-y-auto">
+      <div className="page flex animate-fade-in flex-col gap-5">
       <header className="flex flex-wrap items-center gap-2">
-        <h2 dir="auto" className="text-lg font-semibold">{playbook_name}</h2>
+        <h2 dir="auto" className="page-title">{playbook_name}</h2>
         <span className={cn('rounded px-2 py-0.5 text-xs', STATUS_COLOR[run.status])}>{t(`playbooks.statuses.${run.status}`)}</span>
         <span className="text-sm text-muted-foreground">
           {fmt.format(new Date(run.period_start))} → {fmt.format(new Date(run.period_end))}
@@ -36,12 +37,13 @@ export function ReportView({ runId, people }: { runId: string; people: Map<strin
         </div>
       )}
       {Object.entries(reports).map(([uid, text]) => (
-        <article key={uid} className="flex flex-col gap-2 rounded-md border border-border p-4">
+        <article key={uid} className="flex flex-col gap-2 rounded-xl border border-border bg-background p-5 shadow-xs">
           {is_owner && <h3 className="text-sm font-semibold text-muted-foreground">{t('playbooks.for', { name: people.get(uid)?.display_name ?? '?' })}</h3>}
           <pre dir="auto" className="whitespace-pre-wrap font-sans text-sm leading-relaxed">{text}</pre>
         </article>
       ))}
       {run.inputs.ai && <p className="text-xs text-ai-foreground">{t('playbooks.writtenByAi')}</p>}
+      </div>
     </section>
   )
 }
