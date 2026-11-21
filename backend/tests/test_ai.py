@@ -282,3 +282,14 @@ async def test_owner_reads_all_conversations(people: People, llm: FakeLLM) -> No
 
 async def test_log_requires_auth(client: AsyncClient) -> None:
     assert (await client.get("/api/v1/ai/log")).status_code == 401
+
+
+async def test_my_unconfigured_assistant_is_unavailable_not_missing(people: People) -> None:
+    r = await people.amina.get(f"/api/v1/ai/{people.amina_user.id}/thread")
+    assert r.status_code == 200 and r.json() == {
+        "owner_id": str(people.amina_user.id),
+        "available": False,
+        "messages": [],
+    }
+    # someone else's unconfigured AI is still hidden
+    assert (await people.lucas.get(f"/api/v1/ai/{people.amina_user.id}/thread")).status_code == 404

@@ -120,6 +120,9 @@ async def _allowed_profile(db: AsyncSession, owner_id: uuid.UUID, caller: User) 
 
 @router.get("/{owner_id}/thread", response_model=ThreadOut)
 async def get_thread(owner_id: uuid.UUID, user: CurrentUser, db: DB) -> ThreadOut:
+    if owner_id == user.id and await _get_profile(db, user.id) is None:
+        # My own assistant, not configured yet: empty and unavailable (not "not found").
+        return ThreadOut(owner_id=owner_id, available=False, messages=[])
     profile = await _allowed_profile(db, owner_id, user)
     thread = await db.scalar(
         select(AIConversation).where(

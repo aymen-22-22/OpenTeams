@@ -2,6 +2,26 @@
 # and your domain in production (automatic Let's Encrypt certificate).
 {$SITE_ADDRESS:localhost} {
 	encode gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "same-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		# The app only loads its own scripts and styles and talks to its own API/WebSocket.
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' wss:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+		-Server
+	}
+
+	# Uploads: a little above MAX_UPLOAD_MB (default 100 MB).
+	request_body /api/* {
+		max_size 110MB
+	}
+
+	# /metrics is internal (Prometheus scrapes api:8000 directly) and never proxied.
+	respond /metrics 404
+
 	reverse_proxy /api/* api:8000
 	reverse_proxy /ws* api:8000
 	reverse_proxy web:80

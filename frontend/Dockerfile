@@ -7,5 +7,5 @@ RUN npm run build
 
 FROM caddy:2-alpine
 COPY --from=build /app/dist /srv
-# Serve the single-page app; unknown paths fall back to index.html.
-CMD ["caddy", "file-server", "--root", "/srv", "--listen", ":80", "--try-files", "{path} /index.html"]
+# Serve the single-page app; unknown paths fall back to index.html (see Caddyfile).
+COPY Caddyfile /etc/caddy/Caddyfile
