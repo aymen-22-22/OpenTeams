@@ -1,4 +1,4 @@
-.PHONY: up down dev dev-api dev-web install test lint migrate
+.PHONY: up down dev dev-api dev-web install test lint migrate e2e backup monitoring
 
 up:            ## Start everything (with Mailpit)
 	docker compose --profile dev up --build
@@ -26,3 +26,12 @@ lint:
 
 migrate:
 	cd backend && .venv/bin/alembic upgrade head
+
+e2e:           ## End-to-end tests (needs the API on :8000 and the test users)
+	./scripts/e2e.sh
+
+backup:        ## Run a backup now (into the "backups" volume)
+	docker compose run --rm --entrypoint /scripts/backup.sh backup
+
+monitoring:    ## Start Prometheus and Grafana (http://127.0.0.1:3000)
+	docker compose --profile monitoring up -d prometheus grafana

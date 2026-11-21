@@ -2,7 +2,9 @@
 
 Self-hosted team chat and work platform: chat, files, kanban tasks, calendar, reminders and personal AI. The full specification is in [CLAUDE.md](CLAUDE.md).
 
-**Status:** Phase 3 done: login, roles, presence, and real-time direct chat (replies, edit/delete, read state, typing, pins, search). Files per conversation (Nextcloud or local storage, versions). Kanban tasks with their own task chats. Personal AI per user (own API key). Reminders, notification center and HTML emails. Playbooks (automatic reports). Calendar with iCal feed. Leave and other requests, projects, manager dashboard.
+**Status:** Phase 3 done: login, roles, presence, and real-time direct chat (replies, edit/delete, read state, typing, pins, search). Files per conversation (Nextcloud or local storage, versions). Kanban tasks with their own task chats. Personal AI per user (own API key). Reminders, notification center and HTML emails. Playbooks (automatic reports). Calendar with iCal feed. Leave and other requests, projects, manager dashboard. Hardened for production: backups, monitoring, end-to-end tests.
+
+**Deploying on a server? Read [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).**
 
 ## Run everything with Docker
 
@@ -50,6 +52,10 @@ make dev-web                 # http://localhost:5173 (proxies /api to the API)
 ```
 
 ## Tests and checks
+
+- `make test`: backend (pytest, real PostgreSQL) and frontend (Vitest).
+- `make lint`: ruff, mypy, eslint, tsc.
+- `make e2e`: Playwright smoke tests (login, send a message, upload a file, move a task, open a task chat), an accessibility scan (axe, WCAG 2.1 AA, French and Arabic) and a check that the app works under the production Content-Security-Policy. See the end of docs/DEPLOYMENT.md for the setup.
 
 Backend tests need PostgreSQL with a database `openteams_test` (user/password `openteams`), or set `TEST_DATABASE_URL`. Quick way:
 

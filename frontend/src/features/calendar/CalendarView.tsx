@@ -138,22 +138,30 @@ export function CalendarView({ me, people, onOpenTask, onOpenProject, onRemind }
 
       {mode === 'month' ? (
         <div role="grid" aria-label={title} className="grid grid-cols-7 gap-px overflow-hidden rounded-md border border-border bg-border">
-          {weekdays.map((w) => <div key={w} role="columnheader" className="bg-muted p-1 text-center text-xs font-semibold">{w}</div>)}
-          {days.map((d) => {
-            const key = dayKey(d)
-            const list = byDay.get(key) ?? []
-            return (
-              <div key={key} role="gridcell" aria-label={new Intl.DateTimeFormat(i18n.language, { dateStyle: 'full' }).format(d)}
-                className={cn('flex min-h-24 flex-col gap-0.5 bg-background p-1', d.getMonth() !== anchor.getMonth() && 'opacity-50')}>
-                <button type="button" onClick={() => { setAnchor(d); setMode('day') }}
-                  className={cn('self-start rounded-full px-1.5 text-xs', key === today && 'bg-accent font-semibold text-accent-foreground')}>
-                  {d.getDate()}
-                </button>
-                {list.slice(0, 3).map((e) => <Chip key={e.id} event={e} onOpen={setOpen} />)}
-                {list.length > 3 && <span className="text-xs text-muted-foreground">{t('calendar.more', { count: list.length - 3 })}</span>}
-              </div>
-            )
-          })}
+          {/* Rows use display: contents so the 7-column CSS grid stays intact. */}
+          <div role="row" className="contents">
+            {weekdays.map((w) => <div key={w} role="columnheader" className="bg-muted p-1 text-center text-xs font-semibold">{w}</div>)}
+          </div>
+          {Array.from({ length: days.length / 7 }, (_, week) => (
+            <div key={week} role="row" className="contents">
+              {days.slice(week * 7, week * 7 + 7).map((d) => {
+                const key = dayKey(d)
+                const list = byDay.get(key) ?? []
+                const outside = d.getMonth() !== anchor.getMonth()
+                return (
+                  <div key={key} role="gridcell" aria-label={new Intl.DateTimeFormat(i18n.language, { dateStyle: 'full' }).format(d)}
+                    className={cn('flex min-h-24 flex-col gap-0.5 p-1', outside ? 'bg-muted text-muted-foreground' : 'bg-background')}>
+                    <button type="button" onClick={() => { setAnchor(d); setMode('day') }}
+                      className={cn('self-start rounded-full px-1.5 text-xs', key === today && 'bg-accent font-semibold text-accent-foreground')}>
+                      {d.getDate()}
+                    </button>
+                    {list.slice(0, 3).map((e) => <Chip key={e.id} event={e} onOpen={setOpen} />)}
+                    {list.length > 3 && <span className="text-xs text-muted-foreground">{t('calendar.more', { count: list.length - 3 })}</span>}
+                  </div>
+                )
+              })}
+            </div>
+          ))}
         </div>
       ) : (
         <div className={cn('grid gap-3', mode === 'week' && 'md:grid-cols-7')}>

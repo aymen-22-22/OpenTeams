@@ -23,34 +23,33 @@ export function TaskCard({ task, assigneeName, onOpen }: Props) {
     : null
 
   return (
-    <li
-      ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition }}
-      {...attributes}
-      {...listeners}
-      onClick={() => onOpen(task)}
-      onKeyDown={(e) => {
-        listeners?.onKeyDown?.(e)
-        if (e.key === 'Enter') onOpen(task)
-      }}
-      aria-label={task.title}
-      className={cn(
-        'flex cursor-grab flex-col gap-2 rounded-md border bg-background p-3 shadow-sm',
-        task.overdue ? 'border-red-500' : 'border-border',
-        isDragging && 'opacity-50',
-      )}
-    >
-      <span dir="auto" className="font-medium">{task.title}</span>
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <span className={cn('size-2 rounded-full', PRIORITY_COLOR[task.priority])} aria-label={t(`tasks.priority.${task.priority}`)} />
-        <span className="flex-1 truncate">{assigneeName}</span>
-        {due && (
-          <span className={cn('flex items-center gap-1', task.overdue && 'font-semibold text-red-600')}>
-            <CalendarDays className="size-3" aria-hidden />
-            {due}
-            {task.overdue && <span>· {t('tasks.overdue')}</span>}
-          </span>
+    // A plain list item; the draggable button inside it. Its name is its visible content.
+    <li ref={setNodeRef} style={{ transform: CSS.Transform.toString(transform), transition }} className={cn(isDragging && 'opacity-50')}>
+      <div
+        {...attributes}
+        {...listeners}
+        onClick={() => onOpen(task)}
+        onKeyDown={(e) => {
+          listeners?.onKeyDown?.(e)
+          if (e.key === 'Enter') onOpen(task)
+        }}
+        className={cn(
+          'flex cursor-grab flex-col gap-2 rounded-md border bg-background p-3 shadow-sm',
+          task.overdue ? 'border-red-500' : 'border-border',
         )}
+      >
+        <span dir="auto" className="font-medium">{task.title}</span>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className={cn('size-2 rounded-full', PRIORITY_COLOR[task.priority])} aria-label={t(`tasks.priority.${task.priority}`)} />
+          <span className="flex-1 truncate">{assigneeName}</span>
+          {due && (
+            <span className={cn('flex items-center gap-1', task.overdue && 'font-semibold text-red-600')}>
+              <CalendarDays className="size-3" aria-hidden />
+              {due}
+              {task.overdue && <span>· {t('tasks.overdue')}</span>}
+            </span>
+          )}
+        </div>
       </div>
     </li>
   )

@@ -41,3 +41,62 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm audit --audit-level=high
+
+  e2e:
+    # Smoke tests (login, message, upload, move task, task chat), accessibility scan and CSP check
+    # against the real API and the production build of the frontend.
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: openteams
+          POSTGRES_PASSWORD: openteams
+          POSTGRES_DB: openteams_e2e
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U openteams" --health-interval 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql+asyncpg://openteams:openteams@localhost:5432/openteams_e2e
+      ALLOWED_ORIGINS: '["http://localhost:4173"]'
+      SCHEDULER_ENABLED: "false"
+      LOCAL_STORAGE_DIR: /tmp/openteams-files
+      OPENTEAMS_PASSWORD: e2e-password-123
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: "frontend/package-lock.json" }
+      - name: Start the API with two test users
+        working-directory: backend
+        run: |
+          pip install -e .
+          alembic upgrade head
+          python -m app.cli create-admin e2e-admin@example.com "E2E Admin"
+          python -m app.cli create-user e2e-member@example.com "E2E Member"
+          nohup uvicorn app.main:app --port 8000 > /tmp/api.log 2>&1 &
+      - name: Build and serve the frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+          nohup npx vite preview --port 4173 > /tmp/web.log 2>&1 &
+      - name: Install Playwright
+        working-directory: e2e
+        run: |
+          npm ci
+          npx tsc
+          npx playwright install --with-deps chromium
+      - name: Wait for the app
+        run: |
+          for i in $(seq 1 30); do curl -sf http://localhost:4173/api/v1/health && exit 0; sleep 1; done
+          cat /tmp/api.log /tmp/web.log
+          exit 1
+      - name: End-to-end tests
+        working-directory: e2e
+        run: npx playwright test
+      - name: Logs on failure
+        if: failure()
+        run: tail -100 /tmp/api.log /tmp/web.log
