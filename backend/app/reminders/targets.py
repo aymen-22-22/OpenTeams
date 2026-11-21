@@ -4,6 +4,8 @@ import uuid
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.calendar.models import CalendarEvent
+from app.calendar.service import visible_events
 from app.chat.access import is_member, require_message
 from app.core.errors import AppError
 from app.files.models import File
@@ -33,4 +35,7 @@ async def target_link(
             task = await require_task(db, target_id, user)
             return f"/tasks/{task.id}"
         case TargetType.EVENT:
-            raise AppError("not_supported", "Calendar events arrive in a later phase", 422)
+            event = await db.scalar(visible_events(user).where(CalendarEvent.id == target_id))
+            if event is None:
+                raise AppError("not_found", "Event not found", 404)
+            return "/calendar"

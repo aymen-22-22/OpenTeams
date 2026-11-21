@@ -31,6 +31,8 @@ class User(Base):
         default=Role.EMPLOYEE,
     )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    # SHA-256 of the private iCal feed token (the token itself is never stored).
+    ical_token_hash: Mapped[str | None] = mapped_column(String(64), unique=True)
 
 
 class Team(Base):

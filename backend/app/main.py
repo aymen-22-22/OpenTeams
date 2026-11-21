@@ -7,6 +7,7 @@ from app.admin.router import router as admin_router
 from app.ai.router import router as ai_router
 from app.api import health, ws
 from app.auth.router import router as auth_router
+from app.calendar.router import router as calendar_router
 from app.chat.router import router as chat_router
 from app.core.csrf import register_csrf
 from app.core.errors import register_error_handlers
@@ -55,6 +56,7 @@ def create_app() -> FastAPI:
         ai_router,
         reminders_router,
         playbooks_router,
+        calendar_router,
     ):
         app.include_router(router, prefix="/api/v1")
     app.include_router(ws.router)

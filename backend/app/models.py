@@ -3,6 +3,7 @@
 from app.admin.models import AuditLog
 from app.ai.models import AIAuditLog, AIConversation, AIMessage, AIProfile
 from app.auth.models import Session
+from app.calendar.models import CalendarEvent, EventAttendee
 from app.chat.events import RealtimeEvent
 from app.chat.models import Conversation, ConversationMember, Message, MessageRead, Pin
 from app.files.models import File, FileVersion
@@ -12,6 +13,8 @@ from app.tasks.models import Task, TaskEvent
 from app.users.models import Team, TeamMember, User
 
 __all__ = [
+    "CalendarEvent",
+    "EventAttendee",
     "EmailOutbox",
     "Notification",
     "NotificationPreference",

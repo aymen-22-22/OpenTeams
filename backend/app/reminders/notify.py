@@ -19,6 +19,7 @@ DEFAULT_EMAIL = {
     NotificationType.TASK,
     NotificationType.APPROVAL,
     NotificationType.REPORT,
+    NotificationType.EVENT,
 }
 
 
