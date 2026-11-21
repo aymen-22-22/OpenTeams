@@ -189,7 +189,8 @@
       "reminder": "Rappel",
       "file": "Nouveau fichier",
       "task": "Tâche",
-      "approval": "Approbation"
+      "approval": "Approbation",
+      "report": "Rapport"
     }
   },
   "reminders": {
@@ -207,6 +208,75 @@
       "daily": "Chaque jour",
       "weekly": "Chaque semaine",
       "monthly": "Chaque mois"
+    }
+  },
+  "playbooks": {
+    "title": "Playbooks",
+    "new": "Nouveau playbook",
+    "empty": "Aucun playbook. Créez un rapport automatique.",
+    "name": "Nom",
+    "kind": "Type",
+    "enabled": "Activé",
+    "disabled": "Désactivé",
+    "next": "Prochain :",
+    "schedule": "Planification",
+    "frequency": "Fréquence",
+    "weekday": "Jour",
+    "dayOfMonth": "Jour du mois",
+    "hour": "Heure",
+    "scope": "Tâches de (vide = tout ce que je vois)",
+    "recipients": "Destinataires (vide = moi)",
+    "delivery": "Envoi",
+    "inApp": "Rapport dans l'application",
+    "email": "E-mail",
+    "approval": "Je valide avant l'envoi",
+    "approvalBadge": "Validation",
+    "useAi": "Rédigé par mon IA",
+    "instructions": "Instructions pour l'IA",
+    "saveFailed": "Impossible d'enregistrer.",
+    "preview": "Aperçu",
+    "runNow": "Exécuter maintenant",
+    "history": "Historique",
+    "noRuns": "Aucune exécution.",
+    "when": "Quand",
+    "status": "Statut",
+    "cost": "Coût",
+    "open": "Voir",
+    "approve": "Approuver et envoyer",
+    "reject": "Rejeter",
+    "awaitingHint": "Ce rapport attend votre validation avant d'être envoyé.",
+    "for": "Pour {{name}}",
+    "reportNotFound": "Rapport introuvable.",
+    "writtenByAi": "Rédigé par l'IA à partir des données ci-dessus.",
+    "kinds": {
+      "task_summary": "Résumé des tâches",
+      "weekly_report": "Rapport hebdomadaire",
+      "monthly_report": "Rapport mensuel",
+      "monday_summary": "Résumé du lundi"
+    },
+    "frequencies": {
+      "daily": "Chaque jour",
+      "weekly": "Chaque semaine",
+      "monthly": "Chaque mois"
+    },
+    "weekdays": {
+      "0": "Lundi",
+      "1": "Mardi",
+      "2": "Mercredi",
+      "3": "Jeudi",
+      "4": "Vendredi",
+      "5": "Samedi",
+      "6": "Dimanche"
+    },
+    "statuses": {
+      "delivered": "Envoyé",
+      "awaiting_approval": "En attente de validation",
+      "rejected": "Rejeté",
+      "failed": "Échec"
+    },
+    "triggers": {
+      "schedule": "planifié",
+      "manual": "manuel"
     }
   }
 }

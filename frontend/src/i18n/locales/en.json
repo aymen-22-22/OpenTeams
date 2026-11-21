@@ -189,7 +189,8 @@
       "reminder": "Reminder",
       "file": "New file",
       "task": "Task",
-      "approval": "Approval"
+      "approval": "Approval",
+      "report": "Report"
     }
   },
   "reminders": {
@@ -207,6 +208,75 @@
       "daily": "Every day",
       "weekly": "Every week",
       "monthly": "Every month"
+    }
+  },
+  "playbooks": {
+    "title": "Playbooks",
+    "new": "New playbook",
+    "empty": "No playbooks yet. Create an automatic report.",
+    "name": "Name",
+    "kind": "Type",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "next": "Next:",
+    "schedule": "Schedule",
+    "frequency": "Frequency",
+    "weekday": "Day",
+    "dayOfMonth": "Day of month",
+    "hour": "Hour",
+    "scope": "Tasks of (empty = everything I can see)",
+    "recipients": "Recipients (empty = me)",
+    "delivery": "Delivery",
+    "inApp": "Report in the app",
+    "email": "Email",
+    "approval": "I approve before sending",
+    "approvalBadge": "Approval",
+    "useAi": "Written by my AI",
+    "instructions": "Instructions for the AI",
+    "saveFailed": "Could not save.",
+    "preview": "Preview",
+    "runNow": "Run now",
+    "history": "History",
+    "noRuns": "No runs yet.",
+    "when": "When",
+    "status": "Status",
+    "cost": "Cost",
+    "open": "Open",
+    "approve": "Approve and send",
+    "reject": "Reject",
+    "awaitingHint": "This report is waiting for your approval before it is sent.",
+    "for": "For {{name}}",
+    "reportNotFound": "Report not found.",
+    "writtenByAi": "Written by the AI from the data above.",
+    "kinds": {
+      "task_summary": "Task summary",
+      "weekly_report": "Weekly report",
+      "monthly_report": "Monthly report",
+      "monday_summary": "Monday summary"
+    },
+    "frequencies": {
+      "daily": "Every day",
+      "weekly": "Every week",
+      "monthly": "Every month"
+    },
+    "weekdays": {
+      "0": "Monday",
+      "1": "Tuesday",
+      "2": "Wednesday",
+      "3": "Thursday",
+      "4": "Friday",
+      "5": "Saturday",
+      "6": "Sunday"
+    },
+    "statuses": {
+      "delivered": "Sent",
+      "awaiting_approval": "Awaiting approval",
+      "rejected": "Rejected",
+      "failed": "Failed"
+    },
+    "triggers": {
+      "schedule": "scheduled",
+      "manual": "manual"
     }
   }
 }

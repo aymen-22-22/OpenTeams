@@ -2,7 +2,7 @@
 
 Self-hosted team chat and work platform: chat, files, kanban tasks, calendar, reminders and personal AI. The full specification is in [CLAUDE.md](CLAUDE.md).
 
-**Status:** Phase 3 done: login, roles, presence, and real-time direct chat (replies, edit/delete, read state, typing, pins, search). Files per conversation (Nextcloud or local storage, versions). Kanban tasks with their own task chats. Personal AI per user (own API key). Reminders, notification center and HTML emails.
+**Status:** Phase 3 done: login, roles, presence, and real-time direct chat (replies, edit/delete, read state, typing, pins, search). Files per conversation (Nextcloud or local storage, versions). Kanban tasks with their own task chats. Personal AI per user (own API key). Reminders, notification center and HTML emails. Playbooks (automatic reports).
 
 ## Run everything with Docker
 
@@ -91,6 +91,22 @@ Each user can connect their own AI in **My assistant → Settings**: Claude, Ope
 - **Emails** are never sent during a request: they go to the `email_outbox` table, and a scheduled job sends them with retries (exponential backoff, 5 attempts). Each email is responsive HTML with a plain-text version, a button that opens the right page (`APP_URL`), and a link to the preferences. Arabic emails are right-to-left.
 - **Scheduled jobs** (APScheduler, inside the API): due reminders (30 s), outbox (20 s), overdue-task nudge (daily 08:30), deletion of real-time events older than 7 days (daily). Run a single API instance, or set `SCHEDULER_ENABLED=false` on extra ones.
 - **Development**: emails arrive in Mailpit at http://localhost:8025. In production set the `SMTP_*` variables.
+
+## Playbooks (automatic reports)
+
+Open **Playbooks** in the left panel. A playbook builds a report on a schedule (every day, week or month at a given hour, in `TIMEZONE`) and delivers it as an in-app report and/or email.
+
+| Kind | Content |
+|---|---|
+| Task summary | finished in the period, in progress, pending, overdue |
+| Weekly / monthly report | the same, plus totals per person |
+| Monday summary | each recipient gets their own open tasks; managers get the team view |
+
+- **Permissions**: data is read with the owner's permissions (same rule as the task board). Only managers and admins can send reports to other people; employees can only send them to themselves. Playbooks never change data.
+- **Approval**: with "I approve before sending", each run waits; the owner gets an *Approval* notification, reads every report and approves or rejects it.
+- **AI (optional)**: "Written by my AI" uses the owner's personal AI (their key, budget and audit log) to rewrite the report from the data, which is marked as untrusted. Without a configured AI, the plain report is sent.
+- **Run history**: every run keeps its period, counts, reports, recipients, tokens, cost, duration and attempts. Failed runs are retried after 5 and 10 minutes; after 3 attempts the owner is notified.
+- **Preview** builds the reports without sending; **Run now** runs immediately.
 
 ## Real-time events
 

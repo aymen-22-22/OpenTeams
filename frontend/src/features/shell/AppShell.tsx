@@ -7,6 +7,8 @@ import { usePeople, type User } from '@/features/auth/api'
 import { useConversations, useDirectConversation, type Message } from '@/features/chat/api'
 import type { ReminderInput } from '@/features/notifications/api'
 import { PreferencesView } from '@/features/notifications/PreferencesView'
+import { PlaybooksView } from '@/features/playbooks/PlaybooksView'
+import { ReportView } from '@/features/playbooks/ReportView'
 import { ReminderForm } from '@/features/notifications/ReminderForm'
 import type { Task, TaskInput } from '@/features/tasks/api'
 import { MyTasks } from '@/features/tasks/MyTasks'
@@ -21,7 +23,9 @@ import { SidePanel } from './SidePanel'
 import { TopBar } from './TopBar'
 
 type Column = 'people' | 'conversation' | 'details'
-type View = { kind: 'person' } | { kind: 'myTasks' } | { kind: 'assistant' } | { kind: 'preferences' } | { kind: 'task'; taskId: string }
+type View = { kind: 'person' } | { kind: 'myTasks' } | { kind: 'assistant' } | { kind: 'preferences' }
+  | { kind: 'playbooks' }
+  | { kind: 'report'; runId: string } | { kind: 'task'; taskId: string }
 
 const NAV = [
   { id: 'people', Icon: Users },
@@ -70,6 +74,11 @@ export function AppShell({ me }: { me: User }) {
     setColumn('conversation')
   }
 
+  const show = (next: View) => {
+    setView(next)
+    setColumn('conversation')
+  }
+
   /** Open a conversation: a direct chat shows the person, a task chat shows its task. */
   const openConversation = async (conversationId: string) => {
     const c = conversations?.find((x) => x.id === conversationId)
@@ -87,10 +96,9 @@ export function AppShell({ me }: { me: User }) {
     const [, kind, id] = link.split('/')
     if (kind === 'tasks' && id) openTask({ id })
     else if (kind === 'conversations' && id) void openConversation(id)
-    else if (kind === 'preferences') {
-      setView({ kind: 'preferences' })
-      setColumn('conversation')
-    }
+    else if (kind === 'reports' && id) show({ kind: 'report', runId: id })
+    else if (kind === 'playbooks') show({ kind: 'playbooks' })
+    else if (kind === 'preferences') show({ kind: 'preferences' })
   }
 
   useEffect(() => {
@@ -111,6 +119,7 @@ export function AppShell({ me }: { me: User }) {
             unread={unread}
             selectedId={view.kind === 'person' ? person?.id : undefined}
             onSelect={(p) => showPerson(p.id)}
+            onPlaybooks={() => show({ kind: 'playbooks' })}
             onAssistant={() => {
               setView({ kind: 'assistant' })
               setColumn('conversation')
@@ -128,6 +137,10 @@ export function AppShell({ me }: { me: User }) {
           )}
           {view.kind === 'assistant' && <AssistantView me={me} people={peopleById} />}
           {view.kind === 'preferences' && <PreferencesView />}
+          {view.kind === 'playbooks' && (
+            <PlaybooksView me={me} people={peopleById} onOpenRun={(runId) => show({ kind: 'report', runId })} />
+          )}
+          {view.kind === 'report' && <ReportView key={view.runId} runId={view.runId} people={peopleById} />}
           {view.kind === 'myTasks' && (
             <MyTasks meId={me.id} people={peopleById} onOpen={openTask} onNew={() => setTaskDraft({})} />
           )}
