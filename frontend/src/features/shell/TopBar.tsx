@@ -25,7 +25,7 @@ export function TopBar({ me, onOpenMessage, onNavigate }: Props) {
   return (
     <header className="flex items-center gap-2 border-b border-border px-4 py-2">
       <span className="font-semibold text-accent">{t('app.name')}</span>
-      <SearchBox onOpen={onOpenMessage} />
+      <SearchBox onOpen={onOpenMessage} onNavigate={onNavigate} />
       <select
         aria-label={t('app.language')}
         value={i18n.language}

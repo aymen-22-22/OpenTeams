@@ -38,3 +38,15 @@ export function shift(anchor: Date, mode: CalendarMode, direction: 1 | -1): Date
   if (mode === 'week') return addDays(anchor, 7 * direction)
   return new Date(anchor.getFullYear(), anchor.getMonth() + direction, 1)
 }
+
+/** Every day an event covers: multi-day all-day events (leave) appear on each of their days. */
+export function eventDayKeys(e: { starts_at: string; ends_at: string; all_day: boolean }): string[] {
+  const first = eventDayKey(e)
+  if (!e.all_day) return [first]
+  const last = e.ends_at.slice(0, 10)
+  const keys = [first]
+  for (let d = addDays(new Date(`${first}T12:00`), 1); dayKey(d) <= last && keys.length < 366; d = addDays(d, 1)) {
+    keys.push(dayKey(d))
+  }
+  return keys
+}

@@ -58,6 +58,7 @@ export function useRealtime(enabled: boolean) {
         case 'notification.created':
           void qc.invalidateQueries({ queryKey: notificationKeys.list })
           void qc.invalidateQueries({ queryKey: ['calendar'] }) // e.g. invited to a meeting
+          void qc.invalidateQueries({ queryKey: ['requests'] }) // a request to approve or a decision
           void qc.invalidateQueries({ queryKey: notificationKeys.reminders })
           break
         case 'typing':

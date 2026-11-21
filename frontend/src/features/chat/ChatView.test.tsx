@@ -94,7 +94,7 @@ test('only own messages can be edited or deleted', async () => {
 test('search shows results and opens the conversation', async () => {
   mockApi({
     ...LOGGED_IN,
-    'GET /search?q=rapport': { status: 200, body: { messages: [message(1, 'Le rapport est prêt')] } },
+    'GET /search?q=rapport': { status: 200, body: { messages: [message(1, 'Le rapport est prêt')], tasks: [], projects: [] } },
   })
   renderApp()
   await screen.findByText('Bonjour !')

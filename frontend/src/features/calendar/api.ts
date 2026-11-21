@@ -13,6 +13,7 @@ export interface CalendarEvent {
   all_day: boolean
   user_ids: string[]
   task_id: string | null
+  project_id?: string | null
   creator_id: string | null
   description: string
   conversation_id: string | null

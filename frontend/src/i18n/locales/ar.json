@@ -320,6 +320,93 @@
       "project_finished": "مشروع منتهٍ",
       "task_due": "استحقاق مهمة",
       "task_finished": "مهمة منتهية"
+    },
+    "openProject": "فتح المشروع"
+  },
+  "requests": {
+    "title": "الطلبات",
+    "new": "طلب جديد",
+    "kind": "النوع",
+    "approver": "المعتمِد",
+    "from": "من",
+    "to": "إلى",
+    "leaveType": "نوع الإجازة",
+    "amount": "المبلغ (€)",
+    "comment": "تعليق",
+    "submit": "إرسال الطلب",
+    "failed": "تعذّر إرسال الطلب.",
+    "noApprover": "لا يوجد مسؤول متاح للموافقة.",
+    "empty": "لا توجد طلبات.",
+    "mine": "طلباتي",
+    "toApprove": "بانتظار موافقتي",
+    "by": "من {{name}}",
+    "to_approver": "المعتمِد: {{name}}",
+    "decisionComment": "تعليق (اختياري)",
+    "approve": "موافقة",
+    "reject": "رفض",
+    "cancel": "إلغاء الطلب",
+    "kinds": {
+      "leave": "إجازة",
+      "equipment": "معدات",
+      "expense": "مصاريف",
+      "other": "أخرى"
+    },
+    "leaveTypes": {
+      "paid": "إجازة مدفوعة",
+      "unpaid": "بدون أجر",
+      "sick": "إجازة مرضية",
+      "other": "أخرى"
+    },
+    "statuses": {
+      "pending": "قيد الانتظار",
+      "approved": "موافق عليه",
+      "rejected": "مرفوض",
+      "cancelled": "ملغى"
     }
+  },
+  "projects": {
+    "title": "المشاريع",
+    "new": "مشروع جديد",
+    "empty": "لا توجد مشاريع.",
+    "name": "اسم المشروع",
+    "status": "الحالة",
+    "start": "البداية",
+    "due": "الاستحقاق",
+    "members": "الأعضاء",
+    "membersCount": "أعضاء",
+    "milestones": "المراحل",
+    "milestoneTitle": "مرحلة جديدة",
+    "addMilestone": "إضافة",
+    "failed": "تعذّر حفظ المشروع.",
+    "project": "المشروع",
+    "none": "بدون مشروع",
+    "progress": "{{done}}/{{total}} مهام منتهية",
+    "statuses": {
+      "active": "نشط",
+      "on_hold": "متوقف مؤقتًا",
+      "finished": "منتهٍ"
+    }
+  },
+  "dashboard": {
+    "title": "لوحة القيادة",
+    "period": "الفترة",
+    "week": "هذا الأسبوع",
+    "month": "هذا الشهر",
+    "team": "الفريق",
+    "everyone": "الجميع",
+    "person": "الشخص",
+    "overdue": "متأخرة",
+    "finishedVsPlanned": "منتهية / مخططة",
+    "finished": "منتهية",
+    "total": "المجموع",
+    "delays": "التأخيرات",
+    "noDelays": "لا توجد تأخيرات 🎉",
+    "daysLate_zero": "متأخرة {{count}} يوم",
+    "daysLate_one": "متأخرة يومًا واحدًا",
+    "daysLate_two": "متأخرة يومين",
+    "daysLate_few": "متأخرة {{count}} أيام",
+    "daysLate_many": "متأخرة {{count}} يومًا",
+    "daysLate_other": "متأخرة {{count}} يوم",
+    "ratio": "{{done}} منتهية من {{planned}} مخططة"
   }
 }

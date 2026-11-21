@@ -2,7 +2,7 @@
 
 Self-hosted team chat and work platform: chat, files, kanban tasks, calendar, reminders and personal AI. The full specification is in [CLAUDE.md](CLAUDE.md).
 
-**Status:** Phase 3 done: login, roles, presence, and real-time direct chat (replies, edit/delete, read state, typing, pins, search). Files per conversation (Nextcloud or local storage, versions). Kanban tasks with their own task chats. Personal AI per user (own API key). Reminders, notification center and HTML emails. Playbooks (automatic reports). Calendar with iCal feed.
+**Status:** Phase 3 done: login, roles, presence, and real-time direct chat (replies, edit/delete, read state, typing, pins, search). Files per conversation (Nextcloud or local storage, versions). Kanban tasks with their own task chats. Personal AI per user (own API key). Reminders, notification center and HTML emails. Playbooks (automatic reports). Calendar with iCal feed. Leave and other requests, projects, manager dashboard.
 
 ## Run everything with Docker
 
@@ -115,7 +115,16 @@ Open **Calendar** in the left panel: month, week and day views, for me, for ever
 - **Automatic events** come from tasks: a due date shows as an all-day "task due" event, a finished task as a "task finished" event. They are computed when the calendar is read, so they always match the tasks (and follow the same visibility rule as the board).
 - **Meetings** are created from the calendar or from a chat (*Schedule a meeting* invites the conversation's members). They are private to the organizer and attendees; attendees get a notification. Only the organizer can edit or delete a meeting. You can set a reminder on a meeting.
 - **iCal feed**: *Subscribe (iCal)* creates a private link to add in Outlook, Google Calendar or a phone. The link is the only credential (stored hashed in the database); creating a new one disables the old one. It covers 60 days back and one year ahead.
-- Leave, project milestones and finished projects will appear here in Phase 10.
+- Approved leave shows as a day off (visible to the whole team, without the request's details). Project milestones and finished projects show for the project's members.
+
+## Requests and approvals
+
+Open **Requests**: leave (dates and type), equipment, expense (amount) or other. The requester chooses an approver among managers and admins; the approver gets a notification and decides in **To approve** with an optional comment; the requester is notified (in the app and by email). A pending request can be cancelled. Every step is kept in the history. Approved leave creates a day-off event in the calendar.
+
+## Projects and manager dashboard
+
+- **Projects**: name, description, status (active, on hold, finished), dates, members and milestones. Tasks can belong to a project (choose it when creating a task). The project page shows its milestones, tasks by status and the files of the task chats you belong to. Projects are visible to their members and to managers/admins; the owner, managers and admins can change them. Weekly and monthly reports include a per-project section; global search also finds tasks and projects.
+- **Dashboard** (managers and admins): for this week or month, and optionally one team: open and overdue tasks per person, finished versus planned (tasks due in the period), and the list of delays.
 
 ## Real-time events
 

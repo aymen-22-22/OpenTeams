@@ -8,7 +8,7 @@ import type { Person, User } from '@/features/auth/api'
 import { cn, textDirection } from '@/lib/utils'
 
 import { useDeleteMeeting, useEvents, useNewFeedUrl, type CalendarEvent, type CalendarFilter, type EventType } from './api'
-import { addDays, dayKey, eventDayKey, shift, startOfDay, visibleRange, type CalendarMode } from './dates'
+import { addDays, dayKey, eventDayKeys, shift, startOfDay, visibleRange, type CalendarMode } from './dates'
 import { MeetingForm } from './MeetingForm'
 
 export const EVENT_COLOR: Record<EventType, string> = {
@@ -32,9 +32,9 @@ function Chip({ event, onOpen }: { event: CalendarEvent; onOpen: (e: CalendarEve
   )
 }
 
-function EventDetails({ event, me, people, onClose, onEdit, onOpenTask, onRemind }: {
+function EventDetails({ event, me, people, onClose, onEdit, onOpenTask, onOpenProject, onRemind }: {
   event: CalendarEvent; me: User; people: Map<string, Person>; onClose: () => void
-  onEdit: () => void; onOpenTask: (id: string) => void; onRemind: (e: CalendarEvent) => void
+  onEdit: () => void; onOpenTask: (id: string) => void; onOpenProject: (id: string) => void; onRemind: (e: CalendarEvent) => void
 }) {
   const { t, i18n } = useTranslation()
   const remove = useDeleteMeeting()
@@ -54,6 +54,7 @@ function EventDetails({ event, me, people, onClose, onEdit, onOpenTask, onRemind
         )}
         {event.description && <p dir="auto" className="whitespace-pre-wrap text-sm">{event.description}</p>}
         <div className="flex flex-wrap justify-end gap-2">
+          {event.project_id && <Button variant="outline" onClick={() => onOpenProject(event.project_id!)}>{t('calendar.openProject')}</Button>}
           {event.task_id && <Button variant="outline" onClick={() => onOpenTask(event.task_id!)}>{t('calendar.openTask')}</Button>}
           {event.type === 'meeting' && <Button variant="outline" onClick={() => onRemind(event)}>{t('reminders.remindMe')}</Button>}
           {mine && <Button variant="outline" onClick={onEdit}>{t('chat.edit')}</Button>}
@@ -69,10 +70,11 @@ interface Props {
   me: User
   people: Map<string, Person>
   onOpenTask: (taskId: string) => void
+  onOpenProject: (projectId: string) => void
   onRemind: (event: CalendarEvent) => void
 }
 
-export function CalendarView({ me, people, onOpenTask, onRemind }: Props) {
+export function CalendarView({ me, people, onOpenTask, onOpenProject, onRemind }: Props) {
   const { t, i18n } = useTranslation()
   const [mode, setMode] = useState<CalendarMode>('month')
   const [anchor, setAnchor] = useState(() => startOfDay(new Date()))
@@ -86,7 +88,7 @@ export function CalendarView({ me, people, onOpenTask, onRemind }: Props) {
   const others = [...people.values()].filter((p) => p.id !== me.id)
 
   const byDay = new Map<string, CalendarEvent[]>()
-  for (const e of events) byDay.set(eventDayKey(e), [...(byDay.get(eventDayKey(e)) ?? []), e])
+  for (const e of events) for (const key of eventDayKeys(e)) byDay.set(key, [...(byDay.get(key) ?? []), e])
   const days = Array.from({ length: Math.round((end.getTime() - start.getTime()) / 86_400_000) }, (_, i) => addDays(start, i))
   const today = dayKey(new Date())
   const weekdays = Array.from({ length: 7 }, (_, i) =>
@@ -182,6 +184,7 @@ export function CalendarView({ me, people, onOpenTask, onRemind }: Props) {
         <EventDetails event={open} me={me} people={people} onClose={() => setOpen(null)}
           onEdit={() => { setForm({ event: open }); setOpen(null) }}
           onOpenTask={(id) => { setOpen(null); onOpenTask(id) }}
+          onOpenProject={(id) => { setOpen(null); onOpenProject(id) }}
           onRemind={(e) => { setOpen(null); onRemind(e) }} />
       )}
       {form && <MeetingForm people={others} event={form.event} date={form.date} onDone={() => setForm(null)} />}

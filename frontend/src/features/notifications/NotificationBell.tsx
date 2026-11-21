@@ -1,5 +1,5 @@
 import { Bell } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,20 @@ export function NotificationBell({ onNavigate }: { onNavigate: (link: string) =>
   const markRead = useMarkRead()
   const [open, setOpen] = useState(false)
   const unread = data?.unread ?? 0
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  // Close on Escape or on a click outside the panel.
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
+    const onClick = (e: MouseEvent) => !rootRef.current?.contains(e.target as Node) && setOpen(false)
+    document.addEventListener('keydown', onKey)
+    document.addEventListener('mousedown', onClick)
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.removeEventListener('mousedown', onClick)
+    }
+  }, [open])
 
   const openItem = (n: AppNotification) => {
     if (!n.read_at) markRead.mutate(n.id)
@@ -21,7 +35,7 @@ export function NotificationBell({ onNavigate }: { onNavigate: (link: string) =>
   }
 
   return (
-    <div className="relative">
+    <div ref={rootRef} className="relative">
       <Button variant="ghost" aria-label={t('notifications.title', { count: unread })} aria-expanded={open}
         onClick={() => setOpen((o) => !o)} className="relative">
         <Bell className="size-5" aria-hidden />

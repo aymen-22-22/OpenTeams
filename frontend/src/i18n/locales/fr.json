@@ -320,6 +320,89 @@
       "project_finished": "Projet terminé",
       "task_due": "Échéance de tâche",
       "task_finished": "Tâche terminée"
+    },
+    "openProject": "Ouvrir le projet"
+  },
+  "requests": {
+    "title": "Demandes",
+    "new": "Nouvelle demande",
+    "kind": "Type",
+    "approver": "Approbateur",
+    "from": "Du",
+    "to": "Au",
+    "leaveType": "Type de congé",
+    "amount": "Montant (€)",
+    "comment": "Commentaire",
+    "submit": "Envoyer la demande",
+    "failed": "Impossible d'envoyer la demande.",
+    "noApprover": "Aucun responsable disponible pour approuver.",
+    "empty": "Aucune demande.",
+    "mine": "Mes demandes",
+    "toApprove": "À approuver",
+    "by": "Par {{name}}",
+    "to_approver": "Approbateur : {{name}}",
+    "decisionComment": "Commentaire (facultatif)",
+    "approve": "Approuver",
+    "reject": "Refuser",
+    "cancel": "Annuler la demande",
+    "kinds": {
+      "leave": "Congé",
+      "equipment": "Matériel",
+      "expense": "Note de frais",
+      "other": "Autre"
+    },
+    "leaveTypes": {
+      "paid": "Congé payé",
+      "unpaid": "Sans solde",
+      "sick": "Maladie",
+      "other": "Autre"
+    },
+    "statuses": {
+      "pending": "En attente",
+      "approved": "Approuvée",
+      "rejected": "Refusée",
+      "cancelled": "Annulée"
     }
+  },
+  "projects": {
+    "title": "Projets",
+    "new": "Nouveau projet",
+    "empty": "Aucun projet.",
+    "name": "Nom du projet",
+    "status": "Statut",
+    "start": "Début",
+    "due": "Échéance",
+    "members": "Membres",
+    "membersCount": "membres",
+    "milestones": "Jalons",
+    "milestoneTitle": "Nouveau jalon",
+    "addMilestone": "Ajouter",
+    "failed": "Impossible d'enregistrer le projet.",
+    "project": "Projet",
+    "none": "Aucun projet",
+    "progress": "{{done}}/{{total}} tâches terminées",
+    "statuses": {
+      "active": "En cours",
+      "on_hold": "En pause",
+      "finished": "Terminé"
+    }
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "period": "Période",
+    "week": "Cette semaine",
+    "month": "Ce mois-ci",
+    "team": "Équipe",
+    "everyone": "Tout le monde",
+    "person": "Personne",
+    "overdue": "En retard",
+    "finishedVsPlanned": "Terminées / prévues",
+    "finished": "Terminées",
+    "total": "Total",
+    "delays": "Retards",
+    "noDelays": "Aucun retard 🎉",
+    "daysLate_one": "{{count}} jour de retard",
+    "daysLate_other": "{{count}} jours de retard",
+    "ratio": "{{done}} terminées sur {{planned}} prévues"
   }
 }

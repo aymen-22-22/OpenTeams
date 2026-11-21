@@ -16,13 +16,23 @@ function useDebounced(value: string) {
   return debounced
 }
 
-export function SearchBox({ onOpen }: { onOpen: (message: Message) => void }) {
+interface Hit {
+  id: string
+  title: string
+}
+
+interface Props {
+  onOpen: (message: Message) => void
+  onNavigate: (link: string) => void
+}
+
+export function SearchBox({ onOpen, onNavigate }: Props) {
   const { t } = useTranslation()
   const [q, setQ] = useState('')
   const term = useDebounced(q.trim())
   const results = useQuery({
     queryKey: ['search', term],
-    queryFn: () => api<{ messages: Message[] }>(`/search?q=${encodeURIComponent(term)}`),
+    queryFn: () => api<{ messages: Message[]; tasks: Hit[]; projects: Hit[] }>(`/search?q=${encodeURIComponent(term)}`),
     enabled: term.length >= 2,
   })
   const open = q.trim().length >= 2 && term.length >= 2 && results.isSuccess
@@ -35,7 +45,19 @@ export function SearchBox({ onOpen }: { onOpen: (message: Message) => void }) {
       {open && (
         <ul role="listbox" aria-label={t('search.results')}
           className="absolute inset-x-0 top-full z-10 mt-1 max-h-80 overflow-y-auto rounded-md border border-border bg-background shadow-lg">
-          {results.data.messages.length === 0 && <li className="p-3 text-sm text-muted-foreground">{t('search.noResults')}</li>}
+          {results.data.messages.length + results.data.tasks.length + results.data.projects.length === 0 && (
+            <li className="p-3 text-sm text-muted-foreground">{t('search.noResults')}</li>
+          )}
+          {[...results.data.projects.map((h) => ({ ...h, link: `/projects/${h.id}`, label: t('projects.project') })),
+            ...results.data.tasks.map((h) => ({ ...h, link: `/tasks/${h.id}`, label: t('tabs.tasks') }))].map((h) => (
+            <li key={h.link} role="option" aria-selected={false}>
+              <button type="button" dir="auto" className="flex min-h-11 w-full items-center gap-2 truncate px-3 py-2 text-start text-sm hover:bg-muted"
+                onClick={() => { onNavigate(h.link); setQ('') }}>
+                <span className="text-xs text-accent">{h.label}</span>
+                <span className="truncate">{h.title}</span>
+              </button>
+            </li>
+          ))}
           {results.data.messages.map((m) => (
             <li key={m.id} role="option" aria-selected={false}>
               <button type="button" dir="auto" className="min-h-11 w-full truncate px-3 py-2 text-start text-sm hover:bg-muted"

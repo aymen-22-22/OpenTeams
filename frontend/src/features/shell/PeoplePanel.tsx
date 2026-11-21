@@ -1,4 +1,4 @@
-import { Bot, CalendarDays, KanbanSquare, Workflow } from 'lucide-react'
+import { Bot, CalendarDays, ClipboardCheck, FolderKanban, Gauge, KanbanSquare, Workflow } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { cn } from '@/lib/utils'
@@ -11,38 +11,44 @@ const DOT: Record<Presence, string> = {
   offline: 'bg-neutral-400',
 }
 
+/** Pages reachable from the top of the left panel. */
+export type Page = 'assistant' | 'myTasks' | 'calendar' | 'projects' | 'requests' | 'playbooks' | 'dashboard'
+
+const PAGES = [
+  { page: 'assistant', Icon: Bot, label: 'people.myAssistant' },
+  { page: 'myTasks', Icon: KanbanSquare, label: 'tasks.myTasks' },
+  { page: 'calendar', Icon: CalendarDays, label: 'calendar.title' },
+  { page: 'projects', Icon: FolderKanban, label: 'projects.title' },
+  { page: 'requests', Icon: ClipboardCheck, label: 'requests.title' },
+  { page: 'playbooks', Icon: Workflow, label: 'playbooks.title' },
+  { page: 'dashboard', Icon: Gauge, label: 'dashboard.title', managersOnly: true },
+] as const
+
 interface Props {
   people: Person[]
   unread: Map<string, number>
   selectedId: string | undefined
+  isManager: boolean
   onSelect: (person: Person) => void
-  onMyTasks: () => void
-  onAssistant: () => void
-  onPlaybooks: () => void
-  onCalendar: () => void
+  onOpen: (page: Page) => void
 }
 
-export function PeoplePanel({ people, unread, selectedId, onSelect, onMyTasks, onAssistant, onPlaybooks, onCalendar }: Props) {
+export function PeoplePanel({ people, unread, selectedId, isManager, onSelect, onOpen }: Props) {
   const { t } = useTranslation()
 
   return (
     <nav aria-label={t('people.title')} className="flex h-full flex-col gap-2 p-2">
-      <button type="button" onClick={onAssistant} className="flex min-h-11 items-center gap-2 rounded-md px-2 text-start font-medium text-accent hover:bg-muted">
-        <Bot className="size-5" aria-hidden />
-        {t('people.myAssistant')}
-      </button>
-      <button type="button" onClick={onMyTasks} className="flex min-h-11 items-center gap-2 rounded-md px-2 text-start font-medium hover:bg-muted">
-        <KanbanSquare className="size-5" aria-hidden />
-        {t('tasks.myTasks')}
-      </button>
-      <button type="button" onClick={onCalendar} className="flex min-h-11 items-center gap-2 rounded-md px-2 text-start font-medium hover:bg-muted">
-        <CalendarDays className="size-5" aria-hidden />
-        {t('calendar.title')}
-      </button>
-      <button type="button" onClick={onPlaybooks} className="flex min-h-11 items-center gap-2 rounded-md px-2 text-start font-medium hover:bg-muted">
-        <Workflow className="size-5" aria-hidden />
-        {t('playbooks.title')}
-      </button>
+      <ul className="flex flex-col">
+        {PAGES.filter((p) => isManager || !('managersOnly' in p)).map(({ page, Icon, label }) => (
+          <li key={page}>
+            <button type="button" onClick={() => onOpen(page)}
+              className={cn('flex min-h-11 w-full items-center gap-2 rounded-md px-2 text-start font-medium hover:bg-muted', page === 'assistant' && 'text-accent')}>
+              <Icon className="size-5" aria-hidden />
+              {t(label)}
+            </button>
+          </li>
+        ))}
+      </ul>
 
       <h2 className="px-2 pt-2 text-xs font-semibold uppercase text-muted-foreground">{t('people.title')}</h2>
       <ul className="flex flex-col gap-1">

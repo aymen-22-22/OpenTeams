@@ -21,6 +21,7 @@ export interface Task {
   assignee_id: string | null
   conversation_id: string
   source_message_id: string | null
+  project_id: string | null
   created_at: string
 }
 
@@ -31,6 +32,7 @@ export interface TaskInput {
   due_date?: string | null
   priority?: Priority
   source_message_id?: string | null
+  project_id?: string | null
 }
 
 export type TaskCounts = Record<TaskStatus, number>

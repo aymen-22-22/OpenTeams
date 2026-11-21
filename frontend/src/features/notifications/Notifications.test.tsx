@@ -98,3 +98,12 @@ test('a deep link from an email opens the task', async () => {
   expect(await screen.findByText('Dans la tâche')).toBeInTheDocument()
   expect(location.pathname).toBe('/')
 })
+
+test('the notification panel closes with Escape', async () => {
+  mockApi(LOGGED_IN)
+  renderApp()
+  await userEvent.click(await screen.findByRole('button', { name: /Notifications/ }))
+  expect(screen.getByRole('dialog', { name: 'Notifications' })).toBeInTheDocument()
+  await userEvent.keyboard('{Escape}')
+  expect(screen.queryByRole('dialog', { name: 'Notifications' })).not.toBeInTheDocument()
+})

@@ -10,6 +10,9 @@ import { useConversations, useDirectConversation, type Message } from '@/feature
 import type { ReminderInput } from '@/features/notifications/api'
 import { PreferencesView } from '@/features/notifications/PreferencesView'
 import { PlaybooksView } from '@/features/playbooks/PlaybooksView'
+import { ProjectsView } from '@/features/projects/ProjectsView'
+import { RequestsView } from '@/features/requests/RequestsView'
+import { DashboardView } from '@/features/dashboard/DashboardView'
 import { ReportView } from '@/features/playbooks/ReportView'
 import { ReminderForm } from '@/features/notifications/ReminderForm'
 import type { Task, TaskInput } from '@/features/tasks/api'
@@ -20,7 +23,7 @@ import { api } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
 import { ConversationArea, type ConversationTab } from './ConversationArea'
-import { PeoplePanel } from './PeoplePanel'
+import { PeoplePanel, type Page } from './PeoplePanel'
 import { SidePanel } from './SidePanel'
 import { TopBar } from './TopBar'
 
@@ -28,6 +31,9 @@ type Column = 'people' | 'conversation' | 'details'
 type View = { kind: 'person' } | { kind: 'myTasks' } | { kind: 'assistant' } | { kind: 'preferences' }
   | { kind: 'playbooks' }
   | { kind: 'calendar' }
+  | { kind: 'requests' }
+  | { kind: 'projects'; projectId?: string }
+  | { kind: 'dashboard' }
   | { kind: 'report'; runId: string } | { kind: 'task'; taskId: string }
 
 const NAV = [
@@ -103,6 +109,9 @@ export function AppShell({ me }: { me: User }) {
     else if (kind === 'reports' && id) show({ kind: 'report', runId: id })
     else if (kind === 'playbooks') show({ kind: 'playbooks' })
     else if (kind === 'calendar') show({ kind: 'calendar' })
+    else if (kind === 'requests') show({ kind: 'requests' })
+    else if (kind === 'projects') show({ kind: 'projects', projectId: id })
+    else if (kind === 'dashboard') show({ kind: 'dashboard' })
     else if (kind === 'preferences') show({ kind: 'preferences' })
   }
 
@@ -124,16 +133,8 @@ export function AppShell({ me }: { me: User }) {
             unread={unread}
             selectedId={view.kind === 'person' ? person?.id : undefined}
             onSelect={(p) => showPerson(p.id)}
-            onPlaybooks={() => show({ kind: 'playbooks' })}
-            onCalendar={() => show({ kind: 'calendar' })}
-            onAssistant={() => {
-              setView({ kind: 'assistant' })
-              setColumn('conversation')
-            }}
-            onMyTasks={() => {
-              setView({ kind: 'myTasks' })
-              setColumn('conversation')
-            }}
+            isManager={me.role !== 'employee'}
+            onOpen={(page: Page) => show({ kind: page })}
           />
         </div>
         <div className={cn(column === 'conversation' ? 'flex' : 'hidden', 'min-w-0 flex-1 flex-col md:flex')}>
@@ -145,8 +146,15 @@ export function AppShell({ me }: { me: User }) {
           {view.kind === 'preferences' && <PreferencesView />}
           {view.kind === 'calendar' && (
             <CalendarView me={me} people={peopleById} onOpenTask={(id) => openTask({ id })}
+              onOpenProject={(id) => show({ kind: 'projects', projectId: id })}
               onRemind={(e) => setReminderDraft({ title: e.title, target_type: 'event', target_id: e.id })} />
           )}
+          {view.kind === 'requests' && <RequestsView me={me} people={peopleById} />}
+          {view.kind === 'projects' && (
+            <ProjectsView key={view.projectId ?? 'list'} me={me} people={peopleById} initialId={view.projectId}
+              onOpenTask={openTask} onNewTask={(projectId) => setTaskDraft({ project_id: projectId })} />
+          )}
+          {view.kind === 'dashboard' && <DashboardView onOpenTask={(id) => openTask({ id })} />}
           {view.kind === 'playbooks' && (
             <PlaybooksView me={me} people={peopleById} onOpenRun={(runId) => show({ kind: 'report', runId })} />
           )}

@@ -320,6 +320,89 @@
       "project_finished": "Project finished",
       "task_due": "Task due",
       "task_finished": "Task finished"
+    },
+    "openProject": "Open project"
+  },
+  "requests": {
+    "title": "Requests",
+    "new": "New request",
+    "kind": "Type",
+    "approver": "Approver",
+    "from": "From",
+    "to": "To",
+    "leaveType": "Leave type",
+    "amount": "Amount (€)",
+    "comment": "Comment",
+    "submit": "Send request",
+    "failed": "Could not send the request.",
+    "noApprover": "No manager available to approve.",
+    "empty": "No requests.",
+    "mine": "My requests",
+    "toApprove": "To approve",
+    "by": "By {{name}}",
+    "to_approver": "Approver: {{name}}",
+    "decisionComment": "Comment (optional)",
+    "approve": "Approve",
+    "reject": "Reject",
+    "cancel": "Cancel request",
+    "kinds": {
+      "leave": "Leave",
+      "equipment": "Equipment",
+      "expense": "Expense",
+      "other": "Other"
+    },
+    "leaveTypes": {
+      "paid": "Paid leave",
+      "unpaid": "Unpaid",
+      "sick": "Sick leave",
+      "other": "Other"
+    },
+    "statuses": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "cancelled": "Cancelled"
     }
+  },
+  "projects": {
+    "title": "Projects",
+    "new": "New project",
+    "empty": "No projects yet.",
+    "name": "Project name",
+    "status": "Status",
+    "start": "Start",
+    "due": "Due",
+    "members": "Members",
+    "membersCount": "members",
+    "milestones": "Milestones",
+    "milestoneTitle": "New milestone",
+    "addMilestone": "Add",
+    "failed": "Could not save the project.",
+    "project": "Project",
+    "none": "No project",
+    "progress": "{{done}}/{{total}} tasks finished",
+    "statuses": {
+      "active": "Active",
+      "on_hold": "On hold",
+      "finished": "Finished"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "period": "Period",
+    "week": "This week",
+    "month": "This month",
+    "team": "Team",
+    "everyone": "Everyone",
+    "person": "Person",
+    "overdue": "Overdue",
+    "finishedVsPlanned": "Finished / planned",
+    "finished": "Finished",
+    "total": "Total",
+    "delays": "Delays",
+    "noDelays": "No delays 🎉",
+    "daysLate_one": "{{count}} day late",
+    "daysLate_other": "{{count}} days late",
+    "ratio": "{{done}} finished of {{planned}} planned"
   }
 }
