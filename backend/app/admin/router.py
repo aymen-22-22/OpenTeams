@@ -6,6 +6,7 @@ from sqlalchemy import func, select
 from app.admin import audit
 from app.admin.schemas import TeamCreate, TeamMemberAdd, UserAdminUpdate, UserCreate
 from app.auth.deps import DB, AdminUser
+from app.auth.service import revoke_other_sessions
 from app.core.errors import AppError
 from app.core.security import hash_password
 from app.users.models import Team, TeamMember, User
@@ -46,9 +47,15 @@ async def update_user(user_id: uuid.UUID, body: UserAdminUpdate, admin: AdminUse
     changes = body.model_dump(exclude_unset=True, exclude_none=True)
     if user.id == admin.id and ("role" in changes or changes.get("is_active") is False):
         raise AppError("self_change", "You cannot change your own role or deactivate yourself")
+    new_password = changes.pop("new_password", None)
+    if new_password:
+        user.password_hash = hash_password(new_password)
+    if new_password or changes.get("is_active") is False:
+        await revoke_other_sessions(db, user.id, None)  # sign the user out everywhere
     for field, value in changes.items():
         setattr(user, field, value)
-    audit.record(db, admin.id, "admin.user_updated", "user", user.id, fields=sorted(changes))
+    fields = sorted([*changes, *(["password"] if new_password else [])])
+    audit.record(db, admin.id, "admin.user_updated", "user", user.id, fields=fields)
     await db.commit()
     return user
 

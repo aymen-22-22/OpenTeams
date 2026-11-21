@@ -22,3 +22,6 @@ def setup_logging(level: str) -> None:
     handler = logging.StreamHandler()
     handler.setFormatter(JsonFormatter())
     logging.basicConfig(level=level, handlers=[handler], force=True)
+    # These libraries log full URLs (outbound calls, raw paths with tokens): keep them quiet.
+    for noisy in ("httpx", "httpcore", "uvicorn.access", "LiteLLM"):
+        logging.getLogger(noisy).setLevel(logging.WARNING)

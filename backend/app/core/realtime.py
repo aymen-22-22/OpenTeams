@@ -25,6 +25,9 @@ class ConnectionHub:
             return True
         return False
 
+    def user_count(self) -> int:
+        return len(self._connections)
+
     async def send_to_user(self, user_id: uuid.UUID, event: dict[str, Any]) -> None:
         for ws in list(self._connections.get(user_id, ())):
             await ws.send_json(event)

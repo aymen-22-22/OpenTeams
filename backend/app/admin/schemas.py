@@ -18,6 +18,7 @@ class UserAdminUpdate(BaseModel):
     role: Role | None = None
     is_active: bool | None = None
     display_name: str | None = Field(default=None, min_length=1, max_length=120)
+    new_password: str | None = Field(default=None, min_length=12, max_length=256)  # reset
 
 
 class TeamCreate(BaseModel):

@@ -1,6 +1,7 @@
+import uuid
 from datetime import timedelta
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.models import Session
@@ -61,3 +62,14 @@ async def end_session(db: AsyncSession, token: str | None) -> None:
     session = await db.get(Session, claims.session_id)
     if session is not None and session.revoked_at is None:
         session.revoked_at = clock.now()
+
+
+async def revoke_other_sessions(
+    db: AsyncSession, user_id: uuid.UUID, keep_token: str | None
+) -> None:
+    """Sign the user out everywhere except (optionally) the current session."""
+    keep = decode_session_token(keep_token, clock.now()) if keep_token else None
+    query = update(Session).where(Session.user_id == user_id, Session.revoked_at.is_(None))
+    if keep is not None:
+        query = query.where(Session.id != keep.session_id)
+    await db.execute(query.values(revoked_at=clock.now()))
