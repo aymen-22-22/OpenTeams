@@ -34,6 +34,7 @@ class NotificationType(enum.StrEnum):
     FILE = "file"
     TASK = "task"
     APPROVAL = "approval"
+    REPORT = "report"
 
 
 class Recurrence(enum.StrEnum):

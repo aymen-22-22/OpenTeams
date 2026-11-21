@@ -14,6 +14,7 @@ from app.core.logging import setup_logging
 from app.core.scheduler import create_scheduler
 from app.core.settings import get_settings
 from app.files.router import router as files_router
+from app.playbooks.router import router as playbooks_router
 from app.reminders.router import router as reminders_router
 from app.search.router import router as search_router
 from app.tasks.router import router as tasks_router
@@ -53,6 +54,7 @@ def create_app() -> FastAPI:
         tasks_router,
         ai_router,
         reminders_router,
+        playbooks_router,
     ):
         app.include_router(router, prefix="/api/v1")
     app.include_router(ws.router)

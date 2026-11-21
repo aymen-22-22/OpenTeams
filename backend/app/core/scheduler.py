@@ -25,11 +25,14 @@ def _run(job: Job) -> Callable[[], Awaitable[None]]:
 
 
 def create_scheduler() -> AsyncIOScheduler:
-    from app.reminders import jobs  # local import: jobs depend on most modules
+    from app.playbooks import jobs as playbook_jobs  # local imports: jobs depend on most modules
+    from app.reminders import jobs
 
     scheduler = AsyncIOScheduler(timezone=get_settings().timezone)
     scheduler.add_job(_run(jobs.process_due_reminders), "interval", seconds=30, id="reminders")
     scheduler.add_job(_run(jobs.send_outbox), "interval", seconds=20, id="outbox")
     scheduler.add_job(_run(jobs.nudge_overdue_tasks), "cron", hour=8, minute=30, id="overdue")
     scheduler.add_job(_run(jobs.cleanup_realtime_events), "cron", hour=3, id="cleanup")
+    scheduler.add_job(_run(playbook_jobs.run_due_playbooks), "interval", minutes=1, id="playbooks")
+    scheduler.add_job(_run(playbook_jobs.retry_failed_runs), "interval", minutes=1, id="retries")
     return scheduler

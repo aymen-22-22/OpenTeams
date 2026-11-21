@@ -14,7 +14,12 @@ from app.reminders.schemas import NotificationOut
 from app.users.models import User
 
 # Defaults when the user never changed a preference: everything in-app, email only when it matters.
-DEFAULT_EMAIL = {NotificationType.REMINDER, NotificationType.TASK, NotificationType.APPROVAL}
+DEFAULT_EMAIL = {
+    NotificationType.REMINDER,
+    NotificationType.TASK,
+    NotificationType.APPROVAL,
+    NotificationType.REPORT,
+}
 
 
 async def channels(
@@ -37,12 +42,18 @@ async def notify(
     title: str,
     body: str = "",
     link: str = "/",
+    allow_in_app: bool = True,
+    allow_email: bool = True,
 ) -> Notification | None:
-    """Create the notification in the current transaction. Call `push` after commit."""
+    """Create the notification in the current transaction. Call `push` after commit.
+
+    `allow_*` let the sender narrow the channels; the user's preferences always apply too.
+    """
     user = await db.get(User, user_id)
     if user is None or not user.is_active:
         return None
     in_app, email = await channels(db, user_id, type_)
+    in_app, email = in_app and allow_in_app, email and allow_email
     if email:
         rendered = render_notification(type_.value, title, body, link, user.locale)
         db.add(
