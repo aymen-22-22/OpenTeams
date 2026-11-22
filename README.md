@@ -154,7 +154,9 @@ Admins have an **Administration** page (left panel and account menu): every acco
 and status, create accounts (a strong password is generated and shown once to hand over), change
 name or role, reset a password (signs the person out everywhere), deactivate or reactivate an
 account (messages and tasks are kept). The Teams tab creates, renames and deletes teams and manages
-their members. Admins cannot change their own role or deactivate themselves. Every change is in the
+their members. The E-mail tab sets the outgoing mail server (SMTP: server, port, STARTTLS/SSL, user,
+password, sender) and sends a test email showing why it fails if it does; the password is stored
+encrypted and never shown again, and `.env` is used when no server is set there. Admins cannot change their own role or deactivate themselves. Every change is in the
 audit log. The first admin is created from the server: `python -m app.cli create-admin`.
 
 ## Real-time events

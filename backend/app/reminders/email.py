@@ -1,14 +1,13 @@
 """Email rendering (Jinja2, inline CSS, plain-text twin) and SMTP sending."""
 
 import asyncio
-import smtplib
 from dataclasses import dataclass
-from email.message import EmailMessage
 from pathlib import Path
 from typing import Any
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
+from app.admin.org import SmtpConfig, env_smtp, send_sync
 from app.core.settings import get_settings
 
 _env = Environment(
@@ -149,19 +148,8 @@ def render_digest(entries: list[DigestEntry], lang: str) -> RenderedEmail:
     return _render("digest", ctx)
 
 
-def _send_sync(to: str, subject: str, html: str, text: str) -> None:
-    s = get_settings()
-    msg = EmailMessage()
-    msg["From"], msg["To"], msg["Subject"] = s.mail_from, to, subject
-    msg.set_content(text)
-    msg.add_alternative(html, subtype="html")
-    with smtplib.SMTP(s.smtp_host, s.smtp_port, timeout=20) as smtp:
-        if s.smtp_starttls:
-            smtp.starttls()
-        if s.smtp_user:
-            smtp.login(s.smtp_user, s.smtp_password)
-        smtp.send_message(msg)
-
-
-async def send_email(to: str, subject: str, html: str, text: str) -> None:
-    await asyncio.to_thread(_send_sync, to, subject, html, text)
+async def send_email(
+    to: str, subject: str, html: str, text: str, config: "SmtpConfig | None" = None
+) -> None:
+    """Send now (only the outbox job and the admin test call this; requests never wait on SMTP)."""
+    await asyncio.to_thread(send_sync, config or env_smtp(), to, subject, html, text)

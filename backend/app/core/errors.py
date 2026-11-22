@@ -12,11 +12,14 @@ logger = logging.getLogger(__name__)
 
 
 class AppError(Exception):
-    def __init__(self, code: str, message: str, status_code: int = 400) -> None:
+    def __init__(
+        self, code: str, message: str, status_code: int = 400, details: Any = None
+    ) -> None:
         super().__init__(message)
         self.code = code
         self.message = message
         self.status_code = status_code
+        self.details = details
 
 
 def error_response(status: int, code: str, message: str, details: Any = None) -> JSONResponse:
@@ -26,7 +29,7 @@ def error_response(status: int, code: str, message: str, details: Any = None) ->
 
 async def _app_error(_: Request, exc: Exception) -> JSONResponse:
     assert isinstance(exc, AppError)
-    return error_response(exc.status_code, exc.code, exc.message)
+    return error_response(exc.status_code, exc.code, exc.message, exc.details)
 
 
 async def _http_error(_: Request, exc: Exception) -> JSONResponse:

@@ -33,7 +33,7 @@ Keep `SECRET_KEY` and `AI_ENCRYPTION_KEY` safe and stable: changing `SECRET_KEY`
 
 **Files in Nextcloud** (recommended): create a Nextcloud user (e.g. `openteams`), log in as it, create an app password in *Settings → Security → Devices & sessions*, then set `STORAGE_BACKEND=nextcloud`, `NEXTCLOUD_URL`, `NEXTCLOUD_USER`, `NEXTCLOUD_APP_PASSWORD`. Without Nextcloud, leave `STORAGE_BACKEND=local` (files go to a Docker volume, included in backups).
 
-**Email**: set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_STARTTLS=true` and `MAIL_FROM` for your mail server.
+**Email**: easiest from the app: *Administration → E-mail* (server, port, security, user, password, sender, then *Send a test*). Alternatively set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_STARTTLS=true` and `MAIL_FROM` in `.env`; they are used when no server is set in the app.
 
 **Push notifications** (optional): run `docker compose run --rm api python -m app.cli vapid-keys` once and copy the two lines into `.env` (plus `VAPID_SUBJECT=mailto:you@yourdomain`). Keep the keys stable. Push needs HTTPS (Caddy provides it). The API container must reach the push services over HTTPS: `fcm.googleapis.com` (Chrome, Edge, Android), `updates.push.services.mozilla.com` (Firefox), `web.push.apple.com` (Safari, iPhone); allow them if your firewall filters outgoing traffic.
 

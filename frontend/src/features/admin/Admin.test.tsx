@@ -143,3 +143,58 @@ test('teams: create, add and remove members, delete after confirmation', async (
   await userEvent.click(within(team).getByRole('button', { name: 'Supprimer' }))
   await waitFor(() => expect(calls(fetchMock, 'DELETE', '/admin/teams/t1')).toHaveLength(1))
 })
+
+const EMAIL = { host: '', port: 587, security: 'starttls', user: '', password_set: false, mail_from: '', source: 'env', env_host: 'mailpit' }
+
+async function openEmailTab(extra: object = {}) {
+  const fetchMock = mockApi({ ...ROUTES, 'GET /admin/email': { status: 200, body: EMAIL }, ...extra })
+  await openAdmin()
+  await userEvent.click(screen.getByRole('tab', { name: 'E-mail' }))
+  await screen.findByRole('heading', { name: "Serveur d'envoi (SMTP)" })
+  return fetchMock
+}
+
+test('SMTP settings: saved without echoing the password back', async () => {
+  const saved = { ...EMAIL, host: 'smtp.sdg.dz', port: 465, security: 'ssl', user: 'notify@sdg.dz', password_set: true, mail_from: 'SDG <notify@sdg.dz>', source: 'admin' }
+  const fetchMock = await openEmailTab({ 'PUT /admin/email': { status: 200, body: saved } })
+  expect(screen.getByText('Réglages du serveur (.env) utilisés : mailpit')).toBeInTheDocument()
+  await userEvent.type(screen.getByLabelText('Serveur'), 'smtp.sdg.dz')
+  await userEvent.selectOptions(screen.getByLabelText('Sécurité'), 'ssl')
+  expect(screen.getByLabelText('Port')).toHaveValue(465) // port follows the security choice
+  await userEvent.type(screen.getByLabelText('Utilisateur'), 'notify@sdg.dz')
+  await userEvent.type(screen.getByLabelText('Mot de passe'), 'secret-pass')
+  await userEvent.type(screen.getByLabelText('Expéditeur'), 'SDG <notify@sdg.dz>')
+  await userEvent.click(screen.getByRole('button', { name: 'Enregistrer' }))
+  await waitFor(() => expect(calls(fetchMock, 'PUT', '/admin/email')).toHaveLength(1))
+  expect(body(fetchMock, 'PUT', '/admin/email')).toEqual({ host: 'smtp.sdg.dz', port: 465, security: 'ssl', user: 'notify@sdg.dz', mail_from: 'SDG <notify@sdg.dz>', password: 'secret-pass' })
+  expect(await screen.findByText('Réglages de cette page utilisés')).toBeInTheDocument()
+  expect(screen.getByLabelText('Mot de passe')).toHaveValue('') // never shown again
+  expect(screen.getByText(/Mot de passe enregistré \(chiffré\)/)).toBeInTheDocument()
+})
+
+test('saving again without typing a password keeps the saved one', async () => {
+  const fetchMock = await openEmailTab({
+    'GET /admin/email': { status: 200, body: { ...EMAIL, host: 'smtp.sdg.dz', password_set: true, source: 'admin' } },
+    'PUT /admin/email': { status: 200, body: { ...EMAIL, host: 'smtp.sdg.dz', password_set: true, source: 'admin' } },
+  })
+  await userEvent.click(screen.getByRole('button', { name: 'Enregistrer' }))
+  await waitFor(() => expect(calls(fetchMock, 'PUT', '/admin/email')).toHaveLength(1))
+  expect(body(fetchMock, 'PUT', '/admin/email')).not.toHaveProperty('password')
+})
+
+test('test email: success and a clear reason on failure', async () => {
+  let fail = false
+  const fetchMock = await openEmailTab({
+    'POST /admin/email/test': () => (fail
+      ? { status: 502, body: { error: { code: 'smtp_failed', message: '', details: { reason: 'auth', code: 535 } } } }
+      : { status: 204 }),
+  })
+  const to = screen.getByLabelText('Destinataire du test')
+  expect(to).toHaveValue('me@example.com') // my own address by default
+  await userEvent.click(screen.getByRole('button', { name: 'Envoyer un test' }))
+  expect(await screen.findByText(/E-mail envoyé à me@example.com/)).toBeInTheDocument()
+  expect(body(fetchMock, 'POST', '/admin/email/test')).toEqual({ to: 'me@example.com' })
+  fail = true
+  await userEvent.click(screen.getByRole('button', { name: 'Envoyer un test' }))
+  expect(await screen.findByRole('alert')).toHaveTextContent("Le serveur a refusé l'identifiant ou le mot de passe.")
+})

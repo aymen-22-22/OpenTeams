@@ -530,7 +530,7 @@
   },
   "admin": {
     "title": "Administration",
-    "hint": "Team accounts and teams.",
+    "hint": "Accounts, teams and email sending.",
     "users": "Users",
     "teams": "Teams",
     "newUser": "New user",
@@ -583,6 +583,36 @@
       "self_change": "You can't change your own role or deactivate yourself.",
       "team_exists": "A team with this name already exists.",
       "failed": "That didn't work. Try again."
+    },
+    "email": "Email",
+    "smtp": {
+      "title": "Outgoing mail server (SMTP)",
+      "usingAdmin": "Using the settings on this page",
+      "usingEnv": "Using the server settings (.env): {{host}}",
+      "hint": "Used for notifications, digests and reports. Leave the server empty to use the .env configuration.",
+      "host": "Server",
+      "port": "Port",
+      "security": "Security",
+      "securities": {
+        "starttls": "STARTTLS (port 587)",
+        "ssl": "SSL/TLS (port 465)",
+        "none": "None (internal network only)"
+      },
+      "user": "Username",
+      "passwordKept": "•••••••• (unchanged)",
+      "passwordSaved": "Password saved (encrypted). Leave empty to keep it.",
+      "passwordNone": "No password saved.",
+      "clearPassword": "Clear",
+      "from": "Sender",
+      "invalid": "Check the fields: the sender must be an email address.",
+      "testTitle": "Test sending",
+      "testHint": "Sends an email now with the saved settings.",
+      "testTo": "Test recipient",
+      "sendTest": "Send a test",
+      "sending": "Sending…",
+      "testSent": "Email sent to {{to}}. Check the inbox (and spam).",
+      "failedAuth": "The server rejected the username or password.",
+      "failedConnect": "Could not reach the server, or sending was refused."
     }
   }
 }

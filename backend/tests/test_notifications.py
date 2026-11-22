@@ -188,7 +188,7 @@ async def test_outbox_sends_and_retries_with_backoff(
     sent: list[str] = []
     failing = True
 
-    async def fake_send(to: str, subject: str, html: str, text: str) -> None:
+    async def fake_send(to: str, subject: str, html: str, text: str, config: object = None) -> None:
         if failing:
             raise ConnectionRefusedError
         sent.append(to)
@@ -217,7 +217,7 @@ async def test_outbox_sends_and_retries_with_backoff(
 async def test_outbox_gives_up_after_max_attempts(
     pair: Pair, fake_clock: FakeClock, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    async def always_fail(*_: str) -> None:
+    async def always_fail(*_: object) -> None:
         raise TimeoutError
 
     monkeypatch.setattr(email, "send_email", always_fail)
@@ -231,7 +231,7 @@ async def test_outbox_gives_up_after_max_attempts(
 
 
 async def test_requests_never_call_smtp(pair: Pair, monkeypatch: pytest.MonkeyPatch) -> None:
-    async def boom(*_: str) -> None:
+    async def boom(*_: object) -> None:
         raise AssertionError("SMTP called during a request")
 
     monkeypatch.setattr(email, "send_email", boom)

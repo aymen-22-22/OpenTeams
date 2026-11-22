@@ -1,6 +1,6 @@
 """Import every model here so Alembic sees them all."""
 
-from app.admin.models import AuditLog
+from app.admin.models import AuditLog, OrgSettings
 from app.ai.models import AIAuditLog, AIConversation, AIMessage, AIProfile
 from app.auth.models import Session
 from app.bridge.models import InboundEmail
@@ -37,6 +37,7 @@ __all__ = [
     "Request",
     "RequestStep",
     "AIAuditLog",
+    "OrgSettings",
     "AIConversation",
     "AIMessage",
     "AIProfile",

@@ -530,7 +530,7 @@
   },
   "admin": {
     "title": "Administration",
-    "hint": "Comptes de l'équipe et équipes.",
+    "hint": "Comptes, équipes et envoi des e-mails.",
     "users": "Utilisateurs",
     "teams": "Équipes",
     "newUser": "Nouvel utilisateur",
@@ -583,6 +583,36 @@
       "self_change": "Vous ne pouvez pas modifier votre propre rôle ni vous désactiver.",
       "team_exists": "Une équipe porte déjà ce nom.",
       "failed": "L'opération a échoué. Réessayez."
+    },
+    "email": "E-mail",
+    "smtp": {
+      "title": "Serveur d'envoi (SMTP)",
+      "usingAdmin": "Réglages de cette page utilisés",
+      "usingEnv": "Réglages du serveur (.env) utilisés : {{host}}",
+      "hint": "Utilisé pour les notifications, résumés et rapports. Laissez le serveur vide pour utiliser la configuration du fichier .env.",
+      "host": "Serveur",
+      "port": "Port",
+      "security": "Sécurité",
+      "securities": {
+        "starttls": "STARTTLS (port 587)",
+        "ssl": "SSL/TLS (port 465)",
+        "none": "Aucune (réseau interne uniquement)"
+      },
+      "user": "Utilisateur",
+      "passwordKept": "•••••••• (inchangé)",
+      "passwordSaved": "Mot de passe enregistré (chiffré). Laissez vide pour le garder.",
+      "passwordNone": "Aucun mot de passe enregistré.",
+      "clearPassword": "Effacer",
+      "from": "Expéditeur",
+      "invalid": "Vérifiez les champs : l'expéditeur doit être une adresse e-mail.",
+      "testTitle": "Tester l'envoi",
+      "testHint": "Envoie un e-mail maintenant avec les réglages enregistrés.",
+      "testTo": "Destinataire du test",
+      "sendTest": "Envoyer un test",
+      "sending": "Envoi…",
+      "testSent": "E-mail envoyé à {{to}}. Vérifiez la boîte de réception (et les indésirables).",
+      "failedAuth": "Le serveur a refusé l'identifiant ou le mot de passe.",
+      "failedConnect": "Impossible de joindre le serveur ou envoi refusé."
     }
   }
 }

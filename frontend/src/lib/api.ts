@@ -8,6 +8,7 @@ export class ApiError extends Error {
     public status: number,
     public code: string,
     message: string,
+    public details?: { reason?: string; code?: number | null } & Record<string, unknown>,
   ) {
     super(message)
   }
@@ -44,7 +45,7 @@ export async function api<T>(path: string, options: { method?: string; body?: un
 
   if (!res.ok) {
     const data = await res.json().catch(() => null)
-    throw new ApiError(res.status, data?.error?.code ?? 'unknown', data?.error?.message ?? res.statusText)
+    throw new ApiError(res.status, data?.error?.code ?? 'unknown', data?.error?.message ?? res.statusText, data?.error?.details ?? undefined)
   }
   return (res.status === 204 ? undefined : await res.json()) as T
 }

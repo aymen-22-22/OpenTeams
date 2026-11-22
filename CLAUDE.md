@@ -169,6 +169,7 @@ Every table has `id` (UUID), `created_at`, `updated_at`; soft delete only where 
 - Authorization checked on every endpoint and WebSocket event: a user can never read a conversation, task, file or project they are not a member of.
 - File uploads: size and type limits, safe names, no execution, signed URLs.
 - Secrets only in environment variables; never in code, logs or responses. API keys are never returned to the browser.
+  - Approved exception (owner decision): the SMTP password can be set by admins in the Administration page. It is stored encrypted at rest (Fernet, like AI keys), write-only (never returned), never logged, and the `.env` values remain the fallback.
 - Treat messages, files and emails as untrusted input, especially when given to an AI (prompt injection): the AI never gets tools that act without human confirmation.
 - Dependency audits in CI (pip-audit, npm audit). Structured logs without personal content.
 

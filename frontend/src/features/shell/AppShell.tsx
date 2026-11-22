@@ -195,7 +195,7 @@ export function AppShell({ me }: { me: User }) {
               )}
               {view.kind === 'assistant' && <AssistantView me={me} people={peopleById} />}
               {view.kind === 'preferences' && <PreferencesView />}
-              {view.kind === 'admin' && me.role === 'admin' && <AdminView meId={me.id} />}
+              {view.kind === 'admin' && me.role === 'admin' && <AdminView meId={me.id} meEmail={me.email} />}
               {view.kind === 'calendar' && (
                 <CalendarView me={me} people={peopleById} onOpenTask={(id) => openTask({ id })}
                   onOpenProject={(id) => show({ kind: 'projects', projectId: id })}

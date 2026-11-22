@@ -7,6 +7,7 @@ from zoneinfo import ZoneInfo
 
 from sqlalchemy import delete, select
 
+from app.admin.org import smtp_config
 from app.chat.events import RealtimeEvent
 from app.core.db import SessionLocal
 from app.core.settings import get_settings
@@ -76,6 +77,7 @@ async def send_outbox(now: datetime) -> int:
     """Send pending emails; on failure retry with exponential backoff, then give up."""
     sent = 0
     async with SessionLocal() as db:
+        config = await smtp_config(db)  # the Administration page settings, or .env
         pending = list(
             await db.scalars(
                 select(EmailOutbox)
@@ -89,7 +91,7 @@ async def send_outbox(now: datetime) -> int:
         for mail in pending:
             mail.attempts += 1
             try:
-                await email.send_email(mail.to_email, mail.subject, mail.html, mail.text)
+                await email.send_email(mail.to_email, mail.subject, mail.html, mail.text, config)
                 mail.status = EmailStatus.SENT
                 sent += 1
             except Exception as exc:

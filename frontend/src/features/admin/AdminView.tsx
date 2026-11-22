@@ -13,6 +13,7 @@ import { LANGUAGE_NAMES, LANGUAGES } from '@/i18n'
 import { ApiError } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
+import { EmailSettingsPanel } from './EmailSettingsPanel'
 import { generatePassword, useAdminUsers, useCreateUser, useTeamActions, useTeams, useUpdateUser, type AdminUser } from './api'
 
 const ROLES: Role[] = ['employee', 'manager', 'admin']
@@ -330,7 +331,7 @@ function TeamsPanel() {
 }
 
 /** Administration (admins only): accounts and teams. */
-export function AdminView({ meId }: { meId: string }) {
+export function AdminView({ meId, meEmail }: { meId: string; meEmail: string }) {
   const { t, i18n } = useTranslation()
   return (
     <section aria-label={t('admin.title')} className="h-full overflow-y-auto">
@@ -343,9 +344,11 @@ export function AdminView({ meId }: { meId: string }) {
           <TabsList>
             <TabsTrigger value="users">{t('admin.users')}</TabsTrigger>
             <TabsTrigger value="teams">{t('admin.teams')}</TabsTrigger>
+            <TabsTrigger value="email">{t('admin.email')}</TabsTrigger>
           </TabsList>
           <TabsContent value="users"><UsersPanel meId={meId} /></TabsContent>
           <TabsContent value="teams"><TeamsPanel /></TabsContent>
+          <TabsContent value="email"><EmailSettingsPanel meEmail={meEmail} /></TabsContent>
         </Tabs>
       </div>
     </section>
