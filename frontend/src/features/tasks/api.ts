@@ -23,6 +23,8 @@ export interface Task {
   source_message_id: string | null
   project_id: string | null
   created_at: string
+  message_count?: number // in the task chat
+  file_count?: number
 }
 
 export interface TaskInput {
@@ -33,6 +35,7 @@ export interface TaskInput {
   priority?: Priority
   source_message_id?: string | null
   project_id?: string | null
+  status?: TaskStatus // quick add straight into a column
 }
 
 export type TaskCounts = Record<TaskStatus, number>

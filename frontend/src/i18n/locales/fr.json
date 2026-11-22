@@ -150,7 +150,21 @@
     "back": "Retour",
     "status": "Statut",
     "myTasksHint": "Toutes les tâches qui vous sont assignées, dans toutes les conversations.",
-    "dropHere": "Glissez une tâche ici"
+    "dropHere": "Glissez une tâche ici",
+    "lateBy_one": "En retard d'1 jour",
+    "lateBy_other": "En retard de {{count}} jours",
+    "dueToday": "Aujourd'hui",
+    "dueTomorrow": "Demain",
+    "dueIn_one": "Dans {{count}} jour",
+    "dueIn_other": "Dans {{count}} jours",
+    "hasDescription": "A une description",
+    "messages_one": "{{count}} message",
+    "messages_other": "{{count}} messages",
+    "files_one": "{{count}} fichier",
+    "files_other": "{{count}} fichiers",
+    "quickAdd": "Ajouter une tâche",
+    "quickAddLabel": "Titre de la nouvelle tâche ({{column}})",
+    "quickAddHint": "Entrée pour ajouter · Échap pour fermer"
   },
   "side": {
     "pins": "Épinglés",

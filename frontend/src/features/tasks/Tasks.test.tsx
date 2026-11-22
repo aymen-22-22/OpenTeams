@@ -1,5 +1,5 @@
 import { QueryClient } from '@tanstack/react-query'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { App } from '@/app/App'
@@ -33,9 +33,9 @@ test('the Tasks tab shows the person board in three columns, overdue highlighted
   await userEvent.click(await screen.findByRole('tab', { name: 'Tâches' }))
   const pending = await screen.findByRole('region', { name: 'En attente' })
   const card = within(pending).getByRole('button', { name: /^Préparer le rapport/ })
-  expect(card).toHaveTextContent('en retard')
+  expect(card).toHaveTextContent(/En retard de \d+ jours/)
   expect(within(screen.getByRole('region', { name: 'En cours' })).getByText('Relire')).toBeInTheDocument()
-  expect(within(screen.getByRole('region', { name: 'Terminé' })).queryAllByRole('button')).toHaveLength(0)
+  expect(within(screen.getByRole('region', { name: 'Terminé' })).getAllByRole('button').map((b) => b.textContent)).toEqual(['Ajouter une tâche'])
 })
 
 test('side panel shows real task counts and opens the board', async () => {
@@ -90,4 +90,51 @@ test('changing status from the task view moves the task', async () => {
   await userEvent.selectOptions(await screen.findByLabelText('Statut'), 'finished')
   const call = fetchMock.mock.calls.find(([url]) => String(url).endsWith('/tasks/t1/move'))!
   expect(JSON.parse(String(call[1]!.body))).toEqual({ status: 'finished', after_id: null })
+})
+
+test('cards show relative due dates, chat activity and a description marker', async () => {
+  const day = (offset: number) => {
+    const d = new Date()
+    d.setDate(d.getDate() + offset)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  }
+  mockApi({
+    ...LOGGED_IN,
+    'GET /tasks?assignee_id=u1': {
+      status: 200,
+      body: [
+        task('t1', 'Aujourd’hui', 'pending', { due_date: day(0) }),
+        task('t2', 'Demain', 'pending', { due_date: day(1), message_count: 3, file_count: 1, description: 'Détails' }),
+        task('t3', 'Bientôt', 'in_progress', { due_date: day(3), priority: 'high' }),
+        task('t4', 'En retard', 'pending', { due_date: day(-2), overdue: true }),
+      ],
+    },
+  })
+  renderApp()
+  await openChat()
+  await userEvent.click(await screen.findByRole('tab', { name: 'Tâches' }))
+  const card = async (name: RegExp) => screen.findByRole('button', { name })
+  expect(await card(/^Aujourd’hui/)).toHaveTextContent("Aujourd'hui")
+  const tomorrow = await card(/^Demain/)
+  expect(within(tomorrow).getByText('3 messages')).toHaveClass('sr-only')
+  expect(within(tomorrow).getByText('1 fichier')).toBeInTheDocument()
+  expect(within(tomorrow).getByText('A une description')).toBeInTheDocument()
+  expect(await card(/^Bientôt/)).toHaveTextContent(/Haute.*Dans 3 jours/)
+  expect(await card(/^En retard/)).toHaveTextContent('En retard de 2 jours')
+})
+
+test('quick add creates a task in that column, for the board owner', async () => {
+  const fetchMock = mockApi({ ...LOGGED_IN, 'POST /tasks': { status: 201, body: task('t9', 'Appeler le client', 'in_progress') } })
+  renderApp()
+  await openChat()
+  await userEvent.click(await screen.findByRole('tab', { name: 'Tâches' }))
+  const column = await screen.findByRole('region', { name: 'En cours' })
+  await userEvent.click(within(column).getByRole('button', { name: 'Ajouter une tâche' }))
+  const field = within(column).getByLabelText('Titre de la nouvelle tâche (En cours)')
+  await userEvent.type(field, 'Appeler le client{Enter}')
+  const call = fetchMock.mock.calls.find(([url, init]) => String(url).endsWith('/tasks') && init?.method === 'POST')!
+  expect(JSON.parse(String(call[1]!.body))).toEqual({ title: 'Appeler le client', status: 'in_progress', assignee_id: 'u1' })
+  await waitFor(() => expect(field).toHaveValue('')) // stays open for the next one
+  await userEvent.keyboard('{Escape}')
+  expect(within(column).getByRole('button', { name: 'Ajouter une tâche' })).toBeInTheDocument()
 })

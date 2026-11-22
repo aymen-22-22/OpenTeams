@@ -22,6 +22,8 @@ class TaskOut(BaseModel):
     source_message_id: uuid.UUID | None
     project_id: uuid.UUID | None
     created_at: datetime
+    message_count: int = 0  # in the task chat
+    file_count: int = 0
 
     @classmethod
     def of(cls, task: Task, today: date) -> "TaskOut":
@@ -57,6 +59,7 @@ class TaskCreate(BaseModel):
     priority: Priority = Priority.NORMAL
     source_message_id: uuid.UUID | None = None
     project_id: uuid.UUID | None = None
+    status: TaskStatus = TaskStatus.PENDING  # quick add straight into a column
 
 
 class TaskUpdate(BaseModel):

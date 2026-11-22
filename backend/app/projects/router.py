@@ -16,7 +16,8 @@ from app.projects.models import Milestone, Project, ProjectMember, ProjectStatus
 from app.projects.schemas import MilestoneIn, MilestoneOut, ProjectDetail, ProjectIn, ProjectOut
 from app.tasks.access import visible_tasks
 from app.tasks.models import Task
-from app.tasks.schemas import TaskCounts, TaskOut
+from app.tasks.schemas import TaskCounts
+from app.tasks.service import task_outs
 from app.users.models import Role, User
 
 router = APIRouter(prefix="/projects", tags=["projects"])
@@ -93,7 +94,6 @@ async def create_project(body: ProjectIn, user: CurrentUser, db: DB) -> ProjectO
 @router.get("/{project_id}", response_model=ProjectDetail)
 async def get_project(project_id: uuid.UUID, user: CurrentUser, db: DB) -> ProjectDetail:
     p = await require_project(db, project_id, user)
-    today = clock.now().date()
     tasks = list(
         await db.scalars(
             visible_tasks(user).where(Task.project_id == p.id).order_by(Task.status, Task.position)
@@ -119,7 +119,7 @@ async def get_project(project_id: uuid.UUID, user: CurrentUser, db: DB) -> Proje
     return ProjectDetail(
         **base.model_dump(),
         milestones=[MilestoneOut.model_validate(m) for m in milestones],
-        tasks=[TaskOut.of(t, today) for t in tasks],
+        tasks=await task_outs(db, list(tasks)),
         files=[FileOut.model_validate(f) for f in files],
     )
 

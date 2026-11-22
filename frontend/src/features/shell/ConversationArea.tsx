@@ -77,7 +77,7 @@ export function ConversationArea(props: Props) {
 
         <TabsContent value="tasks" className="flex flex-col gap-3">
           <Button className="self-start" onClick={onNewTask}>{t('tasks.new')}</Button>
-          <KanbanBoard tasks={tasks} people={people} onOpen={onOpenTask} />
+          <KanbanBoard tasks={tasks} people={people} onOpen={onOpenTask} assigneeId={person.id} />
         </TabsContent>
       </Tabs>
     </section>

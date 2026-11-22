@@ -235,3 +235,38 @@ async def test_delete_only_creator_or_admin(team: Team) -> None:
     assert (await team.amina.get(f"/api/v1/tasks/{task['id']}")).status_code == 404
     chat = await team.amina.get(f"/api/v1/conversations/{task['conversation_id']}")
     assert chat.status_code == 404
+
+
+# --- cards: quick add and chat activity ------------------------------------------------
+
+
+async def test_quick_add_straight_into_a_column(team: Team) -> None:
+    await create(team.amina, "Déjà en cours", status="in_progress")
+    task = await create(team.amina, "Ajoutée en cours", status="in_progress")
+    assert task["status"] == "in_progress"
+    assert await column(team.amina, "in_progress") == ["Ajoutée en cours", "Déjà en cours"]
+    done = await create(team.amina, "Déjà faite", status="finished")
+    assert done["finished_at"] is not None
+    r = await team.amina.post("/api/v1/tasks", json={"title": "x", "status": "blocked"})
+    assert r.status_code == 422
+
+
+async def test_cards_show_message_and_file_counts(team: Team) -> None:
+    task = await create(team.amina, "Avec activité", assignee_id=str(team.lucas_user.id))
+    empty = await create(team.amina, "Sans activité")
+    assert (task["message_count"], task["file_count"]) == (0, 0)
+    conv = task["conversation_id"]
+    for body in ("un", "deux", "trois"):
+        r = await team.lucas.post(f"/api/v1/conversations/{conv}/messages", json={"body": body})
+    await team.lucas.delete(f"/api/v1/messages/{r.json()['id']}")  # deleted ones don't count
+    await team.amina.post(
+        f"/api/v1/conversations/{conv}/files", content=b"x", headers={"X-File-Name": "a.pdf"}
+    )
+    by_id = {t["id"]: t for t in (await team.amina.get("/api/v1/tasks")).json()}
+    assert (by_id[task["id"]]["message_count"], by_id[task["id"]]["file_count"]) == (2, 1)
+    assert (by_id[empty["id"]]["message_count"], by_id[empty["id"]]["file_count"]) == (0, 0)
+    one = (await team.amina.get(f"/api/v1/tasks/{task['id']}")).json()
+    assert (one["message_count"], one["file_count"]) == (2, 1)
+    # A move keeps the counts (the board updates from this response).
+    moved = (await move(team.amina, task["id"], "in_progress")).json()
+    assert (moved["message_count"], moved["file_count"]) == (2, 1)

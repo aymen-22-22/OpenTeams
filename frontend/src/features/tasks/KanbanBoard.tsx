@@ -9,16 +9,57 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core'
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { Plus } from 'lucide-react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { Person } from '@/features/auth/api'
 import { STATUS_DOT } from '@/features/shell/SidePanel'
 import { cn } from '@/lib/utils'
 
-import { STATUSES, useMoveTask, type Task, type TaskStatus } from './api'
+import { STATUSES, useCreateTask, useMoveTask, type Task, type TaskStatus } from './api'
 import { TaskCard } from './TaskCard'
 
-function Column({ status, tasks, children }: { status: TaskStatus; tasks: Task[]; children: React.ReactNode }) {
+/** Type a title at the bottom of a column: Enter adds it there, the field stays open for the next one. */
+function QuickAdd({ status, assigneeId }: { status: TaskStatus; assigneeId: string }) {
+  const { t } = useTranslation()
+  const create = useCreateTask()
+  const [open, setOpen] = useState(false)
+  const [title, setTitle] = useState('')
+
+  if (!open) {
+    return (
+      <button type="button" onClick={() => setOpen(true)}
+        className="flex min-h-10 items-center gap-1.5 rounded-lg px-2 text-sm text-muted-foreground transition-colors hover:bg-background hover:text-foreground">
+        <Plus className="size-4" aria-hidden />
+        {t('tasks.quickAdd')}
+      </button>
+    )
+  }
+  const submit = () => {
+    const value = title.trim()
+    if (!value || create.isPending) return
+    create.mutate({ title: value, status, assignee_id: assigneeId }, { onSuccess: () => setTitle('') })
+  }
+  return (
+    <div className="flex animate-fade-in flex-col gap-1">
+      <textarea autoFocus rows={2} value={title} dir="auto" maxLength={200}
+        aria-label={t('tasks.quickAddLabel', { column: t(`tasks.${status}`) })} placeholder={t('tasks.quickAdd')}
+        onChange={(e) => setTitle(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit() }
+          if (e.key === 'Escape') { setTitle(''); setOpen(false) }
+        }}
+        onBlur={() => { if (!title.trim()) setOpen(false) }}
+        className="field resize-none py-2 text-sm" />
+      {create.isError
+        ? <p role="alert" className="px-1 text-xs text-danger">{t('tasks.createFailed')}</p>
+        : <p className="px-1 text-[11px] text-muted-foreground" aria-hidden>{t('tasks.quickAddHint')}</p>}
+    </div>
+  )
+}
+
+function Column({ status, tasks, children, footer }: { status: TaskStatus; tasks: Task[]; children: React.ReactNode; footer?: React.ReactNode }) {
   const { t } = useTranslation()
   const { setNodeRef, isOver } = useDroppable({ id: status })
   return (
@@ -37,6 +78,7 @@ function Column({ status, tasks, children }: { status: TaskStatus; tasks: Task[]
           </li>
         )}
       </ol>
+      {footer}
     </section>
   )
 }
@@ -61,9 +103,11 @@ interface Props {
   tasks: Task[]
   people: Map<string, Person>
   onOpen: (task: Task) => void
+  /** Whose board this is: quick add assigns new tasks to them. Without it, no quick add. */
+  assigneeId?: string
 }
 
-export function KanbanBoard({ tasks, people, onOpen }: Props) {
+export function KanbanBoard({ tasks, people, onOpen, assigneeId }: Props) {
   const move = useMoveTask()
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }), // a click still opens the task
@@ -82,7 +126,7 @@ export function KanbanBoard({ tasks, people, onOpen }: Props) {
         {STATUSES.map((status) => {
           const column = tasks.filter((t) => t.status === status)
           return (
-            <Column key={status} status={status} tasks={column}>
+            <Column key={status} status={status} tasks={column} footer={assigneeId && <QuickAdd status={status} assigneeId={assigneeId} />}>
               <SortableContext items={column.map((t) => t.id)} strategy={verticalListSortingStrategy}>
                 {column.map((task) => (
                   <TaskCard key={task.id} task={task} onOpen={onOpen}

@@ -28,7 +28,7 @@ export function MyTasks({ meId, people, onOpen, onNew }: Props) {
         </div>
         <Button onClick={onNew}><Plus className="size-4" aria-hidden />{t('tasks.new')}</Button>
       </header>
-      <KanbanBoard tasks={tasks} people={people} onOpen={onOpen} />
+      <KanbanBoard tasks={tasks} people={people} onOpen={onOpen} assigneeId={meId} />
       </div>
     </section>
   )

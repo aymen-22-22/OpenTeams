@@ -17,15 +17,12 @@ from app.reminders.notify import notify, push
 from app.tasks.access import require_task, visible_tasks
 from app.tasks.models import Task, TaskEvent, TaskStatus
 from app.tasks.schemas import TaskCounts, TaskCreate, TaskMove, TaskOut, TaskUpdate
+from app.tasks.service import task_out, task_outs
 from app.users.models import Role, User
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 STEP = 1024.0  # gap between positions when appending
-
-
-def _out(task: Task) -> TaskOut:
-    return TaskOut.of(task, clock.now().date())
 
 
 async def _active_user(db: AsyncSession, user_id: uuid.UUID) -> User:
@@ -65,7 +62,7 @@ async def _publish(
         )
     await db.flush()
     await db.refresh(task)
-    out = _out(task)
+    out = await task_out(db, task)
     await commit_and_publish(db, task.conversation_id, f"task.{type_}", out.model_dump(mode="json"))
     await push(db, created)
     return out
@@ -83,7 +80,7 @@ async def list_tasks(
     if assignee_id is not None:
         query = query.where(Task.assignee_id == assignee_id)
     tasks = await db.scalars(query.order_by(Task.status, Task.position).limit(limit))
-    return [_out(t) for t in tasks]
+    return await task_outs(db, list(tasks))
 
 
 @router.get("/counts", response_model=TaskCounts)
@@ -112,7 +109,7 @@ async def create_task(body: TaskCreate, user: CurrentUser, db: DB) -> TaskOut:
     for member_id in {user.id, assignee.id}:
         db.add(ConversationMember(conversation_id=conversation.id, user_id=member_id))
 
-    top = await db.scalar(select(func.min(Task.position)).where(Task.status == TaskStatus.PENDING))
+    top = await db.scalar(select(func.min(Task.position)).where(Task.status == body.status))
     task = Task(
         title=body.title,
         description=body.description,
@@ -123,6 +120,8 @@ async def create_task(body: TaskCreate, user: CurrentUser, db: DB) -> TaskOut:
         conversation_id=conversation.id,
         source_message_id=body.source_message_id,
         project_id=body.project_id,
+        status=body.status,
+        finished_at=clock.now() if body.status == TaskStatus.FINISHED else None,
         position=(top - STEP) if top is not None else 0.0,  # new tasks go on top
     )
     db.add(task)
@@ -132,7 +131,7 @@ async def create_task(body: TaskCreate, user: CurrentUser, db: DB) -> TaskOut:
 
 @router.get("/{task_id}", response_model=TaskOut)
 async def get_task(task_id: uuid.UUID, user: CurrentUser, db: DB) -> TaskOut:
-    return _out(await require_task(db, task_id, user))
+    return await task_out(db, await require_task(db, task_id, user))
 
 
 @router.patch("/{task_id}", response_model=TaskOut)
