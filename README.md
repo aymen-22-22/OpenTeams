@@ -95,13 +95,22 @@ Each user can connect their own AI in **My assistant → Settings**: Claude, Ope
 - **Channels** (left panel, *Channels* section, **+** to browse or create): public channels can be browsed and joined by anyone; private channels are invitation-only and invisible to others. The creator or an admin manages name, description and members. Channels have their own messages, files, pins and search, like any conversation.
 - **@mentions**: type `@` in the message box to pick a member (`@channel` notifies everyone in a channel). The mentioned person gets a *Mention* notification (in the app and by email by default); mentions of you are highlighted. Plain channel messages notify nobody (the unread badge is enough), so busy channels stay quiet. In direct and task chats a mention replaces the usual message notification.
 
+## Email bridge (optional)
+
+Lets the team move away from the mailbox gradually: emails sent to a conversation's address appear in it as messages.
+
+- In any conversation (direct, task chat or channel), the side panel has an **E-mail** section: *Create an email address* gives an address like `team+c-k3x9…@example.com`. Members forward an email to it or put it in copy. *New address* replaces it if it leaks; the old one stops working at once.
+- The server reads the mailbox `BRIDGE_ADDRESS` over IMAP every `BRIDGE_POLL_SECONDS`. Your mail server must deliver `team+anything@…` to that mailbox (plus-addressing; on by default in Postfix, Exchange Online, Gmail).
+- An email is posted only if: the address matches a conversation, the sender is an active user who is a **member** of that conversation, and the mail server marked it `dmarc=pass` (topmost `Authentication-Results` header; disable with `BRIDGE_REQUIRE_DMARC=false` only for a server that does not add it). Otherwise it is rejected silently (no reply is ever sent) and recorded in `inbound_emails` and the audit log, without content.
+- The message is the subject and the new text (HTML is turned into text, quoted history and signatures are removed), marked *by email*. Attachments go through the normal upload rules (types, size, scan); refused ones are skipped. Each email is processed once (by Message-ID), then marked as read in the mailbox.
+
 ## Notifications, reminders and email
 
 - **Notification center** (bell): new messages, files, task assignments, reminders, overdue tasks. Each user chooses per type: in the app and/or by email (*Notification preferences*).
 - **Daily digest**: for each type, email can be *Off*, *Instant* or *Daily digest*. Digest notifications are collected (`digest_items`) and sent as one email per day at the hour the user picks (default 08:00, in `TIMEZONE`), grouped by type. Anything already read in the app is left out, and no email is sent when there is nothing new. Items that arrive after today's digest time wait for tomorrow's.
 - **Reminders**: one-time or recurring (daily, weekly, monthly), optionally attached to a message or task; shown in the side panel.
 - **Emails** are never sent during a request: they go to the `email_outbox` table, and a scheduled job sends them with retries (exponential backoff, 5 attempts). Each email is responsive HTML with a plain-text version, a button that opens the right page (`APP_URL`), and a link to the preferences. Arabic emails are right-to-left.
-- **Scheduled jobs** (APScheduler, inside the API): due reminders (30 s), outbox (20 s), overdue-task nudge (daily 08:30), daily digests (checked every 10 min), deletion of real-time events older than 7 days (daily). Run a single API instance, or set `SCHEDULER_ENABLED=false` on extra ones.
+- **Scheduled jobs** (APScheduler, inside the API): due reminders (30 s), outbox (20 s), overdue-task nudge (daily 08:30), daily digests (checked every 10 min), email bridge (every minute, if configured), deletion of real-time events older than 7 days (daily). Run a single API instance, or set `SCHEDULER_ENABLED=false` on extra ones.
 - **Development**: emails arrive in Mailpit at http://localhost:8025. In production set the `SMTP_*` variables.
 
 ## Playbooks (automatic reports)

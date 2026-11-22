@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
+import { EmailAddressSection } from '@/features/bridge/EmailAddressSection'
 import { usePins } from '@/features/chat/api'
 import { useFiles } from '@/features/files/api'
 import { FileIcon } from '@/features/files/FileIcon'
@@ -107,6 +108,8 @@ export function SidePanel({ conversationId, personId, onOpenBoard, onNewReminder
         )}
         <Button variant="outline" onClick={onNewReminder}>{t('reminders.new')}</Button>
       </Section>
+
+      {conversationId && <EmailAddressSection conversationId={conversationId} />}
     </aside>
   )
 }

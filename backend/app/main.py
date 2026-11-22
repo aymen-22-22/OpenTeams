@@ -7,6 +7,7 @@ from app.admin.router import router as admin_router
 from app.ai.router import router as ai_router
 from app.api import health, metrics, ws
 from app.auth.router import router as auth_router
+from app.bridge.router import router as bridge_router
 from app.calendar.router import router as calendar_router
 from app.chat.channels import router as channels_router
 from app.chat.router import router as chat_router
@@ -61,6 +62,7 @@ def create_app() -> FastAPI:
         channels_router,
         search_router,
         files_router,
+        bridge_router,
         tasks_router,
         ai_router,
         reminders_router,

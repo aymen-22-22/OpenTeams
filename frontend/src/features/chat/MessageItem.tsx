@@ -1,4 +1,4 @@
-import { BellPlus, ListPlus, Pencil, Pin, PinOff, Reply, Trash2 } from 'lucide-react'
+import { BellPlus, ListPlus, Mail, Pencil, Pin, PinOff, Reply, Trash2 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -76,8 +76,9 @@ export function MessageItem({ message, mine, authorName, replyTo, pinned, groupe
             </p>
           )}
         </div>
-        {(message.edited_at && !message.deleted) || pinned ? (
+        {(message.edited_at && !message.deleted) || pinned || message.via_email ? (
           <span className="flex items-center gap-1.5 px-1 text-[11px] text-muted-foreground">
+            {message.via_email && <><Mail className="size-3" aria-hidden /><span>{t('chat.viaEmail')}</span></>}
             {pinned && <><Pin className="size-3 text-amber-600" aria-hidden /><span>{t('chat.pinned')}</span></>}
             {message.edited_at && !message.deleted && <span>{t('chat.edited')}</span>}
           </span>

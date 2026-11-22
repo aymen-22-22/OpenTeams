@@ -48,6 +48,8 @@ class Conversation(Base):
     created_by: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL")
     )
+    # Secret part of the conversation's email address (email bridge); None until requested.
+    email_token: Mapped[str | None] = mapped_column(String(32), unique=True)
 
 
 class ConversationMember(Base):
@@ -82,6 +84,7 @@ class Message(Base):
     idempotency_key: Mapped[str | None] = mapped_column(String(100))
     edited_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    via_email: Mapped[bool] = mapped_column(Boolean, default=False)  # posted by the email bridge
     # "simple" config: no language-specific stemming, works the same for fr, en and ar.
     search: Mapped[str] = mapped_column(
         TSVECTOR, Computed("to_tsvector('simple', body)", persisted=True), deferred=True

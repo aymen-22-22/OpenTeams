@@ -51,7 +51,8 @@
     "everyone": "tous les membres",
     "today": "Aujourd'hui",
     "yesterday": "Hier",
-    "emptyHint": "Écrivez le premier message ci-dessous."
+    "emptyHint": "Écrivez le premier message ci-dessous.",
+    "viaEmail": "par e-mail"
   },
   "ai": {
     "label": "IA de {{name}}",
@@ -449,5 +450,16 @@
     "open": "Ouvrir",
     "joinHint": "Rejoignez ce canal pour lire et écrire les messages.",
     "empty": "Aucun canal pour l'instant."
+  },
+  "bridge": {
+    "title": "E-mail",
+    "intro": "Donnez une adresse à cette conversation : les e-mails envoyés à cette adresse y apparaissent comme des messages, avec leurs pièces jointes.",
+    "create": "Créer une adresse e-mail",
+    "copy": "Copier l'adresse",
+    "copied": "Adresse copiée",
+    "hint": "Seuls les membres de cette conversation peuvent y écrire, depuis leur adresse e-mail OpenTeams. Transférez ou mettez en copie cette adresse.",
+    "replace": "Nouvelle adresse",
+    "replaceWarning": "L'adresse actuelle cessera de fonctionner immédiatement.",
+    "replaceConfirm": "Remplacer l'adresse"
   }
 }

@@ -51,6 +51,21 @@ class Settings(BaseSettings):
     smtp_starttls: bool = False
     mail_from: str = "OpenTeams <no-reply@openteams.local>"
 
+    # Email bridge (optional): emails sent to BRIDGE_ADDRESS+<tag>@domain land in a conversation.
+    bridge_address: str = ""  # e.g. team@example.com; empty = bridge off
+    bridge_imap_host: str = ""
+    bridge_imap_port: int = 993
+    bridge_imap_user: str = ""
+    bridge_imap_password: str = ""
+    bridge_imap_folder: str = "INBOX"
+    bridge_poll_seconds: int = 60
+    # Accept only mail your server marked "dmarc=pass" (protects against forged senders).
+    bridge_require_dmarc: bool = True
+
+    @property
+    def bridge_enabled(self) -> bool:
+        return bool(self.bridge_address and self.bridge_imap_host)
+
     login_max_attempts: int = 5
     login_window_seconds: int = 300
 

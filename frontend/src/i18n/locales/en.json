@@ -51,7 +51,8 @@
     "everyone": "all members",
     "today": "Today",
     "yesterday": "Yesterday",
-    "emptyHint": "Write the first message below."
+    "emptyHint": "Write the first message below.",
+    "viaEmail": "by email"
   },
   "ai": {
     "label": "AI of {{name}}",
@@ -449,5 +450,16 @@
     "open": "Open",
     "joinHint": "Join this channel to read and write messages.",
     "empty": "No channels yet."
+  },
+  "bridge": {
+    "title": "Email",
+    "intro": "Give this conversation an address: emails sent to it appear here as messages, with their attachments.",
+    "create": "Create an email address",
+    "copy": "Copy address",
+    "copied": "Address copied",
+    "hint": "Only members of this conversation can write to it, from their OpenTeams email address. Forward to it or add it in copy.",
+    "replace": "New address",
+    "replaceWarning": "The current address will stop working immediately.",
+    "replaceConfirm": "Replace address"
   }
 }

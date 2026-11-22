@@ -20,6 +20,7 @@ class MessageOut(BaseModel):
     created_at: datetime
     edited_at: datetime | None
     deleted: bool
+    via_email: bool = False
 
     @classmethod
     def of(cls, m: Message) -> "MessageOut":
@@ -33,6 +34,7 @@ class MessageOut(BaseModel):
             created_at=m.created_at,
             edited_at=m.edited_at,
             deleted=m.deleted_at is not None,
+            via_email=m.via_email,
         )
 
 

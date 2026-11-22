@@ -12,6 +12,7 @@ export interface Message {
   created_at: string
   edited_at: string | null
   deleted: boolean
+  via_email?: boolean // posted by the email bridge
 }
 
 export interface Conversation {
