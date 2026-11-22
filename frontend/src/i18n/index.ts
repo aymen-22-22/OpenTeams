@@ -6,6 +6,7 @@ import en from './locales/en.json'
 import fr from './locales/fr.json'
 
 export const LANGUAGES = ['fr', 'en', 'ar'] as const
+export const LANGUAGE_NAMES = { fr: 'Français', en: 'English', ar: 'العربية' } as const
 export type Language = (typeof LANGUAGES)[number]
 
 const RTL: readonly string[] = ['ar']

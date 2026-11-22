@@ -1,4 +1,4 @@
-import { Info, MessageSquare, Users } from 'lucide-react'
+import { House, Info, LayoutList, MessageSquare, Menu, Users } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -49,11 +49,12 @@ const PAGE_KINDS = new Set<string>(['home', 'assistant', 'myTasks', 'calendar', 
 /** Conversations show the side panel (pins, files, tasks, reminders); full pages use the whole width. */
 const SIDE_PANEL_VIEWS = new Set<string>(['person', 'channel'])
 
-const NAV = [
-  { id: 'people', Icon: Users },
-  { id: 'conversation', Icon: MessageSquare },
-  { id: 'details', Icon: Info },
-] as const
+/** Name of the current view in the phone's bottom bar. */
+const VIEW_LABELS: Record<string, string> = {
+  myTasks: 'tasks.myTasks', calendar: 'calendar.title', projects: 'projects.title', requests: 'requests.title',
+  playbooks: 'playbooks.title', report: 'playbooks.title', dashboard: 'dashboard.title', assistant: 'people.myAssistant',
+  preferences: 'notifications.preferences', channels: 'channels.browse', task: 'tabs.tasks',
+}
 
 /** Three columns on desktop; one column at a time with bottom navigation on mobile. */
 export function AppShell({ me }: { me: User }) {
@@ -253,17 +254,23 @@ export function AppShell({ me }: { me: User }) {
       </div>
 
       {/* Mobile: one column at a time */}
-      <nav aria-label="Navigation" className="flex border-t border-border bg-background pb-[env(safe-area-inset-bottom)] md:hidden">
-        {NAV.map(({ id, Icon }) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => setColumn(id)}
-            aria-current={column === id}
-            className={cn('flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors', column === id ? 'text-accent' : 'text-muted-foreground')}
-          >
+      <nav aria-label={t('nav.title')} className="flex border-t border-border bg-background pb-[env(safe-area-inset-bottom)] md:hidden">
+        {[
+          { id: 'home', Icon: House, label: t('home.title'), active: column === 'conversation' && view.kind === 'home', onClick: () => show({ kind: 'home' }) },
+          { id: 'people', Icon: Menu, label: t('nav.menu'), active: column === 'people', onClick: () => setColumn('people') },
+          ...(view.kind === 'home' ? [] : [{
+            id: 'conversation',
+            Icon: SIDE_PANEL_VIEWS.has(view.kind) ? MessageSquare : LayoutList,
+            label: SIDE_PANEL_VIEWS.has(view.kind) ? t('nav.conversation') : t(VIEW_LABELS[view.kind] ?? 'nav.conversation'),
+            active: column === 'conversation',
+            onClick: () => setColumn('conversation'),
+          }]),
+          ...(SIDE_PANEL_VIEWS.has(view.kind) ? [{ id: 'details', Icon: Info, label: t('nav.details'), active: column === 'details', onClick: () => setColumn('details') }] : []),
+        ].map(({ id, Icon, label, active, onClick }) => (
+          <button key={id} type="button" onClick={onClick} aria-current={active ? 'page' : undefined}
+            className={cn('flex min-h-14 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 text-[11px] font-medium transition-colors', active ? 'text-accent' : 'text-muted-foreground')}>
             <Icon className="size-5" aria-hidden />
-            {t(`nav.${id}`)}
+            <span className="max-w-full truncate">{label}</span>
           </button>
         ))}
       </nav>

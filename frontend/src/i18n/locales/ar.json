@@ -179,7 +179,9 @@
   "nav": {
     "people": "الأشخاص",
     "conversation": "المحادثة",
-    "details": "التفاصيل"
+    "details": "التفاصيل",
+    "title": "التنقل",
+    "menu": "القائمة"
   },
   "login": {
     "title": "سجّل الدخول إلى مساحة فريقك",
@@ -199,7 +201,8 @@
   },
   "search": {
     "results": "نتائج البحث",
-    "noResults": "لا توجد نتائج"
+    "noResults": "لا توجد نتائج",
+    "close": "إغلاق البحث"
   },
   "notifications": {
     "title": "الإشعارات ({{count}} غير مقروءة)",
@@ -530,7 +533,6 @@
     "seeAll": "عرض الكل",
     "agenda": "اليوم وغدًا",
     "noEvents": "لا شيء مخطط.",
-    "openCalendar": "فتح التقويم",
     "today": "اليوم",
     "tomorrow": "غدًا",
     "allDay": "طوال اليوم",

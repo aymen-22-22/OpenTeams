@@ -4,10 +4,11 @@ import { useTranslation } from 'react-i18next'
 
 import { Avatar } from '@/components/ui/avatar'
 import { useLogout, type User } from '@/features/auth/api'
+import { LANGUAGE_NAMES, LANGUAGES } from '@/i18n'
 
 /** Avatar button opening a small menu: who I am, preferences, sign out. */
 export function AccountMenu({ me, onNavigate }: { me: User; onNavigate: (link: string) => void }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const logout = useLogout()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -48,6 +49,15 @@ export function AccountMenu({ me, onNavigate }: { me: User; onNavigate: (link: s
             <BellRing className="size-4 text-muted-foreground" aria-hidden />
             {t('notifications.preferences')}
           </button>
+          <div role="group" aria-label={t('app.language')} className="flex gap-1 px-1.5 py-1 sm:hidden">
+            {LANGUAGES.map((l) => (
+              <button key={l} type="button" role="menuitemradio" aria-checked={i18n.language === l} lang={l}
+                onClick={() => void i18n.changeLanguage(l)}
+                className={`min-h-11 flex-1 rounded-lg text-sm font-medium transition-colors ${i18n.language === l ? 'bg-accent-soft text-accent-soft-foreground' : 'hover:bg-muted'}`}>
+                {LANGUAGE_NAMES[l]}
+              </button>
+            ))}
+          </div>
           <button type="button" role="menuitem" className={`${entry} text-danger`} onClick={() => logout.mutate()}>
             <LogOut className="size-4 rtl:-scale-x-100" aria-hidden />
             {t('app.logout')}

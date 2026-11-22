@@ -179,7 +179,9 @@
   "nav": {
     "people": "People",
     "conversation": "Conversation",
-    "details": "Details"
+    "details": "Details",
+    "title": "Navigation",
+    "menu": "Menu"
   },
   "login": {
     "title": "Sign in to your team space",
@@ -199,7 +201,8 @@
   },
   "search": {
     "results": "Search results",
-    "noResults": "No results"
+    "noResults": "No results",
+    "close": "Close search"
   },
   "notifications": {
     "title": "Notifications ({{count}} unread)",
@@ -506,7 +509,6 @@
     "seeAll": "See all",
     "agenda": "Today and tomorrow",
     "noEvents": "Nothing planned.",
-    "openCalendar": "Open calendar",
     "today": "Today",
     "tomorrow": "Tomorrow",
     "allDay": "All day",

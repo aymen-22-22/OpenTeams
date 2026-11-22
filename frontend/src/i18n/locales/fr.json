@@ -179,7 +179,9 @@
   "nav": {
     "people": "Personnes",
     "conversation": "Conversation",
-    "details": "Détails"
+    "details": "Détails",
+    "title": "Navigation",
+    "menu": "Menu"
   },
   "login": {
     "title": "Connectez-vous à votre espace d'équipe",
@@ -199,7 +201,8 @@
   },
   "search": {
     "results": "Résultats de recherche",
-    "noResults": "Aucun résultat"
+    "noResults": "Aucun résultat",
+    "close": "Fermer la recherche"
   },
   "notifications": {
     "title": "Notifications ({{count}} non lues)",
@@ -506,7 +509,6 @@
     "seeAll": "Tout voir",
     "agenda": "Aujourd'hui et demain",
     "noEvents": "Rien de prévu.",
-    "openCalendar": "Ouvrir le calendrier",
     "today": "Aujourd'hui",
     "tomorrow": "Demain",
     "allDay": "Journée",

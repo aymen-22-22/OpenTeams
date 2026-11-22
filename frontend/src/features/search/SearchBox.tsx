@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
-import { FolderKanban, KanbanSquare, MessageSquare, Search } from 'lucide-react'
+import { ArrowLeft, FolderKanban, KanbanSquare, MessageSquare, Search } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import type { Message } from '@/features/chat/api'
+import { cn } from '@/lib/utils'
 import { api } from '@/lib/api'
 
 const DEBOUNCE_MS = 250
@@ -38,6 +39,8 @@ export function SearchBox({ onOpen, onNavigate }: Props) {
   })
   const open = q.trim().length >= 2 && term.length >= 2 && results.isSuccess
   const inputRef = useRef<HTMLInputElement>(null)
+  const [expanded, setExpanded] = useState(false) // phones: the field covers the top bar while searching
+  const close = () => { setQ(''); setExpanded(false) }
 
   // Ctrl+K / ⌘K jumps to the search box from anywhere.
   useEffect(() => {
@@ -52,17 +55,28 @@ export function SearchBox({ onOpen, onNavigate }: Props) {
   }, [])
 
   return (
-    <div className="relative hidden w-full max-w-md md:block">
+    <>
+    <button type="button" aria-label={t('app.search')} onClick={() => { setExpanded(true); requestAnimationFrame(() => inputRef.current?.focus()) }}
+      className="flex size-11 items-center justify-center rounded-lg text-foreground/80 hover:bg-muted md:hidden">
+      <Search className="size-[18px]" aria-hidden />
+    </button>
+    <div className={cn(expanded ? 'absolute inset-0 z-30 flex animate-fade-in items-center gap-1 bg-background px-2' : 'hidden', 'md:relative md:inset-auto md:z-auto md:block md:w-full md:max-w-md md:bg-transparent md:px-0')}>
+      <button type="button" aria-label={t('search.close')} onClick={close}
+        className="flex size-11 shrink-0 items-center justify-center rounded-lg hover:bg-muted md:hidden">
+        <ArrowLeft className="size-5 rtl:-scale-x-100" aria-hidden />
+      </button>
+      <span className="relative block flex-1">
       <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
       <input ref={inputRef} type="search" aria-label={t('app.search')} placeholder={t('app.search')} value={q}
-        onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === 'Escape' && setQ('')}
+        onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === 'Escape' && close()}
         className="peer h-10 w-full rounded-xl border border-transparent bg-muted ps-9 pe-16 text-sm transition-[background-color,border-color,box-shadow] placeholder:text-muted-foreground hover:bg-muted/70 focus-visible:border-accent focus-visible:bg-background focus-visible:shadow-[0_0_0_3px_color-mix(in_oklab,var(--accent)_18%,transparent)] focus-visible:outline-none [&::-webkit-search-cancel-button]:hidden" />
-      <kbd aria-hidden className="pointer-events-none absolute end-2.5 top-1/2 -translate-y-1/2 rounded-md border border-border bg-background px-1.5 py-0.5 font-sans text-[11px] text-muted-foreground peer-focus-visible:opacity-0">
+      <kbd aria-hidden className="pointer-events-none absolute end-2.5 top-1/2 hidden -translate-y-1/2 rounded-md border border-border bg-background px-1.5 py-0.5 font-sans text-[11px] text-muted-foreground peer-focus-visible:opacity-0 md:block">
         {t('app.searchShortcut')}
       </kbd>
+      </span>
       {open && (
         <ul role="listbox" aria-label={t('search.results')}
-          className="absolute inset-x-0 top-full z-30 mt-2 max-h-96 animate-pop overflow-y-auto rounded-xl border border-border bg-background p-1.5 shadow-lg">
+          className="absolute inset-x-2 top-full z-30 mt-2 max-h-[70vh] md:inset-x-0 md:max-h-96 animate-pop overflow-y-auto rounded-xl border border-border bg-background p-1.5 shadow-lg">
           {results.data.messages.length + results.data.tasks.length + results.data.projects.length === 0 && (
             <li className="px-3 py-6 text-center text-sm text-muted-foreground">{t('search.noResults')}</li>
           )}
@@ -70,7 +84,7 @@ export function SearchBox({ onOpen, onNavigate }: Props) {
             ...results.data.tasks.map((h) => ({ ...h, link: `/tasks/${h.id}`, label: t('tabs.tasks'), Icon: KanbanSquare }))].map((h) => (
             <li key={h.link} role="option" aria-selected={false}>
               <button type="button" dir="auto" className="flex min-h-11 w-full items-center gap-2.5 truncate rounded-lg px-3 py-2 text-start text-sm transition-colors hover:bg-muted"
-                onClick={() => { onNavigate(h.link); setQ('') }}>
+                onClick={() => { onNavigate(h.link); close() }}>
                 <h.Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
                 <span className="text-xs font-medium text-accent">{h.label}</span>
                 <span className="truncate">{h.title}</span>
@@ -80,7 +94,7 @@ export function SearchBox({ onOpen, onNavigate }: Props) {
           {results.data.messages.map((m) => (
             <li key={m.id} role="option" aria-selected={false}>
               <button type="button" dir="auto" className="flex min-h-11 w-full items-center gap-2.5 rounded-lg px-3 py-2 text-start text-sm transition-colors hover:bg-muted"
-                onClick={() => { onOpen(m); setQ('') }}>
+                onClick={() => { onOpen(m); close() }}>
                 <MessageSquare className="size-4 shrink-0 text-muted-foreground" aria-hidden />
                 <span className="truncate">{m.body}</span>
               </button>
@@ -89,5 +103,6 @@ export function SearchBox({ onOpen, onNavigate }: Props) {
         </ul>
       )}
     </div>
+    </>
   )
 }

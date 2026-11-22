@@ -7,12 +7,10 @@ import type { Message } from '@/features/chat/api'
 import { NotificationBell } from '@/features/notifications/NotificationBell'
 import { SearchBox } from '@/features/search/SearchBox'
 import { useTheme } from '@/hooks/useTheme'
-import { LANGUAGES } from '@/i18n'
+import { LANGUAGE_NAMES, LANGUAGES } from '@/i18n'
 
 import { AccountMenu } from './AccountMenu'
 import { Logo } from './Logo'
-
-const LANGUAGE_NAMES = { fr: 'Français', en: 'English', ar: 'العربية' } as const
 
 interface Props {
   me: User

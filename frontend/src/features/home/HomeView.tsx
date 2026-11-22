@@ -26,12 +26,12 @@ function Card({ title, Icon, count, action, children }: { title: string; Icon: L
   return (
     <section className="card flex min-w-0 flex-col" aria-label={title}>
       <header className="flex min-h-12 items-center gap-2 border-b border-border px-4">
-        <Icon className="size-4 text-accent" aria-hidden />
-        <h2 className="text-sm font-semibold">{title}</h2>
+        <Icon className="size-4 shrink-0 text-accent" aria-hidden />
+        <h2 className="min-w-0 truncate text-sm font-semibold">{title}</h2>
         {count !== undefined && count > 0 && (
-          <span className="rounded-full bg-muted px-2 text-xs leading-5 font-medium text-muted-foreground tabular-nums">{count}</span>
+          <span className="shrink-0 rounded-full bg-muted px-2 text-xs leading-5 font-medium text-muted-foreground tabular-nums">{count}</span>
         )}
-        <span className="ms-auto">{action}</span>
+        <span className="ms-auto shrink-0">{action}</span>
       </header>
       <div className="flex flex-1 flex-col p-2">{children}</div>
     </section>
@@ -49,7 +49,7 @@ function Empty({ children }: { children: ReactNode }) {
 
 function SeeAll({ label, onClick }: { label: string; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="flex min-h-9 items-center gap-0.5 rounded-lg px-2 text-[13px] font-medium text-accent hover:bg-accent-soft">
+    <button type="button" onClick={onClick} className="flex min-h-9 items-center gap-0.5 rounded-lg px-2 text-[13px] font-medium whitespace-nowrap text-accent hover:bg-accent-soft">
       {label}
       <ChevronRight className="size-4 rtl:-scale-x-100" aria-hidden />
     </button>
@@ -170,7 +170,7 @@ export function HomeView({ me, peopleById, conversations, onOpenConversation, on
             )}
           </Card>
 
-          <Card title={t('home.agenda')} Icon={CalendarDays} count={events.length} action={<SeeAll label={t('home.openCalendar')} onClick={() => onOpenPage('calendar')} />}>
+          <Card title={t('home.agenda')} Icon={CalendarDays} count={events.length} action={<SeeAll label={t('home.seeAll')} onClick={() => onOpenPage('calendar')} />}>
             {events.length === 0 ? <Empty>{t('home.noEvents')}</Empty> : (
               <ul className="flex flex-col">
                 {events.slice(0, LIST_LIMIT).map((e) => (
