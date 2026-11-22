@@ -159,7 +159,12 @@ password, sender) and sends a test email showing why it fails if it does; the pa
 encrypted and never shown again, and `.env` is used when no server is set there. Below it, admins
 set the emails' look (name, color, logo PNG/JPEG ≤ 300 KB, footer line) and the wording per email type
 and language (label and intro paragraph), with a live preview of unsaved changes and *Send this example*.
-The logo is served publicly at `/api/v1/branding/logo` so mail clients can display it. Admins cannot change their own role or deactivate themselves. Every change is in the
+The logo is served publicly at `/api/v1/branding/logo` so mail clients can display it.
+Each email type and language can also use the admin's **own HTML** (a starter template is offered).
+It is filled by plain `{{variable}}` replacement with HTML-escaped values (never run as a template),
+must contain `{{preferences_url}}`, may not contain `<script>`, and its plain-text version is derived
+automatically. Variables: subject, title, body, intro, link, brand_name, brand_color, on_color,
+logo_url, preferences_url, app_url, count and items (digest). Admins cannot change their own role or deactivate themselves. Every change is in the
 audit log. The first admin is created from the server: `python -m app.cli create-admin`.
 
 ## Real-time events

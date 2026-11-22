@@ -285,7 +285,7 @@ async def test_logo_rejected(admin_client: AsyncClient, content: bytes, status: 
 
 async def test_texts_defaults_overrides_and_rendering(admin_client: AsyncClient) -> None:
     data = (await admin_client.get(f"{URL}/texts")).json()
-    assert data["defaults"]["task"]["fr"] == {"subject": "Tâche", "intro": ""}
+    assert data["defaults"]["task"]["fr"] == {"subject": "Tâche", "intro": "", "html": ""}
     assert data["defaults"]["digest"]["en"]["subject"].startswith("Your daily summary")
     assert data["overrides"] == {}
     r = await admin_client.put(
@@ -301,9 +301,15 @@ async def test_texts_defaults_overrides_and_rendering(admin_client: AsyncClient)
     assert r.status_code == 200
     assert r.json()["overrides"] == {  # empty entries are not stored
         "task": {
-            "fr": {"subject": "Nouvelle mission", "intro": "Bonjour,\nune tâche vous attend."}
+            "fr": {
+                "subject": "Nouvelle mission",
+                "intro": "Bonjour,\nune tâche vous attend.",
+                "html": "",
+            }
         },
-        "digest": {"fr": {"subject": "Votre journée chez SDG : {n} nouveautés", "intro": ""}},
+        "digest": {
+            "fr": {"subject": "Votre journée chez SDG : {n} nouveautés", "intro": "", "html": ""}
+        },
     }
     task = (await admin_client.post(f"{URL}/preview", json={"kind": "task", "lang": "fr"})).json()
     assert task["subject"] == "Nouvelle mission : Préparer le rapport mensuel"
@@ -387,3 +393,91 @@ async def test_branding_admin_only(employee_client: AsyncClient) -> None:
         assert (
             await employee_client.request(method.upper(), f"{URL}{path}", json={})
         ).status_code == 403
+
+
+# --- custom HTML per email type ---------------------------------------------------------
+
+CUSTOM = (
+    "<html><body style='background:{{brand_color}}'><h1>{{title}}</h1><p>{{body}}</p>"
+    "<a href='{{link}}'>Voir</a> {{unknown}} "
+    "<a href='{{preferences_url}}'>Préférences</a></body></html>"
+)
+
+
+async def test_custom_html_is_used_with_escaped_values(admin_client: AsyncClient) -> None:
+    data = (await admin_client.get(f"{URL}/texts")).json()
+    assert "{{preferences_url}}" in data["starter_html"] and "items" in data["variables"]
+    r = await admin_client.put(
+        f"{URL}/texts", json={"task": {"fr": {"subject": "", "intro": "", "html": CUSTOM}}}
+    )
+    assert r.status_code == 200
+    # A real notification with a hostile title: values are escaped, never executed.
+    lucas = await make_user("lucas@example.com")
+    await admin_client.post(
+        "/api/v1/tasks",
+        json={"title": "<img src=x onerror=alert(1)>", "assignee_id": str(lucas.id)},
+    )
+    async with SessionLocal() as db:
+        mail = await db.scalar(select(EmailOutbox))
+    assert mail is not None
+    assert "&lt;img src=x onerror=alert(1)&gt;" in mail.html and "<img src=x" not in mail.html
+    assert (
+        "background:#0F766E" in mail.html and "/tasks/" in mail.html and "/preferences" in mail.html
+    )
+    assert "{{unknown}}" in mail.html  # unknown variables are left visible, not evaluated
+    assert "<h1>" not in mail.text and "/preferences" in mail.text  # derived plain text, no tags
+    # Other languages keep the built-in design.
+    en = (await admin_client.post(f"{URL}/preview", json={"kind": "task", "lang": "en"})).json()
+    assert "<h1>" not in en["html"]
+
+
+async def test_custom_html_is_not_a_template_engine(admin_client: AsyncClient) -> None:
+    attack = "{{ ''.__class__.__mro__ }} {% for x in range(3) %}x{% endfor %} {{7*7}} "
+    attack += "{{preferences_url}}"
+    await admin_client.put(
+        f"{URL}/texts", json={"mention": {"fr": {"subject": "", "intro": "", "html": attack}}}
+    )
+    html = (
+        await admin_client.post(f"{URL}/preview", json={"kind": "mention", "lang": "fr"})
+    ).json()["html"]
+    assert (
+        "{{ ''.__class__.__mro__ }}" in html
+        and "{% for x in range(3) %}" in html
+        and "{{7*7}}" in html
+    )
+    assert "49" not in html and "xxx" not in html
+
+
+async def test_custom_digest_html_gets_items(admin_client: AsyncClient) -> None:
+    html = "<div>{{count}} nouveautés</div>{{items}}<a href='{{preferences_url}}'>p</a>"
+    await admin_client.put(
+        f"{URL}/texts", json={"digest": {"fr": {"subject": "", "intro": "", "html": html}}}
+    )
+    out = (await admin_client.post(f"{URL}/preview", json={"kind": "digest", "lang": "fr"})).json()
+    assert "<div>4 nouveautés</div>" in out["html"] and "Préparer le rapport mensuel" in out["html"]
+    assert "<h2" in out["html"]  # items are our own HTML, inserted as is
+
+
+@pytest.mark.parametrize(
+    "html",
+    [
+        "<p>no preferences link</p>",
+        "<script>alert(1)</script>{{preferences_url}}",
+        "< SCRIPT src=x></script>{{preferences_url}}",
+        "{{preferences_url}}" + "x" * 100_001,
+    ],
+)
+async def test_custom_html_validation(admin_client: AsyncClient, html: str) -> None:
+    r = await admin_client.put(
+        f"{URL}/texts", json={"task": {"fr": {"subject": "", "intro": "", "html": html}}}
+    )
+    assert r.status_code == 422
+
+
+async def test_preview_of_unsaved_custom_html(admin_client: AsyncClient) -> None:
+    r = await admin_client.post(
+        f"{URL}/preview",
+        json={"kind": "task", "lang": "fr", "texts": {"task": {"fr": {"html": CUSTOM}}}},
+    )
+    assert "<h1>Préparer le rapport mensuel</h1>" in r.json()["html"]
+    assert (await admin_client.get(f"{URL}/texts")).json()["overrides"] == {}

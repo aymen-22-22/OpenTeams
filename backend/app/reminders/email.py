@@ -8,8 +8,10 @@ from typing import Any
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from app.admin.org import SmtpConfig, env_smtp, send_sync
+from app.bridge.parse import html_to_text
 from app.core.settings import get_settings
 from app.reminders.brand import DEFAULT_BRAND, Brand
+from app.reminders.custom_html import fill
 
 _env = Environment(
     loader=FileSystemLoader(Path(__file__).parent / "templates"),
@@ -132,6 +134,14 @@ def render_notification(
         "intro": brand.text(kind, lang, "intro"),
         "link_url": f"{ctx['base_url']}{link}",
     }
+    custom = brand.text(kind, lang, "html")
+    if custom:
+        values = _custom_values(ctx, brand) | {
+            "title": title,
+            "body": body,
+            "link": ctx["link_url"],
+        }
+        return _render_custom(custom, values, ctx)
     return _render("notification", ctx)
 
 
@@ -160,7 +170,38 @@ def render_digest(
             }
         )
     ctx["groups"] = groups
+    custom = brand.text("digest", lang, "html")
+    if custom:
+        items_html = _env.get_template("digest_items.html").render(ctx)
+        values = _custom_values(ctx, brand) | {
+            "title": ctx["subject"],
+            "count": str(len(entries)),
+            "items": items_html,
+            "link": f"{ctx['base_url']}/",
+        }
+        return _render_custom(custom, values, ctx)
     return _render("digest", ctx)
+
+
+def _custom_values(ctx: dict[str, Any], brand: Brand) -> dict[str, str]:
+    return {
+        "subject": ctx["subject"],
+        "intro": ctx.get("intro", ""),
+        "brand_name": brand.name,
+        "brand_color": brand.color,
+        "on_color": brand.on_color,
+        "logo_url": brand.logo_url,
+        "preferences_url": ctx["preferences_url"],
+        "app_url": ctx["base_url"],
+    }
+
+
+def _render_custom(template: str, values: dict[str, str], ctx: dict[str, Any]) -> RenderedEmail:
+    """An admin's HTML, filled with escaped values; the text version is derived from it."""
+    html = fill(template, values)
+    footer = f"{ctx['t']['preferences']}: {ctx['preferences_url']}"
+    text = f"{html_to_text(html)}\n\n{values.get('link', '')}\n\n{footer}"
+    return RenderedEmail(subject=ctx["subject"], html=html, text=text.strip())
 
 
 async def send_email(

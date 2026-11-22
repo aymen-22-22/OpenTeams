@@ -57,11 +57,14 @@ export interface BrandingOut extends Branding {
 export interface EmailText {
   subject: string
   intro: string
+  html?: string // the admin's own HTML for the whole email; empty: built-in design
 }
 export type Texts = Partial<Record<string, Partial<Record<Lang, EmailText>>>>
 export interface TextsOut {
   defaults: Record<string, Record<Lang, EmailText>>
   overrides: Texts
+  starter_html: string
+  variables: string[]
 }
 export interface Preview {
   subject: string

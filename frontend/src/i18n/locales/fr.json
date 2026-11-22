@@ -657,7 +657,14 @@
       "useDefault": "Revenir au texte par défaut",
       "preview": "Aperçu",
       "previewHint": "L'aperçu montre vos modifications avant l'enregistrement, avec des données d'exemple.",
-      "sendExample": "Envoyer cet exemple"
+      "sendExample": "Envoyer cet exemple",
+      "customHtml": "HTML personnalisé (facultatif)",
+      "customHtmlHint": "Collez votre propre code HTML pour cet e-mail et cette langue. Il remplace la mise en page intégrée ; laissez vide pour la garder.",
+      "variables": "Variables :",
+      "customHtmlRules": "Obligatoire : {{link}} (lien vers les préférences). Interdit : <script>. Le texte brut est généré automatiquement.",
+      "insertStarter": "Insérer un modèle de départ",
+      "removeHtml": "Retirer le HTML",
+      "htmlInvalid": "HTML refusé : il doit contenir {{link}} et ne pas contenir de <script> (100 000 caractères max)."
     }
   }
 }

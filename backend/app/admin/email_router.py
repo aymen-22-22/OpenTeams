@@ -22,6 +22,7 @@ from app.admin.org import (
 from app.auth.deps import DB, AdminUser
 from app.core.crypto import encrypt
 from app.core.errors import AppError
+from app.reminders import custom_html
 from app.reminders.brand import DEFAULT_BRAND, Brand
 from app.reminders.email import (
     TEXTS,
@@ -96,9 +97,21 @@ class BrandingOut(Branding):
     has_logo: bool
 
 
+def _custom_html(value: str) -> str:
+    if value.strip():
+        found = custom_html.problems(value)
+        if found:
+            raise ValueError(f"Invalid custom HTML: {', '.join(found)}")
+    return value
+
+
 class EmailText(BaseModel):
     subject: str = Field(default="", max_length=150)
     intro: str = Field(default="", max_length=1000)
+    # Admin-written HTML for the whole email (empty: the built-in design)
+    html: Annotated[str, AfterValidator(_custom_html)] = Field(
+        default="", max_length=custom_html.MAX_SIZE
+    )
 
 
 # kind -> lang -> texts; only what differs from the defaults is stored
@@ -108,6 +121,8 @@ Texts = dict[Literal[KINDS], dict[Lang, EmailText]]  # type: ignore[valid-type]
 class TextsOut(BaseModel):
     defaults: dict[str, dict[str, EmailText]]
     overrides: dict[str, dict[str, EmailText]]
+    starter_html: str  # a starting point for custom HTML
+    variables: list[str]  # what {{name}} can be used in custom HTML
 
 
 class PreviewIn(BaseModel):
@@ -214,7 +229,7 @@ def _texts_dump(texts: Texts) -> dict[str, Any]:
     out: dict[str, Any] = {}
     for kind, langs in texts.items():
         for lang, value in langs.items():
-            if value.subject.strip() or value.intro.strip():
+            if value.subject.strip() or value.intro.strip() or value.html.strip():
                 out.setdefault(kind, {})[lang] = value.model_dump()
     return out
 
@@ -279,7 +294,12 @@ async def get_texts(_: AdminUser, db: DB) -> TextsOut:
             else:
                 value = EmailText(subject=t[kind], intro="")
             defaults.setdefault(kind, {})[lang] = value
-    return TextsOut(defaults=defaults, overrides=org.email_texts or {})
+    return TextsOut(
+        defaults=defaults,
+        overrides=org.email_texts or {},
+        starter_html=custom_html.STARTER,
+        variables=list(custom_html.VARIABLES),
+    )
 
 
 @router.put("/texts", response_model=TextsOut)

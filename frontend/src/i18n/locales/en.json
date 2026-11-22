@@ -657,7 +657,14 @@
       "useDefault": "Back to the default text",
       "preview": "Preview",
       "previewHint": "The preview shows your changes before saving, with sample data.",
-      "sendExample": "Send this example"
+      "sendExample": "Send this example",
+      "customHtml": "Custom HTML (optional)",
+      "customHtmlHint": "Paste your own HTML code for this email and language. It replaces the built-in layout; leave empty to keep it.",
+      "variables": "Variables:",
+      "customHtmlRules": "Required: {{link}} (link to preferences). Not allowed: <script>. The plain-text version is generated automatically.",
+      "insertStarter": "Insert a starter template",
+      "removeHtml": "Remove HTML",
+      "htmlInvalid": "HTML refused: it must contain {{link}} and no <script> (100,000 characters max)."
     }
   }
 }

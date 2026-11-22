@@ -1,4 +1,4 @@
-import { CheckCircle2, ImagePlus, Palette, Send, Trash2, Type } from 'lucide-react'
+import { CheckCircle2, Code2, ImagePlus, Palette, Send, Trash2, Type } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -77,7 +77,7 @@ function WordingCard({ texts, onChange, data, kind, lang, onKind, onLang }: {
 }) {
   const { t } = useTranslation()
   const save = useSaveTexts()
-  const current: EmailText = texts[kind]?.[lang] ?? { subject: '', intro: '' }
+  const current: EmailText = texts[kind]?.[lang] ?? { subject: '', intro: '', html: '' }
   const defaults = data.defaults[kind]?.[lang] ?? { subject: '', intro: '' }
   const set = (patch: Partial<EmailText>) =>
     onChange({ ...texts, [kind]: { ...texts[kind], [lang]: { ...current, ...patch } } })
@@ -108,11 +108,27 @@ function WordingCard({ texts, onChange, data, kind, lang, onKind, onLang }: {
         <textarea rows={3} value={current.intro} onChange={(e) => set({ intro: e.target.value })} placeholder={defaults.intro || t('admin.design.introPlaceholder')}
           maxLength={1000} className="field resize-y" dir={lang === 'ar' ? 'rtl' : 'ltr'} lang={lang} />
       </label>
+      <section className="flex flex-col gap-2 rounded-xl border border-border p-4" aria-labelledby="custom-html-title">
+        <h4 id="custom-html-title" className="flex items-center gap-2 text-sm font-semibold"><Code2 className="size-4 text-muted-foreground" aria-hidden />{t('admin.design.customHtml')}</h4>
+        <p className="text-[13px] text-muted-foreground">{t('admin.design.customHtmlHint')}</p>
+        <textarea rows={current.html ? 14 : 4} value={current.html ?? ''} onChange={(e) => set({ html: e.target.value })}
+          aria-labelledby="custom-html-title" aria-describedby="custom-html-vars" spellCheck={false} maxLength={100000}
+          placeholder="<html>…{{title}}…{{preferences_url}}…</html>" className="field resize-y py-2 font-mono text-xs leading-relaxed" dir="ltr" />
+        <p id="custom-html-vars" className="flex flex-wrap gap-1 text-xs text-muted-foreground">
+          <span>{t('admin.design.variables')}</span>
+          {(data.variables ?? []).map((v) => <code key={v} dir="ltr" className="rounded bg-muted px-1.5 py-0.5">{`{{${v}}}`}</code>)}
+        </p>
+        <p className="text-xs text-muted-foreground">{t('admin.design.customHtmlRules', { link: '{{preferences_url}}' })}</p>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => set({ html: data.starter_html ?? '' })}>{t('admin.design.insertStarter')}</Button>
+          {current.html && <Button variant="ghost" onClick={() => set({ html: '' })}>{t('admin.design.removeHtml')}</Button>}
+        </div>
+      </section>
       <div className="flex flex-wrap items-center gap-2">
         <Button onClick={() => save.mutate(texts)} disabled={save.isPending}>{t('chat.save')}</Button>
-        {(current.subject || current.intro) && <Button variant="ghost" onClick={() => set({ subject: '', intro: '' })}>{t('admin.design.useDefault')}</Button>}
+        {(current.subject || current.intro || current.html) && <Button variant="ghost" onClick={() => set({ subject: '', intro: '', html: '' })}>{t('admin.design.useDefault')}</Button>}
         {save.isSuccess && <span role="status" className="flex items-center gap-1.5 text-sm text-success"><CheckCircle2 className="size-4" aria-hidden />{t('ai.settings.saved')}</span>}
-        {save.isError && <span role="alert" className="text-sm text-danger">{t('admin.errors.failed')}</span>}
+        {save.isError && <span role="alert" className="text-sm text-danger">{t(save.error instanceof ApiError && save.error.status === 422 ? 'admin.design.htmlInvalid' : 'admin.errors.failed', { link: '{{preferences_url}}' })}</span>}
       </div>
     </section>
   )

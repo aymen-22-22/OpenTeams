@@ -206,6 +206,8 @@ const DESIGN = {
     body: {
       defaults: { task: { fr: { subject: 'Tâche', intro: '' }, en: { subject: 'Task', intro: '' }, ar: { subject: 'مهمة', intro: '' } } },
       overrides: {},
+      starter_html: '<html>{{preferences_url}}</html>',
+      variables: ['title', 'preferences_url'],
     },
   },
   'POST /admin/email/preview': { status: 200, body: { subject: 'Tâche : Préparer le rapport mensuel', html: '<p>aperçu</p>', text: 'aperçu' } },
@@ -237,7 +239,7 @@ test('wording per type and language, with defaults as placeholders', async () =>
   await userEvent.selectOptions(within(wording).getByLabelText('Langue'), 'ar')
   expect(within(wording).getByLabelText("Libellé (début de l'objet)")).toHaveAttribute('dir', 'rtl')
   await userEvent.click(within(wording).getByRole('button', { name: 'Enregistrer' }))
-  await waitFor(() => expect(body(fetchMock, 'PUT', '/admin/email/texts')).toEqual({ task: { fr: { subject: 'Mission', intro: 'Bonjour' } } }))
+  await waitFor(() => expect(body(fetchMock, 'PUT', '/admin/email/texts')).toEqual({ task: { fr: { subject: 'Mission', intro: 'Bonjour', html: '' } } }))
 })
 
 test('send the previewed example to an address', async () => {
@@ -245,4 +247,29 @@ test('send the previewed example to an address', async () => {
   const preview = await screen.findByRole('region', { name: 'Aperçu' })
   await userEvent.click(within(preview).getByRole('button', { name: 'Envoyer cet exemple' }))
   await waitFor(() => expect(body(fetchMock, 'POST', '/admin/email/test')).toEqual({ to: 'me@example.com', kind: 'task', lang: 'fr' }))
+})
+
+test('custom HTML per type: insert the starter, preview it, save; invalid HTML is explained', async () => {
+  let invalid = false
+  const texts = { ...DESIGN['GET /admin/email/texts'].body, starter_html: '<html>{{title}} {{preferences_url}}</html>', variables: ['title', 'preferences_url'] }
+  const fetchMock = await openEmailTab({
+    ...DESIGN,
+    'GET /admin/email/texts': { status: 200, body: texts },
+    'PUT /admin/email/texts': () => (invalid ? { status: 422, body: { error: { code: 'validation_error', message: '' } } } : { status: 200, body: texts }),
+  })
+  const wording = await screen.findByRole('region', { name: 'Textes des e-mails' })
+  expect(within(wording).getByText('{{preferences_url}}', { selector: 'code' })).toBeInTheDocument()
+  expect(within(wording).getByText(/Obligatoire : \{\{preferences_url\}\}/)).toBeInTheDocument()
+  await userEvent.click(within(wording).getByRole('button', { name: 'Insérer un modèle de départ' }))
+  const editor = within(wording).getByRole('textbox', { name: 'HTML personnalisé (facultatif)' })
+  expect(editor).toHaveValue('<html>{{title}} {{preferences_url}}</html>')
+  await waitFor(() => {
+    const last = calls(fetchMock, 'POST', '/admin/email/preview').at(-1)!
+    expect(JSON.parse(String(last[1]!.body)).texts).toEqual({ task: { fr: { subject: '', intro: '', html: '<html>{{title}} {{preferences_url}}</html>' } } })
+  })
+  await userEvent.click(within(wording).getByRole('button', { name: 'Enregistrer' }))
+  await waitFor(() => expect(calls(fetchMock, 'PUT', '/admin/email/texts')).toHaveLength(1))
+  invalid = true
+  await userEvent.click(within(wording).getByRole('button', { name: 'Enregistrer' }))
+  expect(await within(wording).findByRole('alert')).toHaveTextContent('HTML refusé : il doit contenir {{preferences_url}}')
 })

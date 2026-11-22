@@ -1,0 +1,12 @@
+{% for group in groups %}
+<h2 style="margin:20px 0 8px;font-size:13px;letter-spacing:0.04em;text-transform:uppercase;color:{{ brand.color }};">{{ group.label }}</h2>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+  {% for item in group.entries %}
+  <tr><td style="padding:8px 0;border-bottom:1px solid #eeeeee;text-align:{{ start }};">
+    <a href="{{ item.url }}" style="color:#171717;font-weight:bold;text-decoration:none;" dir="auto">{{ item.title }}</a>
+    {% if item.body %}<div style="margin-top:2px;color:#525252;font-size:14px;white-space:pre-line;" dir="auto">{{ item.body }}</div>{% endif %}
+  </td></tr>
+  {% endfor %}
+</table>
+{% if group.more %}<p style="margin:6px 0 0;color:#525252;font-size:13px;">{{ group.more }}</p>{% endif %}
+{% endfor %}
