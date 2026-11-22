@@ -23,5 +23,6 @@ def setup_logging(level: str) -> None:
     handler.setFormatter(JsonFormatter())
     logging.basicConfig(level=level, handlers=[handler], force=True)
     # These libraries log full URLs (outbound calls, raw paths with tokens): keep them quiet.
-    for noisy in ("httpx", "httpcore", "uvicorn.access", "LiteLLM"):
+    # APScheduler logs every job run (every few seconds); failures still show as warnings/errors.
+    for noisy in ("httpx", "httpcore", "uvicorn.access", "LiteLLM", "apscheduler"):
         logging.getLogger(noisy).setLevel(logging.WARNING)
