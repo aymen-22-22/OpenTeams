@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 
 import { App } from '@/app/App'
 import i18n from '@/i18n'
-import { LOGGED_IN, ME, message, mockApi, task } from '@/test/mockApi'
+import { LOGGED_IN, ME, message, mockApi, task, openChat } from '@/test/mockApi'
 
 const renderApp = () => render(<App client={new QueryClient({ defaultOptions: { queries: { retry: false } } })} />)
 
@@ -53,6 +53,7 @@ test('reminders appear in the side panel', async () => {
     'GET /reminders': { status: 200, body: [{ id: 'r1', title: 'Appeler le client', remind_at: '2026-01-05T10:00:00Z', recurrence: 'weekly', target_type: null, target_id: null, active: true }] },
   })
   renderApp()
+  await openChat()
   const side = await screen.findByRole('complementary')
   expect(await within(side).findByText('Appeler le client')).toBeInTheDocument()
   expect(within(side).getByText(/Chaque semaine/)).toBeInTheDocument()
@@ -64,6 +65,7 @@ test('remind me on a message creates a reminder attached to it', async () => {
     'POST /reminders': { status: 201, body: { id: 'r2' } },
   })
   renderApp()
+  await openChat()
   await screen.findByText('Bonjour !')
   await userEvent.click(screen.getAllByRole('button', { name: 'Me le rappeler' })[0])
   const dialog = screen.getByRole('dialog', { name: 'Nouveau rappel' })

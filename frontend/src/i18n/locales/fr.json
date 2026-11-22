@@ -478,5 +478,33 @@
       "unavailable": ""
     },
     "failed": "Impossible d'activer les notifications sur cet appareil. Réessayez plus tard."
+  },
+  "home": {
+    "title": "Accueil",
+    "morning": "Bonjour, {{name}}",
+    "afternoon": "Bon après-midi, {{name}}",
+    "evening": "Bonsoir, {{name}}",
+    "allClear": "Tout est à jour. Bonne journée !",
+    "sumUnread_one": "{{count}} message non lu",
+    "sumUnread_other": "{{count}} messages non lus",
+    "sumOverdue_one": "{{count}} tâche en retard",
+    "sumOverdue_other": "{{count}} tâches en retard",
+    "sumToday_one": "{{count}} événement aujourd'hui",
+    "sumToday_other": "{{count}} événements aujourd'hui",
+    "sumApprovals_one": "{{count}} demande à valider",
+    "sumApprovals_other": "{{count}} demandes à valider",
+    "unread": "À lire",
+    "noUnread": "Vous avez tout lu.",
+    "tasks": "Mes tâches à échéance",
+    "noTasks": "Aucune tâche à échéance cette semaine.",
+    "overdueSince": "En retard · {{date}}",
+    "seeAll": "Tout voir",
+    "agenda": "Aujourd'hui et demain",
+    "noEvents": "Rien de prévu.",
+    "openCalendar": "Ouvrir le calendrier",
+    "today": "Aujourd'hui",
+    "tomorrow": "Demain",
+    "allDay": "Journée",
+    "approvals": "À valider"
   }
 }

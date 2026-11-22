@@ -148,9 +148,11 @@ export function CalendarView({ me, people, onOpenTask, onOpenProject, onRemind }
                 const list = byDay.get(key) ?? []
                 const outside = d.getMonth() !== anchor.getMonth()
                 return (
-                  <div key={key} role="gridcell" aria-label={new Intl.DateTimeFormat(i18n.language, { dateStyle: 'full' }).format(d)}
+                  <div key={key} role="gridcell"
                     className={cn('flex min-h-24 flex-col gap-0.5 p-1', outside ? 'bg-muted text-muted-foreground' : 'bg-background')}>
+                    {/* The full date names the day button (its visible number is part of it); events keep their own names. */}
                     <button type="button" onClick={() => { setAnchor(d); setMode('day') }}
+                      aria-label={new Intl.DateTimeFormat(i18n.language, { dateStyle: 'full' }).format(d)}
                       className={cn('self-start rounded-full px-1.5 text-xs', key === today && 'bg-accent font-semibold text-accent-foreground')}>
                       {d.getDate()}
                     </button>

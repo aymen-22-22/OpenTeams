@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 
 import { App } from '@/app/App'
 import i18n from '@/i18n'
-import { LOGGED_IN, message, mockApi, task } from '@/test/mockApi'
+import { LOGGED_IN, message, mockApi, task, openChat } from '@/test/mockApi'
 
 const renderApp = () => render(<App client={new QueryClient({ defaultOptions: { queries: { retry: false } } })} />)
 
@@ -29,6 +29,7 @@ const TASK_CHAT = {
 test('the Tasks tab shows the person board in three columns, overdue highlighted', async () => {
   mockApi(LOGGED_IN)
   renderApp()
+  await openChat()
   await userEvent.click(await screen.findByRole('tab', { name: 'Tâches' }))
   const pending = await screen.findByRole('region', { name: 'En attente' })
   const card = within(pending).getByRole('button', { name: /^Préparer le rapport/ })
@@ -40,6 +41,7 @@ test('the Tasks tab shows the person board in three columns, overdue highlighted
 test('side panel shows real task counts and opens the board', async () => {
   mockApi(LOGGED_IN)
   renderApp()
+  await openChat()
   const side = await screen.findByRole('complementary')
   expect(await within(side).findByText('4')).toBeInTheDocument()
   await userEvent.click(within(side).getByRole('button', { name: 'Ouvrir le tableau' }))
@@ -49,6 +51,7 @@ test('side panel shows real task counts and opens the board', async () => {
 test('clicking a task opens its own task chat', async () => {
   mockApi({ ...LOGGED_IN, ...TASK_CHAT })
   renderApp()
+  await openChat()
   await userEvent.click(await screen.findByRole('tab', { name: 'Tâches' }))
   await userEvent.click(await screen.findByRole('button', { name: /^Préparer le rapport/ }))
   expect(await screen.findByText('Discussion de la tâche')).toBeInTheDocument()
@@ -62,6 +65,7 @@ test('create a task from a message', async () => {
     'POST /tasks': { status: 201, body: task('t1', 'Bonjour !', 'pending') },
   })
   renderApp()
+  await openChat()
   await screen.findByText('Bonjour !')
   await userEvent.click(screen.getAllByRole('button', { name: 'Créer une tâche' })[0])
   const dialog = screen.getByRole('dialog')
@@ -80,6 +84,7 @@ test('changing status from the task view moves the task', async () => {
     'POST /tasks/t1/move': { status: 200, body: task('t1', 'Préparer le rapport', 'finished') },
   })
   renderApp()
+  await openChat()
   await userEvent.click(await screen.findByRole('tab', { name: 'Tâches' }))
   await userEvent.click(await screen.findByRole('button', { name: /^Préparer le rapport/ }))
   await userEvent.selectOptions(await screen.findByLabelText('Statut'), 'finished')

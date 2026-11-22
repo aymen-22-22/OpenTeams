@@ -45,7 +45,7 @@ test('joined channels are listed with unread badges and open their chat', async 
 test('typing @ suggests channel members and @channel', async () => {
   mockApi(ROUTES)
   renderApp()
-  await userEvent.click(await screen.findByRole('button', { name: /general/ }))
+  await userEvent.click(await within(await screen.findByRole('navigation', { name: 'Personnes' })).findByRole('button', { name: /general/ }))
   const box = await screen.findByLabelText('Écrire un message…')
   await userEvent.type(box, 'Salut @')
   const list = screen.getByRole('listbox', { name: "Mentionner quelqu'un" })

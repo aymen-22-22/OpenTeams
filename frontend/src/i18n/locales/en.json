@@ -478,5 +478,33 @@
       "unavailable": ""
     },
     "failed": "Could not turn on notifications on this device. Try again later."
+  },
+  "home": {
+    "title": "Home",
+    "morning": "Good morning, {{name}}",
+    "afternoon": "Good afternoon, {{name}}",
+    "evening": "Good evening, {{name}}",
+    "allClear": "You're all caught up. Have a good day!",
+    "sumUnread_one": "{{count}} unread message",
+    "sumUnread_other": "{{count}} unread messages",
+    "sumOverdue_one": "{{count}} overdue task",
+    "sumOverdue_other": "{{count}} overdue tasks",
+    "sumToday_one": "{{count}} event today",
+    "sumToday_other": "{{count}} events today",
+    "sumApprovals_one": "{{count}} request to approve",
+    "sumApprovals_other": "{{count}} requests to approve",
+    "unread": "To read",
+    "noUnread": "You've read everything.",
+    "tasks": "My tasks due",
+    "noTasks": "No task due this week.",
+    "overdueSince": "Overdue · {{date}}",
+    "seeAll": "See all",
+    "agenda": "Today and tomorrow",
+    "noEvents": "Nothing planned.",
+    "openCalendar": "Open calendar",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "allDay": "All day",
+    "approvals": "To approve"
   }
 }

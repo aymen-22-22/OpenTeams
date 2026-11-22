@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 
 import { App } from '@/app/App'
 import i18n from '@/i18n'
-import { LOGGED_IN, message, mockApi } from '@/test/mockApi'
+import { LOGGED_IN, message, mockApi, openChat } from '@/test/mockApi'
 
 const renderApp = () => render(<App client={new QueryClient({ defaultOptions: { queries: { retry: false } } })} />)
 const ADDRESS = 'team+c-k3x9abcd2345wxyz@example.com'
@@ -21,6 +21,7 @@ afterEach(() => vi.unstubAllGlobals())
 test('the email section is hidden when the bridge is not configured', async () => {
   mockApi(LOGGED_IN) // email-address answers 404
   renderApp()
+  await openChat()
   expect(await screen.findByText('Bonjour !')).toBeInTheDocument()
   expect(screen.queryByRole('heading', { name: 'E-mail' })).not.toBeInTheDocument()
 })
@@ -38,6 +39,7 @@ test('create, copy and replace the conversation address', async () => {
   const writeText = vi.fn(async () => {})
   Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
   renderApp()
+  await openChat()
 
   const section = (await screen.findByRole('heading', { name: 'E-mail' })).closest('section')!
   await userEvent.click(within(section).getByRole('button', { name: 'Créer une adresse e-mail' }))
@@ -67,5 +69,6 @@ test('messages that came by email are labelled', async () => {
     },
   })
   renderApp()
+  await openChat()
   expect(await screen.findByText('par e-mail')).toBeInTheDocument()
 })

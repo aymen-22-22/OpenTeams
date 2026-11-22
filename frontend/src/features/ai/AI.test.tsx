@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 
 import { App } from '@/app/App'
 import i18n from '@/i18n'
-import { LOGGED_IN, mockApi } from '@/test/mockApi'
+import { LOGGED_IN, mockApi, openChat } from '@/test/mockApi'
 
 const renderApp = () => render(<App client={new QueryClient({ defaultOptions: { queries: { retry: false } } })} />)
 
@@ -32,6 +32,7 @@ test('His AI tab: answers are labeled as AI and a notice says it is not the pers
     'GET /ai/u1/thread': { status: 200, body: { owner_id: 'u1', available: true, messages: [aiMsg('a', 'user', 'Où en est le rapport ?'), aiMsg('b', 'assistant', 'Il est en cours.')] } },
   })
   renderApp()
+  await openChat()
   await userEvent.click(await screen.findByRole('tab', { name: 'Son IA' }))
   expect(await screen.findByText('Il est en cours.')).toBeInTheDocument()
   expect(screen.getByText('IA de Amina Benali')).toBeInTheDocument()
@@ -45,6 +46,7 @@ test('asking sends the question to that person AI', async () => {
     'POST /ai/u1/messages': { status: 201, body: aiMsg('c', 'assistant', 'Réponse') },
   })
   renderApp()
+  await openChat()
   await userEvent.click(await screen.findByRole('tab', { name: 'Son IA' }))
   await userEvent.type(await screen.findByLabelText("Demander à l'IA de Amina Benali…"), 'Bonjour{Enter}')
   const call = fetchMock.mock.calls.find(([url, init]) => String(url).endsWith('/ai/u1/messages') && init?.method === 'POST')!
@@ -54,6 +56,7 @@ test('asking sends the question to that person AI', async () => {
 test('an AI not shared with me shows a clear message', async () => {
   mockApi({ ...LOGGED_IN, 'GET /ai/u1/thread': { status: 404, body: { error: { code: 'not_found' } } } })
   renderApp()
+  await openChat()
   await userEvent.click(await screen.findByRole('tab', { name: 'Son IA' }))
   expect(await screen.findByText("L'IA de Amina Benali n'est pas partagée avec vous.")).toBeInTheDocument()
 })
@@ -65,6 +68,7 @@ test('provider errors are shown translated', async () => {
     'POST /ai/u1/messages': { status: 429, body: { error: { code: 'ai_budget_exceeded' } } },
   })
   renderApp()
+  await openChat()
   await userEvent.click(await screen.findByRole('tab', { name: 'Son IA' }))
   await userEvent.type(await screen.findByLabelText("Demander à l'IA de Amina Benali…"), 'x{Enter}')
   expect(await screen.findByRole('alert')).toHaveTextContent('Le budget quotidien de cette IA est atteint.')

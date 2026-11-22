@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 
 import { App } from '@/app/App'
 import i18n from '@/i18n'
-import { LOGGED_IN, mockApi } from '@/test/mockApi'
+import { LOGGED_IN, mockApi, openChat } from '@/test/mockApi'
 
 const renderApp = () => render(<App client={new QueryClient({ defaultOptions: { queries: { retry: false } } })} />)
 
@@ -54,6 +54,7 @@ async function openFilesTab() {
 test('files are shown as icons only, with name and version on hover', async () => {
   mockApi(LOGGED_IN)
   renderApp()
+  await openChat()
   await openFilesTab()
   const tiles = await screen.findAllByRole('button', { name: 'budget.xlsx' })
   expect(tiles[0]).toHaveAttribute('title', 'budget.xlsx (v2)')
@@ -64,6 +65,7 @@ test('uploads the raw file with name, CSRF token and cookies', async () => {
   FakeXHR.reply = { status: 201, body: { id: 'f3' } }
   const fetchMock = mockApi(LOGGED_IN)
   renderApp()
+  await openChat()
   await openFilesTab()
   const file = new File(['hello'], 'notes été.txt', { type: 'text/plain' })
   await userEvent.upload(screen.getByLabelText('Ajouter des fichiers', { selector: 'input' }), file)
@@ -83,6 +85,7 @@ test('shows a translated error when the type is refused', async () => {
   FakeXHR.reply = { status: 415, body: { error: { code: 'type_not_allowed', message: 'x' } } }
   mockApi(LOGGED_IN)
   renderApp()
+  await openChat()
   await openFilesTab()
   await userEvent.upload(
     screen.getByLabelText('Ajouter des fichiers', { selector: 'input' }),
@@ -96,6 +99,7 @@ test('clicking a file asks for a signed link and downloads it', async () => {
   vi.stubGlobal('location', { ...window.location, assign })
   mockApi({ ...LOGGED_IN, 'GET /files/f2/download-url': { status: 200, body: { url: '/api/v1/files/download?token=t', expires_in: 300 } } })
   renderApp()
+  await openChat()
   await openFilesTab()
   await userEvent.click((await screen.findAllByRole('button', { name: 'rapport.pdf' }))[0])
   await vi.waitFor(() => expect(assign).toHaveBeenCalledWith('/api/v1/files/download?token=t'))

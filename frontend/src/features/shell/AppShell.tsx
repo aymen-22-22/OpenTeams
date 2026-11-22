@@ -24,6 +24,7 @@ import { MyTasks } from '@/features/tasks/MyTasks'
 import { TaskForm } from '@/features/tasks/TaskForm'
 import { TaskView } from '@/features/tasks/TaskView'
 import { EmptyState } from '@/components/ui/empty-state'
+import { HomeView } from '@/features/home/HomeView'
 import { api } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
@@ -34,7 +35,7 @@ import { Logo } from './Logo'
 import { TopBar } from './TopBar'
 
 type Column = 'people' | 'conversation' | 'details'
-type View = { kind: 'person' } | { kind: 'myTasks' } | { kind: 'assistant' } | { kind: 'preferences' }
+type View = { kind: 'home' } | { kind: 'person' } | { kind: 'myTasks' } | { kind: 'assistant' } | { kind: 'preferences' }
   | { kind: 'playbooks' }
   | { kind: 'calendar' }
   | { kind: 'requests' }
@@ -44,7 +45,7 @@ type View = { kind: 'person' } | { kind: 'myTasks' } | { kind: 'assistant' } | {
   | { kind: 'channels' }
   | { kind: 'report'; runId: string } | { kind: 'task'; taskId: string }
 
-const PAGE_KINDS = new Set<string>(['assistant', 'myTasks', 'calendar', 'projects', 'requests', 'playbooks', 'dashboard'])
+const PAGE_KINDS = new Set<string>(['home', 'assistant', 'myTasks', 'calendar', 'projects', 'requests', 'playbooks', 'dashboard'])
 /** Conversations show the side panel (pins, files, tasks, reminders); full pages use the whole width. */
 const SIDE_PANEL_VIEWS = new Set<string>(['person', 'channel'])
 
@@ -61,7 +62,7 @@ export function AppShell({ me }: { me: User }) {
   const conversations = useConversations().data
   const [selectedId, setSelectedId] = useState<string>()
   const [column, setColumn] = useState<Column>('conversation')
-  const [view, setView] = useState<View>({ kind: 'person' })
+  const [view, setView] = useState<View>({ kind: 'home' })
   const [tab, setTab] = useState<ConversationTab>('chat')
   const [taskDraft, setTaskDraft] = useState<Partial<TaskInput> | null>(null)
   const channels = useChannels().data ?? []
@@ -73,7 +74,7 @@ export function AppShell({ me }: { me: User }) {
 
   const peopleById = useMemo(() => new Map((allPeople ?? []).map((p) => [p.id, p])), [allPeople])
   const people = (allPeople ?? []).filter((p) => p.id !== me.id)
-  const person = people.find((p) => p.id === selectedId) ?? people[0]
+  const person = people.find((p) => p.id === selectedId)
   const conversation = useDirectConversation(person?.id).data
 
   // Unread count, last message and time per person (direct chat) and per channel.
@@ -138,6 +139,7 @@ export function AppShell({ me }: { me: User }) {
     else if (kind === 'projects') show({ kind: 'projects', projectId: id })
     else if (kind === 'dashboard') show({ kind: 'dashboard' })
     else if (kind === 'preferences') show({ kind: 'preferences' })
+    else if (!kind) show({ kind: 'home' })
   }
 
   useEffect(() => {
@@ -179,8 +181,13 @@ export function AppShell({ me }: { me: User }) {
           <main className="flex min-h-0 flex-1">
             <div key={viewKey} className={cn(column === 'conversation' ? 'flex' : 'hidden', 'min-w-0 flex-1 animate-fade-in flex-col md:flex')}>
               {view.kind === 'task' && (
-                <TaskView key={view.taskId} taskId={view.taskId} meId={me.id} people={peopleById} onBack={() => setView({ kind: 'person' })}
+                <TaskView key={view.taskId} taskId={view.taskId} meId={me.id} people={peopleById} onBack={() => setView({ kind: 'home' })}
                   onRemind={(id, title) => setReminderDraft({ title, target_type: 'task', target_id: id })} />
+              )}
+              {view.kind === 'home' && (
+                <HomeView me={me} peopleById={peopleById} conversations={conversations ?? []}
+                  onOpenConversation={(id) => void openConversation(id)} onOpenTask={openTask}
+                  onOpenPage={(page) => show({ kind: page })} />
               )}
               {view.kind === 'assistant' && <AssistantView me={me} people={peopleById} />}
               {view.kind === 'preferences' && <PreferencesView />}

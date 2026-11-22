@@ -1,4 +1,4 @@
-import { Bot, CalendarDays, ClipboardCheck, FolderKanban, Gauge, Hash, KanbanSquare, Lock, Plus, Sparkles, Workflow, type LucideIcon } from 'lucide-react'
+import { Bot, CalendarDays, House, ClipboardCheck, FolderKanban, Gauge, Hash, KanbanSquare, Lock, Plus, Sparkles, Workflow, type LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -16,9 +16,10 @@ export interface Activity {
 }
 
 /** Pages reachable from the top of the left panel. */
-export type Page = 'assistant' | 'myTasks' | 'calendar' | 'projects' | 'requests' | 'playbooks' | 'dashboard'
+export type Page = 'home' | 'assistant' | 'myTasks' | 'calendar' | 'projects' | 'requests' | 'playbooks' | 'dashboard'
 
 const PAGES: { page: Page; Icon: LucideIcon; label: string; managersOnly?: boolean }[] = [
+  { page: 'home', Icon: House, label: 'home.title' },
   { page: 'assistant', Icon: Bot, label: 'people.myAssistant' },
   { page: 'myTasks', Icon: KanbanSquare, label: 'tasks.myTasks' },
   { page: 'calendar', Icon: CalendarDays, label: 'calendar.title' },

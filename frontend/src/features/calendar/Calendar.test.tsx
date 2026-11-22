@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 
 import { App } from '@/app/App'
 import i18n from '@/i18n'
-import { LOGGED_IN, mockApi, task } from '@/test/mockApi'
+import { LOGGED_IN, mockApi, task, openChat } from '@/test/mockApi'
 
 const renderApp = () => render(<App client={new QueryClient({ defaultOptions: { queries: { retry: false } } })} />)
 
@@ -36,9 +36,9 @@ test('month view places events on their day, coloured by type', async () => {
   const fetchMock = mockApi({ ...LOGGED_IN, 'GET /calendar/events*': { status: 200, body: EVENTS }, 'GET /teams': { status: 200, body: [] } })
   renderApp()
   await openCalendar()
-  const jan7 = await screen.findByRole('gridcell', { name: 'mercredi 7 janvier 2026' })
+  const jan7 = (await screen.findByRole('button', { name: 'mercredi 7 janvier 2026' })).closest<HTMLElement>('[role=gridcell]')!
   expect(await within(jan7).findByRole('button', { name: /Point projet/ })).toBeInTheDocument()
-  const jan15 = screen.getByRole('gridcell', { name: 'jeudi 15 janvier 2026' })
+  const jan15 = screen.getByRole('button', { name: 'jeudi 15 janvier 2026' }).closest<HTMLElement>('[role=gridcell]')!
   expect(within(jan15).getByRole('button', { name: 'Facture' })).toHaveClass('bg-red-100')
   const url = String(fetchMock.mock.calls.find(([u]) => String(u).includes('/calendar/events'))![0])
   expect(url).toContain('user_id=me') // "My calendar" by default
@@ -86,6 +86,7 @@ test('create a meeting with attendees', async () => {
 test('schedule a meeting from a chat invites its members', async () => {
   const fetchMock = mockApi({ ...LOGGED_IN, 'POST /calendar/events': { status: 201, body: EVENTS[0] } })
   renderApp()
+  await openChat()
   await userEvent.click(await screen.findByRole('button', { name: 'Planifier une réunion' }))
   const dialog = screen.getByRole('dialog', { name: 'Nouvelle réunion' })
   expect(within(dialog).getByText('Les membres de cette conversation seront invités.')).toBeInTheDocument()

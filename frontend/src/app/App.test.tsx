@@ -1,9 +1,9 @@
 import { QueryClient } from '@tanstack/react-query'
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import i18n from '@/i18n'
-import { LOGGED_IN, ME, mockApi } from '@/test/mockApi'
+import { LOGGED_IN, ME, mockApi, openChat } from '@/test/mockApi'
 
 import { App } from './App'
 
@@ -37,7 +37,7 @@ test('wrong password shows an error, then a successful login opens the shell', a
   expect(await screen.findByRole('alert')).toHaveTextContent('E-mail ou mot de passe incorrect.')
 
   await userEvent.click(screen.getByRole('button', { name: 'Se connecter' }))
-  expect(await screen.findByRole('tab', { name: 'Son IA' })).toBeInTheDocument()
+  expect(await screen.findByRole('heading', { name: /Moi/ })).toBeInTheDocument() // home page greets me
 
   const loginCall = fetchMock.mock.calls.find(([url]) => String(url).endsWith('/auth/login'))
   expect((loginCall?.[1]?.headers as Record<string, string>)['X-CSRF-Token']).toBe('test-token')
@@ -46,14 +46,14 @@ test('wrong password shows an error, then a successful login opens the shell', a
 test('people panel lists other users from the API, without me', async () => {
   mockApi(LOGGED_IN)
   renderApp()
-  expect(await screen.findByRole('button', { name: /Lucas Martin/ })).toBeInTheDocument()
+  expect(await within(await screen.findByRole('navigation', { name: 'Personnes' })).findByRole('button', { name: /Lucas Martin/ })).toBeInTheDocument()
   expect(screen.queryByRole('button', { name: /^Moi/ })).not.toBeInTheDocument()
 })
 
 test('presence events from the WebSocket update the people panel', async () => {
   mockApi(LOGGED_IN)
   renderApp()
-  await screen.findByRole('button', { name: /Lucas Martin/ })
+  await within(await screen.findByRole('navigation', { name: 'Personnes' })).findByRole('button', { name: /Lucas Martin/ })
   expect(screen.getAllByLabelText('Hors ligne')).toHaveLength(1)
 
   const ws = (globalThis.WebSocket as unknown as { instances: { onmessage: (e: { data: string }) => void }[] }).instances.at(-1)!
@@ -65,6 +65,7 @@ test('presence events from the WebSocket update the people panel', async () => {
 test('switching to Arabic sets right-to-left direction', async () => {
   mockApi(LOGGED_IN)
   renderApp()
+  await openChat()
   await userEvent.selectOptions(await screen.findByLabelText('Langue'), 'ar')
   expect(document.documentElement.dir).toBe('rtl')
   expect(document.documentElement.lang).toBe('ar')
@@ -74,6 +75,7 @@ test('switching to Arabic sets right-to-left direction', async () => {
 test('switching to English translates the shell', async () => {
   mockApi(LOGGED_IN)
   renderApp()
+  await openChat()
   await userEvent.selectOptions(await screen.findByLabelText('Langue'), 'en')
   expect(screen.getByRole('tab', { name: 'His AI' })).toBeInTheDocument()
   expect(document.documentElement.dir).toBe('ltr')
@@ -91,6 +93,7 @@ test('logout returns to the login page', async () => {
 test('tabs follow the language direction (Radix would default to ltr)', async () => {
   mockApi(LOGGED_IN)
   renderApp()
+  await openChat()
   await userEvent.selectOptions(await screen.findByLabelText('Langue'), 'ar')
   const tablist = screen.getByRole('tablist')
   expect(tablist.closest('[dir]')).toHaveAttribute('dir', 'rtl')

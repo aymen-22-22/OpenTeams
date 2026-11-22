@@ -1,9 +1,18 @@
+import { screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+
 import { vi } from 'vitest'
 
 type Route = { status: number; body?: unknown }
 export type Routes = Record<string, Route | (() => Route)>
 
 /** Mock fetch by "METHOD /path" (path after /api/v1); a key ending in * matches a prefix. Unknown routes return 404. */
+/** The app opens on the home page: open a person's chat from the people panel. */
+export async function openChat(name: RegExp = /Amina Benali/) {
+  const nav = await screen.findByRole('navigation', { name: 'Personnes' })
+  await userEvent.click(await within(nav).findByRole('button', { name }))
+}
+
 export function mockApi(routes: Routes) {
   const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const path = String(input).replace('/api/v1', '')
