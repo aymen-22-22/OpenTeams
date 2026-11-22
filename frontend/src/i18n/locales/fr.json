@@ -53,7 +53,12 @@
     "today": "Aujourd'hui",
     "yesterday": "Hier",
     "emptyHint": "Écrivez le premier message ci-dessous.",
-    "viaEmail": "par e-mail"
+    "viaEmail": "par e-mail",
+    "attach": "Joindre des fichiers",
+    "attachments": "Fichiers à envoyer",
+    "removeFile": "Retirer {{name}}",
+    "dropFiles": "Déposez les fichiers pour les joindre",
+    "keysHint": "Entrée pour envoyer · Maj+Entrée pour aller à la ligne"
   },
   "ai": {
     "label": "IA de {{name}}",

@@ -53,7 +53,12 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "emptyHint": "Write the first message below.",
-    "viaEmail": "by email"
+    "viaEmail": "by email",
+    "attach": "Attach files",
+    "attachments": "Files to send",
+    "removeFile": "Remove {{name}}",
+    "dropFiles": "Drop files to attach them",
+    "keysHint": "Enter to send · Shift+Enter for a new line"
   },
   "ai": {
     "label": "AI of {{name}}",

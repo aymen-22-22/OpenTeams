@@ -53,7 +53,12 @@
     "today": "اليوم",
     "yesterday": "أمس",
     "emptyHint": "اكتب الرسالة الأولى أدناه.",
-    "viaEmail": "عبر البريد"
+    "viaEmail": "عبر البريد",
+    "attach": "إرفاق ملفات",
+    "attachments": "ملفات للإرسال",
+    "removeFile": "إزالة {{name}}",
+    "dropFiles": "أفلت الملفات لإرفاقها",
+    "keysHint": "Enter للإرسال · Shift+Enter لسطر جديد"
   },
   "ai": {
     "label": "الذكاء الاصطناعي لـ {{name}}",

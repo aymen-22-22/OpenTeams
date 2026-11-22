@@ -1,11 +1,15 @@
-import { MessagesSquare, Reply, Pencil, SendHorizontal, X } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { MessagesSquare, Paperclip, Reply, Pencil, SendHorizontal, Upload, X } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState, type ClipboardEvent, type DragEvent, type FormEvent } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { Person } from '@/features/auth/api'
+import { filesKey, uploadFile } from '@/features/files/api'
+import { ApiError } from '@/lib/api'
+import { cn } from '@/lib/utils'
 import { realtime } from '@/lib/realtime'
 
 import {
@@ -25,6 +29,21 @@ import { useTypingUser } from './typing'
 
 const TYPING_EVERY_MS = 3000
 const GROUP_GAP_MS = 5 * 60_000 // messages by the same person within 5 minutes share one header
+const KNOWN_UPLOAD_ERRORS = new Set(['type_not_allowed', 'too_large', 'rejected'])
+
+/** A file chosen in the composer, uploaded when the message is sent. */
+interface Attachment {
+  id: string
+  file: File
+  progress: number | null // null: not started
+  error?: string
+}
+
+/** "12 ko" / "12 kB" / "١٢ ك.ب", in the user's language. */
+function formatSize(bytes: number, lang: string) {
+  const [value, unit] = bytes < 1024 * 1024 ? [Math.max(1, Math.round(bytes / 1024)), 'kilobyte'] : [bytes / 1024 / 1024, 'megabyte']
+  return new Intl.NumberFormat(lang, { style: 'unit', unit, unitDisplay: 'short', maximumFractionDigits: 1 }).format(value)
+}
 
 function sameDay(a: string, b: string) {
   return new Date(a).toDateString() === new Date(b).toDateString()
@@ -72,7 +91,7 @@ interface Props {
 }
 
 export function ChatView({ conversation, meId, people, onCreateTask, onRemind }: Props) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const messages = useMessages(conversation.id)
   const pins = usePins(conversation.id)
   const send = useSendMessage(conversation.id)
@@ -91,6 +110,11 @@ export function ChatView({ conversation, meId, people, onCreateTask, onRemind }:
   const lastTypingSent = useRef(0)
   const lastReadSent = useRef(conversation.last_read_seq)
   const listRef = useRef<HTMLOListElement>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
+  const qc = useQueryClient()
+  const [attachments, setAttachments] = useState<Attachment[]>([])
+  const [uploading, setUploading] = useState(false)
+  const [dragging, setDragging] = useState(false)
 
   // Pages are newest first; display oldest first.
   const items = useMemo(
@@ -147,12 +171,58 @@ export function ChatView({ conversation, meId, people, onCreateTask, onRemind }:
     setEditing(null)
   }
 
-  const onSubmit = (e: FormEvent) => {
+  const addFiles = (files: File[]) => {
+    if (editing || files.length === 0) return
+    setAttachments((list) => [...list, ...files.map((file) => ({ id: crypto.randomUUID(), file, progress: null }))])
+    textRef.current?.focus()
+  }
+  const patchAttachment = (id: string, patch: Partial<Attachment>) =>
+    setAttachments((list) => list.map((a) => (a.id === id ? { ...a, ...patch } : a)))
+  const pending = attachments.filter((a) => !a.error)
+
+  /** Upload the chosen files; returns the names that were stored. Refused ones stay listed with their error. */
+  const uploadPending = async (): Promise<string[]> => {
+    const stored: string[] = []
+    for (const a of pending) {
+      try {
+        const file = await uploadFile(conversation.id, a.file, (ratio) => patchAttachment(a.id, { progress: ratio }))
+        stored.push(file.name)
+        setAttachments((list) => list.filter((x) => x.id !== a.id))
+      } catch (err) {
+        patchAttachment(a.id, { progress: null, error: err instanceof ApiError ? err.code : 'upload_failed' })
+      }
+    }
+    if (stored.length) void qc.invalidateQueries({ queryKey: filesKey(conversation.id) })
+    return stored
+  }
+
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    const body = draft.trim()
-    if (!body) return
-    if (editing) edit.mutate({ id: editing.id, body }, { onSuccess: reset })
-    else send.mutate({ body, reply_to_id: replyTo?.id, key: crypto.randomUUID() }, { onSuccess: reset })
+    const text = draft.trim()
+    if (editing) {
+      if (text) edit.mutate({ id: editing.id, body: text }, { onSuccess: reset })
+      return
+    }
+    if (!text && pending.length === 0) return
+    setUploading(true)
+    const names = pending.length ? await uploadPending() : []
+    setUploading(false)
+    const body = [text, names.length ? `📎 ${names.join(', ')}` : ''].filter(Boolean).join('\n\n')
+    if (!body) return // every file was refused: keep the draft and show the errors
+    send.mutate({ body, reply_to_id: replyTo?.id, key: crypto.randomUUID() }, { onSuccess: reset })
+  }
+
+  const onPaste = (e: ClipboardEvent) => {
+    const files = Array.from(e.clipboardData.files)
+    if (files.length) {
+      e.preventDefault()
+      addFiles(files)
+    }
+  }
+  const onDrop = (e: DragEvent) => {
+    e.preventDefault()
+    setDragging(false)
+    addFiles(Array.from(e.dataTransfer.files))
   }
 
   const startEdit = (m: Message) => {
@@ -162,7 +232,17 @@ export function ChatView({ conversation, meId, people, onCreateTask, onRemind }:
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="relative flex h-full flex-col"
+      onDragOver={(e) => { if (e.dataTransfer.types.includes('Files')) { e.preventDefault(); setDragging(true) } }}
+      onDragLeave={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDragging(false) }}
+      onDrop={onDrop}>
+      {dragging && (
+        <div className="pointer-events-none absolute inset-2 z-20 flex animate-fade-in items-center justify-center rounded-2xl border-2 border-dashed border-accent bg-accent-soft/80">
+          <span className="flex items-center gap-2 text-sm font-semibold text-accent-soft-foreground">
+            <Upload className="size-5" aria-hidden />{t('chat.dropFiles')}
+          </span>
+        </div>
+      )}
       <ol ref={listRef} aria-label={t('tabs.chat')} className="flex flex-1 flex-col overflow-y-auto px-4 py-4 sm:px-6">
         {messages.hasNextPage && (
           <li className="self-center">
@@ -215,7 +295,7 @@ export function ChatView({ conversation, meId, people, onCreateTask, onRemind }:
         )}
       </p>
 
-      <form onSubmit={onSubmit} className="relative px-3 pb-3 sm:px-5 sm:pb-4">
+      <form onSubmit={(e) => void onSubmit(e)} className="relative px-3 pb-3 sm:px-5 sm:pb-4">
         {suggestions.length > 0 && (
           <ul id="mention-list" role="listbox" aria-label={t('chat.mentionSomeone')}
             className="absolute inset-x-3 bottom-full z-10 mb-2 flex animate-pop flex-col overflow-hidden rounded-xl border border-border bg-background p-1 shadow-lg sm:inset-x-5">
@@ -241,8 +321,40 @@ export function ChatView({ conversation, meId, people, onCreateTask, onRemind }:
             </button>
           </div>
         )}
-        <div className="flex items-end gap-2 p-1.5 ps-3">
+        {attachments.length > 0 && (
+          <ul aria-label={t('chat.attachments')} className="flex flex-wrap gap-1.5 border-b border-border p-2">
+            {attachments.map((a) => (
+              <li key={a.id} className={cn('relative flex min-h-9 max-w-64 items-center gap-2 overflow-hidden rounded-lg border ps-2.5 text-[13px]',
+                a.error ? 'border-danger/40 bg-danger-soft text-danger' : 'border-border bg-muted')}>
+                <Paperclip className="size-3.5 shrink-0" aria-hidden />
+                <span className="flex min-w-0 flex-col py-1 leading-tight">
+                  <span dir="auto" className="truncate font-medium">{a.file.name}</span>
+                  <span className={cn('text-[11px]', !a.error && 'text-muted-foreground')}>
+                    {a.error ? t(`files.errors.${KNOWN_UPLOAD_ERRORS.has(a.error) ? a.error : 'upload_failed'}`) : formatSize(a.file.size, i18n.language)}
+                  </span>
+                </span>
+                <button type="button" aria-label={t('chat.removeFile', { name: a.file.name })} disabled={uploading}
+                  onClick={() => setAttachments((list) => list.filter((x) => x.id !== a.id))}
+                  className="flex size-9 shrink-0 items-center justify-center rounded-lg hover:bg-background/60">
+                  <X className="size-3.5" aria-hidden />
+                </button>
+                {a.progress !== null && (
+                  <span role="progressbar" aria-label={a.file.name} aria-valuenow={Math.round(a.progress * 100)}
+                    className="absolute inset-x-0 bottom-0 h-0.5 bg-accent transition-[inline-size]" style={{ inlineSize: `${a.progress * 100}%` }} />
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="flex items-end gap-1 p-1.5">
+          <input ref={fileRef} type="file" multiple hidden aria-label={t('chat.attach')} onChange={(e) => { addFiles(Array.from(e.target.files ?? [])); e.target.value = '' }} />
+          <button type="button" onClick={() => fileRef.current?.click()} disabled={Boolean(editing)}
+            aria-label={t('chat.attach')} title={t('chat.attach')}
+            className="flex size-10 shrink-0 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40">
+            <Paperclip className="size-[18px]" aria-hidden />
+          </button>
           <textarea
+            onPaste={onPaste}
             aria-label={t('chat.placeholder')}
             placeholder={t('chat.placeholder')}
             value={draft}
@@ -271,7 +383,7 @@ export function ChatView({ conversation, meId, people, onCreateTask, onRemind }:
                   return
                 }
               }
-              if (e.key === 'Enter' && !e.shiftKey) onSubmit(e)
+              if (e.key === 'Enter' && !e.shiftKey) void onSubmit(e)
               if (e.key === 'Escape') reset()
             }}
             onInput={(e) => {
@@ -282,12 +394,13 @@ export function ChatView({ conversation, meId, people, onCreateTask, onRemind }:
             }}
             className="max-h-40 min-h-10 flex-1 resize-none bg-transparent py-2.5 text-[15px] leading-6 outline-none placeholder:text-muted-foreground"
           />
-          <Button type="submit" size="icon" className="rounded-xl" disabled={send.isPending || edit.isPending || !draft.trim()}
+          <Button type="submit" size="icon" className="rounded-xl" disabled={uploading || send.isPending || edit.isPending || (!draft.trim() && (editing !== null || pending.length === 0))}
             aria-label={editing ? t('chat.save') : t('chat.send')} title={editing ? t('chat.save') : t('chat.send')}>
             <SendHorizontal className="size-[18px] rtl:-scale-x-100" aria-hidden />
           </Button>
         </div>
         </div>
+        <p className="mt-1.5 hidden px-1 text-end text-[11px] text-muted-foreground sm:block" aria-hidden>{t('chat.keysHint')}</p>
       </form>
     </div>
   )
