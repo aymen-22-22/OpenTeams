@@ -1,6 +1,6 @@
 {{ subject }}
 
-{{ t.digest_intro }}
+{{ intro }}
 {% for group in groups %}
 == {{ group.label }} ==
 {% for item in group.entries -%}
@@ -13,4 +13,5 @@
 {{ t.open_app }}: {{ base_url }}/
 
 --
-{{ t.footer }} {{ t.preferences }}: {{ preferences_url }}
+{% if brand.footer %}{{ brand.footer }}
+{% endif %}{{ footer }} {{ t.preferences }}: {{ preferences_url }}

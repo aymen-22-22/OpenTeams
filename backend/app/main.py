@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.admin.branding_router import router as branding_router
 from app.admin.email_router import router as admin_email_router
 from app.admin.router import router as admin_router
 from app.ai.router import router as ai_router
@@ -61,6 +62,7 @@ def create_app() -> FastAPI:
         users_router,
         admin_router,
         admin_email_router,
+        branding_router,
         chat_router,
         channels_router,
         search_router,

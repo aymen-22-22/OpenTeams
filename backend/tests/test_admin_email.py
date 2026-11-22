@@ -15,7 +15,7 @@ from app.core.crypto import decrypt
 from app.core.db import SessionLocal
 from app.reminders import email, jobs
 from app.reminders.models import EmailOutbox, EmailStatus
-from tests.conftest import new_client
+from tests.conftest import make_user, new_client
 
 URL = "/api/v1/admin/email"
 SETTINGS = {
@@ -210,3 +210,180 @@ def test_send_sync_security_modes(
     config = SmtpConfig("h", 465, security, "u", "p", "Me <me@x.dz>", "admin")
     send_sync(config, "a@x.dz", "Subject", "<p>x</p>", "x")
     assert FakeSMTP.log == expected
+
+
+# --- branding, logo, wording, preview -------------------------------------------------
+
+PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 64
+
+
+async def test_branding_applies_to_emails(admin_client: AsyncClient) -> None:
+    r = await admin_client.put(
+        f"{URL}/branding",
+        json={"name": "SDG Consulting", "color": "#1d4ed8", "footer": "SDG · Alger"},
+    )
+    assert r.status_code == 200 and r.json() == {
+        "name": "SDG Consulting",
+        "color": "#1d4ed8",
+        "footer": "SDG · Alger",
+        "has_logo": False,
+    }
+    preview = (
+        await admin_client.post(f"{URL}/preview", json={"kind": "task", "lang": "fr"})
+    ).json()
+    assert (
+        "SDG Consulting" in preview["html"]
+        and "#1d4ed8" in preview["html"]
+        and "#0F766E" not in preview["html"]
+    )
+    assert "SDG · Alger" in preview["html"] and "SDG · Alger" in preview["text"]
+    assert "via SDG Consulting" in preview["html"]
+    assert preview["subject"] == "Tâche : Préparer le rapport mensuel"
+
+
+@pytest.mark.parametrize(
+    "bad", [{"color": "blue"}, {"color": "#12345"}, {"name": "x" * 121}, {"footer": "x" * 501}]
+)
+async def test_branding_validation(admin_client: AsyncClient, bad: dict[str, Any]) -> None:
+    assert (await admin_client.put(f"{URL}/branding", json=bad)).status_code == 422
+
+
+async def test_light_color_gets_dark_text(admin_client: AsyncClient) -> None:
+    await admin_client.put(f"{URL}/branding", json={"color": "#fde047"})
+    html = (await admin_client.post(f"{URL}/preview", json={})).json()["html"]
+    assert "color:#111111" in html
+
+
+async def test_logo_upload_public_serving_and_removal(admin_client: AsyncClient) -> None:
+    assert (await admin_client.put(f"{URL}/logo", content=PNG)).status_code == 204
+    assert (await admin_client.get(f"{URL}/branding")).json()["has_logo"] is True
+    anonymous = await new_client()
+    r = await anonymous.get("/api/v1/branding/logo")
+    assert r.status_code == 200 and r.content == PNG and r.headers["content-type"] == "image/png"
+    assert r.headers["x-content-type-options"] == "nosniff"
+    html = (await admin_client.post(f"{URL}/preview", json={})).json()["html"]
+    assert "/api/v1/branding/logo?v=" in html
+    assert (await admin_client.delete(f"{URL}/logo")).status_code == 204
+    assert (await anonymous.get("/api/v1/branding/logo")).status_code == 404
+    await anonymous.aclose()
+
+
+@pytest.mark.parametrize(
+    ("content", "status"),
+    [
+        (b"<svg onload=alert(1)></svg>", 415),
+        (b"GIF89a....", 415),
+        (b"\x89PNG\r\n\x1a\n" + b"0" * (300 * 1024), 413),
+    ],
+)
+async def test_logo_rejected(admin_client: AsyncClient, content: bytes, status: int) -> None:
+    r = await admin_client.put(
+        f"{URL}/logo", content=content, headers={"Content-Type": "image/png"}
+    )
+    assert r.status_code == status
+
+
+async def test_texts_defaults_overrides_and_rendering(admin_client: AsyncClient) -> None:
+    data = (await admin_client.get(f"{URL}/texts")).json()
+    assert data["defaults"]["task"]["fr"] == {"subject": "Tâche", "intro": ""}
+    assert data["defaults"]["digest"]["en"]["subject"].startswith("Your daily summary")
+    assert data["overrides"] == {}
+    r = await admin_client.put(
+        f"{URL}/texts",
+        json={
+            "task": {
+                "fr": {"subject": "Nouvelle mission", "intro": "Bonjour,\nune tâche vous attend."},
+                "en": {"subject": "", "intro": ""},
+            },
+            "digest": {"fr": {"subject": "Votre journée chez SDG : {n} nouveautés", "intro": ""}},
+        },
+    )
+    assert r.status_code == 200
+    assert r.json()["overrides"] == {  # empty entries are not stored
+        "task": {
+            "fr": {"subject": "Nouvelle mission", "intro": "Bonjour,\nune tâche vous attend."}
+        },
+        "digest": {"fr": {"subject": "Votre journée chez SDG : {n} nouveautés", "intro": ""}},
+    }
+    task = (await admin_client.post(f"{URL}/preview", json={"kind": "task", "lang": "fr"})).json()
+    assert task["subject"] == "Nouvelle mission : Préparer le rapport mensuel"
+    assert "une tâche vous attend." in task["html"] and "une tâche vous attend." in task["text"]
+    english = (
+        await admin_client.post(f"{URL}/preview", json={"kind": "task", "lang": "en"})
+    ).json()
+    assert english["subject"] == "Task: Prepare the monthly report"  # default kept
+    digest = (
+        await admin_client.post(f"{URL}/preview", json={"kind": "digest", "lang": "fr"})
+    ).json()
+    assert digest["subject"] == "Votre journée chez SDG : 4 nouveautés"
+    assert "Nouvelle mission" in digest["html"]  # group label follows the override
+
+
+async def test_real_notifications_use_branding_and_texts(admin_client: AsyncClient) -> None:
+    await admin_client.put(f"{URL}/branding", json={"name": "SDG Consulting", "color": "#1d4ed8"})
+    await admin_client.put(
+        f"{URL}/texts", json={"task": {"fr": {"subject": "Mission", "intro": "Bonjour"}}}
+    )
+    lucas = await make_user("lucas@example.com")
+    await admin_client.post("/api/v1/tasks", json={"title": "Budget", "assignee_id": str(lucas.id)})
+    async with SessionLocal() as db:
+        mail = await db.scalar(select(EmailOutbox))
+    assert mail is not None and mail.subject == "Mission : Budget"
+    assert "SDG Consulting" in mail.html and "#1d4ed8" in mail.html and "Bonjour" in mail.html
+
+
+@pytest.mark.parametrize(
+    "bad",
+    [
+        {"spam": {"fr": {"subject": "x"}}},
+        {"task": {"de": {"subject": "x"}}},
+        {"task": {"fr": {"subject": "x" * 151}}},
+    ],
+)
+async def test_texts_validation(admin_client: AsyncClient, bad: dict[str, Any]) -> None:
+    assert (await admin_client.put(f"{URL}/texts", json=bad)).status_code == 422
+
+
+async def test_preview_with_unsaved_changes_does_not_save(admin_client: AsyncClient) -> None:
+    r = await admin_client.post(
+        f"{URL}/preview",
+        json={
+            "kind": "mention",
+            "lang": "ar",
+            "branding": {"name": "Brouillon", "color": "#7c3aed", "footer": ""},
+            "texts": {"mention": {"ar": {"subject": "تنبيه", "intro": ""}}},
+        },
+    )
+    data = r.json()
+    assert (
+        "Brouillon" in data["html"]
+        and 'dir="rtl"' in data["html"]
+        and data["subject"].startswith("تنبيه")
+    )
+    assert (await admin_client.get(f"{URL}/branding")).json()["name"] == ""  # nothing saved
+
+
+async def test_test_email_of_a_given_type(
+    admin_client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    sent: list[tuple[Any, ...]] = []
+    monkeypatch.setattr(email_router, "send_sync", lambda *a: sent.append(a))
+    r = await admin_client.post(
+        f"{URL}/test", json={"to": "me@example.com", "kind": "digest", "lang": "en"}
+    )
+    assert r.status_code == 204 and sent[0][2].startswith("Your daily summary")
+
+
+async def test_branding_admin_only(employee_client: AsyncClient) -> None:
+    for method, path in (
+        ("get", "/branding"),
+        ("put", "/branding"),
+        ("put", "/logo"),
+        ("delete", "/logo"),
+        ("get", "/texts"),
+        ("put", "/texts"),
+        ("post", "/preview"),
+    ):
+        assert (
+            await employee_client.request(method.upper(), f"{URL}{path}", json={})
+        ).status_code == 403

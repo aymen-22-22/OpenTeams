@@ -1,8 +1,11 @@
-{{ title }}
+{% if intro %}{{ intro }}
+
+{% endif %}{{ title }}
 
 {% if body %}{{ body }}
 
 {% endif %}{{ t.open }}: {{ link_url }}
 
 --
-{{ t.footer }} {{ t.preferences }}: {{ preferences_url }}
+{% if brand.footer %}{{ brand.footer }}
+{% endif %}{{ footer }} {{ t.preferences }}: {{ preferences_url }}

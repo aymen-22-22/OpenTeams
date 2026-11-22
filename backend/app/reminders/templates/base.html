@@ -10,12 +10,15 @@
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;">
 <tr><td align="center" style="padding:24px 12px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:8px;overflow:hidden;">
-    <tr><td style="background:#0F766E;padding:16px 24px;color:#ffffff;font-size:18px;font-weight:bold;text-align:{{ start }};">OpenTeams</td></tr>
+    <tr><td style="background:{{ brand.color }};padding:14px 24px;color:{{ brand.on_color }};font-size:18px;font-weight:bold;text-align:{{ start }};">
+      {% if brand.logo_url %}<img src="{{ brand.logo_url }}" alt="" height="32" style="height:32px;max-width:160px;vertical-align:middle;border:0;margin-inline-end:10px;">{% endif %}<span style="vertical-align:middle;">{{ brand.name }}</span>
+    </td></tr>
     <tr><td style="padding:24px;color:#171717;font-size:15px;line-height:1.5;text-align:{{ start }};">
       {% block content %}{% endblock %}
     </td></tr>
-    <tr><td style="padding:16px 24px;border-top:1px solid #e5e5e5;color:#525252;font-size:12px;text-align:{{ start }};">
-      {{ t.footer }} <a href="{{ preferences_url }}" style="color:#0F766E;">{{ t.preferences }}</a>
+    <tr><td style="padding:16px 24px;border-top:1px solid #e5e5e5;color:#525252;font-size:12px;line-height:1.5;text-align:{{ start }};">
+      {% if brand.footer %}<p style="margin:0 0 6px;white-space:pre-line;">{{ brand.footer }}</p>{% endif %}
+      {{ footer }} <a href="{{ preferences_url }}" style="color:{{ brand.color }};">{{ t.preferences }}</a>
     </td></tr>
   </table>
 </td></tr>

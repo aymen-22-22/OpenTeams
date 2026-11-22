@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 
 from sqlalchemy import delete, select
 
-from app.admin.org import smtp_config
+from app.admin.org import email_brand, smtp_config
 from app.chat.events import RealtimeEvent
 from app.core.db import SessionLocal
 from app.core.settings import get_settings
@@ -116,6 +116,7 @@ async def send_digests(now: datetime) -> int:
     queued = 0
     async with SessionLocal() as db:
         user_ids = list(await db.scalars(select(DigestItem.user_id).distinct()))
+        brand = await email_brand(db)
         for user_id in user_ids:
             user = await db.get(User, user_id)
             if user is None:
@@ -134,7 +135,7 @@ async def send_digests(now: datetime) -> int:
             unread = [item for item, read_at in rows if read_at is None]
             if user.is_active and unread:
                 entries = [email.DigestEntry(i.type.value, i.title, i.body, i.link) for i in unread]
-                rendered = email.render_digest(entries, user.locale)
+                rendered = email.render_digest(entries, user.locale, brand)
                 db.add(
                     EmailOutbox(
                         to_email=user.email,

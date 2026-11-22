@@ -613,6 +613,51 @@
       "testSent": "Email sent to {{to}}. Check the inbox (and spam).",
       "failedAuth": "The server rejected the username or password.",
       "failedConnect": "Could not reach the server, or sending was refused."
+    },
+    "design": {
+      "appearance": "Email appearance",
+      "name": "Display name",
+      "color": "Color",
+      "colorHex": "Color (hex code)",
+      "reset": "Default",
+      "footer": "Footer line",
+      "footerPlaceholder": "E.g. SDG Consulting · Algiers · www.sdgconsulting.dz",
+      "logo": "Logo",
+      "logoAlt": "Current logo",
+      "uploadLogo": "Add a logo",
+      "replaceLogo": "Replace",
+      "removeLogo": "Remove",
+      "logoHint": "PNG or JPEG, 300 KB max. Shown at the top of every email (32 px high).",
+      "logoErrors": {
+        "too_large": "Logo too large (300 KB max).",
+        "type_not_allowed": "The logo must be a PNG or JPEG image.",
+        "failed": "Could not upload the logo."
+      },
+      "invalid": "Check the color (format #RRGGBB).",
+      "wording": "Email wording",
+      "wordingHint": "Replace the label or add an intro paragraph for each type and language. Leave empty to keep the default text.",
+      "kind": "Email type",
+      "kinds": {
+        "task": "Task assigned",
+        "mention": "Mention",
+        "message": "New message",
+        "reminder": "Reminder",
+        "approval": "Approval",
+        "event": "Meeting",
+        "file": "New file",
+        "report": "Report",
+        "digest": "Daily digest"
+      },
+      "label": "Label (start of the subject)",
+      "labelHint": "The subject becomes “Label: title”.",
+      "subject": "Subject",
+      "subjectHint": "{n} is replaced by the number of notifications.",
+      "intro": "Intro paragraph",
+      "introPlaceholder": "None (optional)",
+      "useDefault": "Back to the default text",
+      "preview": "Preview",
+      "previewHint": "The preview shows your changes before saving, with sample data.",
+      "sendExample": "Send this example"
     }
   }
 }

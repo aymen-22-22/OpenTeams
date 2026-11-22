@@ -198,3 +198,51 @@ test('test email: success and a clear reason on failure', async () => {
   await userEvent.click(screen.getByRole('button', { name: 'Envoyer un test' }))
   expect(await screen.findByRole('alert')).toHaveTextContent("Le serveur a refusé l'identifiant ou le mot de passe.")
 })
+
+const DESIGN = {
+  'GET /admin/email/branding': { status: 200, body: { name: '', color: '', footer: '', has_logo: false } },
+  'GET /admin/email/texts': {
+    status: 200,
+    body: {
+      defaults: { task: { fr: { subject: 'Tâche', intro: '' }, en: { subject: 'Task', intro: '' }, ar: { subject: 'مهمة', intro: '' } } },
+      overrides: {},
+    },
+  },
+  'POST /admin/email/preview': { status: 200, body: { subject: 'Tâche : Préparer le rapport mensuel', html: '<p>aperçu</p>', text: 'aperçu' } },
+}
+
+test('appearance: live preview of unsaved changes, then save', async () => {
+  const fetchMock = await openEmailTab({ ...DESIGN, 'PUT /admin/email/branding': { status: 200, body: { name: 'SDG Consulting', color: '#1d4ed8', footer: 'Alger', has_logo: false } } })
+  expect(await screen.findByText('Tâche : Préparer le rapport mensuel')).toBeInTheDocument()
+  expect(screen.getByTitle('Aperçu')).toHaveAttribute('sandbox', '') // email HTML runs nothing
+  await userEvent.type(screen.getByLabelText('Nom affiché'), 'SDG Consulting')
+  await userEvent.type(screen.getByLabelText('Couleur (code hexadécimal)'), '#1d4ed8')
+  await userEvent.type(screen.getByLabelText('Ligne de pied de page'), 'Alger')
+  await waitFor(() => {
+    const last = calls(fetchMock, 'POST', '/admin/email/preview').at(-1)!
+    expect(JSON.parse(String(last[1]!.body))).toMatchObject({ kind: 'task', lang: 'fr', branding: { name: 'SDG Consulting', color: '#1d4ed8', footer: 'Alger' } })
+  })
+  const appearance = screen.getByRole('region', { name: 'Apparence des e-mails' })
+  await userEvent.click(within(appearance).getByRole('button', { name: 'Enregistrer' }))
+  await waitFor(() => expect(body(fetchMock, 'PUT', '/admin/email/branding')).toEqual({ name: 'SDG Consulting', color: '#1d4ed8', footer: 'Alger' }))
+})
+
+test('wording per type and language, with defaults as placeholders', async () => {
+  const fetchMock = await openEmailTab({ ...DESIGN, 'PUT /admin/email/texts': { status: 200, body: DESIGN['GET /admin/email/texts'].body } })
+  const wording = await screen.findByRole('region', { name: 'Textes des e-mails' })
+  const label = within(wording).getByLabelText("Libellé (début de l'objet)")
+  expect(label).toHaveAttribute('placeholder', 'Tâche')
+  await userEvent.type(label, 'Mission')
+  await userEvent.type(within(wording).getByLabelText("Paragraphe d'introduction"), 'Bonjour')
+  await userEvent.selectOptions(within(wording).getByLabelText('Langue'), 'ar')
+  expect(within(wording).getByLabelText("Libellé (début de l'objet)")).toHaveAttribute('dir', 'rtl')
+  await userEvent.click(within(wording).getByRole('button', { name: 'Enregistrer' }))
+  await waitFor(() => expect(body(fetchMock, 'PUT', '/admin/email/texts')).toEqual({ task: { fr: { subject: 'Mission', intro: 'Bonjour' } } }))
+})
+
+test('send the previewed example to an address', async () => {
+  const fetchMock = await openEmailTab({ ...DESIGN, 'POST /admin/email/test': { status: 204 } })
+  const preview = await screen.findByRole('region', { name: 'Aperçu' })
+  await userEvent.click(within(preview).getByRole('button', { name: 'Envoyer cet exemple' }))
+  await waitFor(() => expect(body(fetchMock, 'POST', '/admin/email/test')).toEqual({ to: 'me@example.com', kind: 'task', lang: 'fr' }))
+})

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ApiError } from '@/lib/api'
 
+import { EmailDesign } from './EmailDesign'
 import { useEmailSettings, useSaveEmailSettings, useTestEmail, type EmailSettings, type Security } from './emailApi'
 
 const DEFAULT_PORTS: Record<Security, number> = { none: 25, starttls: 587, ssl: 465 }
@@ -112,9 +113,12 @@ export function EmailSettingsPanel({ meEmail }: { meEmail: string }) {
   const settings = useEmailSettings().data
   if (!settings) return null
   return (
-    <div className="grid items-start gap-4 lg:grid-cols-[1.4fr_1fr]">
-      <SmtpForm initial={settings} />
-      <TestEmail defaultTo={meEmail} />
+    <div className="flex flex-col gap-6">
+      <div className="grid items-start gap-4 lg:grid-cols-[1.4fr_1fr]">
+        <SmtpForm initial={settings} />
+        <TestEmail defaultTo={meEmail} />
+      </div>
+      <EmailDesign meEmail={meEmail} />
     </div>
   )
 }

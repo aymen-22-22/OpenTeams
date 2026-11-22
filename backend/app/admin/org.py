@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.admin.models import OrgSettings
 from app.core.crypto import decrypt
 from app.core.settings import get_settings
+from app.reminders.brand import DEFAULT_BRAND, Brand
 
 SMTP_TIMEOUT = 20
 
@@ -82,3 +83,22 @@ def send_sync(config: SmtpConfig, to: str, subject: str, html: str, text: str) -
         if config.user:
             smtp.login(config.user, config.password)
         smtp.send_message(msg)
+
+
+def brand_of(org: OrgSettings | None) -> Brand:
+    if org is None:
+        return DEFAULT_BRAND
+    base = get_settings().app_url.rstrip("/")
+    version = int(org.updated_at.timestamp()) if org.updated_at else 0
+    return Brand(
+        name=org.brand_name or DEFAULT_BRAND.name,
+        color=org.brand_color or DEFAULT_BRAND.color,
+        footer=org.brand_footer,
+        # Mail clients load the logo without signing in: it is served publicly (see branding).
+        logo_url=f"{base}/api/v1/branding/logo?v={version}" if org.logo else "",
+        texts=org.email_texts or {},
+    )
+
+
+async def email_brand(db: AsyncSession) -> Brand:
+    return brand_of(await db.scalar(select(OrgSettings).limit(1)))

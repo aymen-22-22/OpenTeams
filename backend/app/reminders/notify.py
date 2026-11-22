@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.admin.org import email_brand
 from app.chat.models import ConversationMember
 from app.core import clock
 from app.core.realtime import hub
@@ -117,7 +118,8 @@ async def notify(
                 )
             )
         else:
-            rendered = render_notification(type_.value, title, body, link, user.locale)
+            brand = await email_brand(db)
+            rendered = render_notification(type_.value, title, body, link, user.locale, brand)
             db.add(
                 EmailOutbox(
                     to_email=user.email,

@@ -613,6 +613,51 @@
       "testSent": "E-mail envoyé à {{to}}. Vérifiez la boîte de réception (et les indésirables).",
       "failedAuth": "Le serveur a refusé l'identifiant ou le mot de passe.",
       "failedConnect": "Impossible de joindre le serveur ou envoi refusé."
+    },
+    "design": {
+      "appearance": "Apparence des e-mails",
+      "name": "Nom affiché",
+      "color": "Couleur",
+      "colorHex": "Couleur (code hexadécimal)",
+      "reset": "Par défaut",
+      "footer": "Ligne de pied de page",
+      "footerPlaceholder": "Ex. SDG Consulting · Alger · www.sdgconsulting.dz",
+      "logo": "Logo",
+      "logoAlt": "Logo actuel",
+      "uploadLogo": "Ajouter un logo",
+      "replaceLogo": "Remplacer",
+      "removeLogo": "Retirer",
+      "logoHint": "PNG ou JPEG, 300 Ko max. Affiché en haut de chaque e-mail (hauteur 32 px).",
+      "logoErrors": {
+        "too_large": "Logo trop lourd (300 Ko max).",
+        "type_not_allowed": "Le logo doit être une image PNG ou JPEG.",
+        "failed": "Envoi du logo impossible."
+      },
+      "invalid": "Vérifiez la couleur (format #RRVVBB).",
+      "wording": "Textes des e-mails",
+      "wordingHint": "Remplacez le libellé ou ajoutez un paragraphe d'introduction pour chaque type et chaque langue. Laissez vide pour garder le texte par défaut.",
+      "kind": "Type d'e-mail",
+      "kinds": {
+        "task": "Tâche assignée",
+        "mention": "Mention",
+        "message": "Nouveau message",
+        "reminder": "Rappel",
+        "approval": "Approbation",
+        "event": "Réunion",
+        "file": "Nouveau fichier",
+        "report": "Rapport",
+        "digest": "Résumé quotidien"
+      },
+      "label": "Libellé (début de l'objet)",
+      "labelHint": "L'objet devient « Libellé : titre ».",
+      "subject": "Objet",
+      "subjectHint": "{n} est remplacé par le nombre de notifications.",
+      "intro": "Paragraphe d'introduction",
+      "introPlaceholder": "Aucun (facultatif)",
+      "useDefault": "Revenir au texte par défaut",
+      "preview": "Aperçu",
+      "previewHint": "L'aperçu montre vos modifications avant l'enregistrement, avec des données d'exemple.",
+      "sendExample": "Envoyer cet exemple"
     }
   }
 }

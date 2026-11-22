@@ -156,7 +156,10 @@ name or role, reset a password (signs the person out everywhere), deactivate or 
 account (messages and tasks are kept). The Teams tab creates, renames and deletes teams and manages
 their members. The E-mail tab sets the outgoing mail server (SMTP: server, port, STARTTLS/SSL, user,
 password, sender) and sends a test email showing why it fails if it does; the password is stored
-encrypted and never shown again, and `.env` is used when no server is set there. Admins cannot change their own role or deactivate themselves. Every change is in the
+encrypted and never shown again, and `.env` is used when no server is set there. Below it, admins
+set the emails' look (name, color, logo PNG/JPEG ≤ 300 KB, footer line) and the wording per email type
+and language (label and intro paragraph), with a live preview of unsaved changes and *Send this example*.
+The logo is served publicly at `/api/v1/branding/logo` so mail clients can display it. Admins cannot change their own role or deactivate themselves. Every change is in the
 audit log. The first admin is created from the server: `python -m app.cli create-admin`.
 
 ## Real-time events

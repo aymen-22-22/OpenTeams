@@ -9,6 +9,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from app.admin.org import SmtpConfig, env_smtp, send_sync
 from app.core.settings import get_settings
+from app.reminders.brand import DEFAULT_BRAND, Brand
 
 _env = Environment(
     loader=FileSystemLoader(Path(__file__).parent / "templates"),
@@ -27,7 +28,7 @@ TEXTS = {
         "mention": "Mention",
         "sep": " : ",
         "open": "Ouvrir",
-        "footer": "Vous recevez cet e-mail d'OpenTeams.",
+        "footer": "Vous recevez cet e-mail via {name}.",
         "preferences": "Gérer mes notifications",
         "digest_subject": "Votre résumé quotidien : {n} notification(s)",
         "digest_intro": "Voici ce qui s'est passé depuis votre dernier résumé.",
@@ -45,7 +46,7 @@ TEXTS = {
         "mention": "Mention",
         "sep": ": ",
         "open": "Open",
-        "footer": "You receive this email from OpenTeams.",
+        "footer": "You receive this email from {name}.",
         "preferences": "Manage my notifications",
         "digest_subject": "Your daily summary: {n} notification(s)",
         "digest_intro": "Here is what happened since your last summary.",
@@ -63,7 +64,7 @@ TEXTS = {
         "mention": "إشارة",
         "sep": ": ",
         "open": "فتح",
-        "footer": "تصلك هذه الرسالة من OpenTeams.",
+        "footer": "تصلك هذه الرسالة من {name}.",
         "preferences": "إدارة إشعاراتي",
         "digest_subject": "ملخصك اليومي: {n} إشعار",
         "digest_intro": "إليك ما حدث منذ آخر ملخص.",
@@ -91,9 +92,11 @@ class DigestEntry:
 DIGEST_GROUP_LIMIT = 10  # items listed per type; the rest is counted ("and 4 more")
 
 
-def _base_context(subject: str, lang: str) -> dict[str, Any]:
+def _base_context(subject: str, lang: str, brand: Brand) -> dict[str, Any]:
     base = get_settings().app_url.rstrip("/")
     return {
+        "brand": brand,
+        "footer": TEXTS[lang]["footer"].format(name=brand.name),
         "subject": subject,
         "base_url": base,
         "preferences_url": f"{base}/preferences",
@@ -116,25 +119,37 @@ def _lang(lang: str) -> str:
     return lang if lang in TEXTS else "fr"
 
 
-def render_notification(kind: str, title: str, body: str, link: str, lang: str) -> RenderedEmail:
+def render_notification(
+    kind: str, title: str, body: str, link: str, lang: str, brand: Brand = DEFAULT_BRAND
+) -> RenderedEmail:
     lang = _lang(lang)
     t = TEXTS[lang]
-    ctx = _base_context(f"{t.get(kind, 'OpenTeams')}{t['sep']}{title}", lang)
-    ctx |= {"title": title, "body": body, "link_url": f"{ctx['base_url']}{link}"}
+    label = brand.text(kind, lang, "subject") or t.get(kind, brand.name)
+    ctx = _base_context(f"{label}{t['sep']}{title}", lang, brand)
+    ctx |= {
+        "title": title,
+        "body": body,
+        "intro": brand.text(kind, lang, "intro"),
+        "link_url": f"{ctx['base_url']}{link}",
+    }
     return _render("notification", ctx)
 
 
-def render_digest(entries: list[DigestEntry], lang: str) -> RenderedEmail:
+def render_digest(
+    entries: list[DigestEntry], lang: str, brand: Brand = DEFAULT_BRAND
+) -> RenderedEmail:
     """One email listing many notifications, grouped by type in a stable order."""
     lang = _lang(lang)
     t = TEXTS[lang]
-    ctx = _base_context(t["digest_subject"].format(n=len(entries)), lang)
+    subject = brand.text("digest", lang, "subject") or t["digest_subject"]
+    ctx = _base_context(subject.replace("{n}", str(len(entries))), lang, brand)
+    ctx["intro"] = brand.text("digest", lang, "intro") or t["digest_intro"]
     groups = []
     for kind in dict.fromkeys(e.kind for e in entries):
         items = [e for e in entries if e.kind == kind]
         groups.append(
             {
-                "label": t.get(kind, kind),
+                "label": brand.text(kind, lang, "subject") or t.get(kind, kind),
                 "entries": [
                     {"title": e.title, "body": e.body[:200], "url": f"{ctx['base_url']}{e.link}"}
                     for e in items[:DIGEST_GROUP_LIMIT]
