@@ -2,7 +2,8 @@
 # real client address and https scheme. Caddy is then only reachable from that server.
 {
 	servers {
-		trusted_proxies static private_ranges
+		# TRUSTED_PROXIES: the reverse proxy's address if it is not in a private range (e.g. 172.50.0.10/32).
+		trusted_proxies static private_ranges {$TRUSTED_PROXIES:127.0.0.1/32}
 	}
 }
 

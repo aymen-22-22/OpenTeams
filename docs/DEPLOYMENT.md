@@ -78,6 +78,16 @@ for a new subdomain and forward it to OpenTeams on a local port:
 
 Caddy still adds the security headers (CSP, HSTS); OpenTeams is only reachable through Apache.
 
+### Behind a reverse proxy on another machine (SafeLine, Nginx Proxy Manager, HAProxy…)
+
+When HTTPS is handled by a separate reverse proxy that cannot tell two applications apart on the
+same upstream, give OpenTeams its own port on the server's LAN address and point the proxy there:
+
+- `.env`: `SITE_ADDRESS=:80`, `HTTP_BIND=<server LAN IP>:8080`, `TRUSTED_PROXIES=<proxy IP>/32`.
+- Reverse proxy: upstream `http://<server LAN IP>:8080`, WebSocket enabled, uploads ≥ 110 MB.
+- Allow port 8080 only from the proxy (Docker bypasses ufw, so use the `DOCKER-USER` chain):
+  `iptables -I DOCKER-USER -p tcp -m conntrack --ctorigdstport 8080 ! -s <proxy IP> -j DROP`
+
 ## 3. Start
 
 ```bash
