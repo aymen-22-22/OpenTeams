@@ -147,7 +147,12 @@ async def test_preferences_defaults_and_update(pair: Pair) -> None:
     prefs = {
         p["type"]: p for p in (await pair.lucas.get("/api/v1/notifications/preferences")).json()
     }
-    assert prefs["message"] == {"type": "message", "in_app": True, "email": False}
+    assert prefs["message"] == {
+        "type": "message",
+        "in_app": True,
+        "email": False,
+        "email_frequency": "instant",
+    }
     assert prefs["task"]["email"] is True
     r = await pair.lucas.put(
         "/api/v1/notifications/preferences",

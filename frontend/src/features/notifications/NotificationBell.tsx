@@ -57,9 +57,9 @@ export function NotificationBell({ onNavigate }: { onNavigate: (link: string) =>
         onClick={() => { setNow(Date.now()); setOpen((o) => !o) }} size="icon" className="relative">
         <Bell className="size-[18px]" aria-hidden />
         {unread > 0 && (
-          <span aria-hidden className="absolute end-1.5 top-1.5 min-w-[18px] animate-pop rounded-full bg-danger px-1 text-center text-[10px] leading-[18px] font-semibold text-white ring-2 ring-background dark:text-black">
-            {unread > 99 ? '99+' : unread}
-          </span>
+          // The number is drawn by CSS: the button's label already says it, so it is not page text.
+          <span aria-hidden data-count={unread > 99 ? '99+' : unread}
+            className="absolute end-1.5 top-1.5 min-w-[18px] animate-pop rounded-full bg-danger px-1 text-center text-[10px] leading-[18px] font-semibold text-white ring-2 ring-background after:content-[attr(data-count)] dark:text-black" />
         )}
       </Button>
       {open && (

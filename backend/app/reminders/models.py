@@ -13,7 +13,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.db import Base
 
@@ -37,6 +37,11 @@ class NotificationType(enum.StrEnum):
     REPORT = "report"
     EVENT = "event"
     MENTION = "mention"
+
+
+class EmailFrequency(enum.StrEnum):
+    INSTANT = "instant"  # one email per notification
+    DAILY = "daily"  # collected into one daily digest
 
 
 class Recurrence(enum.StrEnum):
@@ -88,6 +93,28 @@ class NotificationPreference(Base):
     type: Mapped[NotificationType] = mapped_column(_enum(NotificationType))
     in_app: Mapped[bool] = mapped_column(Boolean, default=True)
     email: Mapped[bool] = mapped_column(Boolean, default=False)
+    email_frequency: Mapped[EmailFrequency] = mapped_column(
+        _enum(EmailFrequency), default=EmailFrequency.INSTANT
+    )
+
+
+class DigestItem(Base):
+    """A notification waiting for the user's daily digest email."""
+
+    __tablename__ = "digest_items"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    type: Mapped[NotificationType] = mapped_column(_enum(NotificationType))
+    title: Mapped[str] = mapped_column(String(200))
+    body: Mapped[str] = mapped_column(Text, default="")
+    link: Mapped[str] = mapped_column(String(300), default="/")
+    # The matching in-app notification, if any: once read there, it is left out of the digest.
+    notification_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("notifications.id", ondelete="SET NULL")
+    )
+    notification: Mapped["Notification | None"] = relationship()
 
 
 class EmailStatus(enum.StrEnum):

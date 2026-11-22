@@ -212,7 +212,12 @@
       "report": "Report",
       "event": "Meeting",
       "mention": "Mention"
-    }
+    },
+    "emailOff": "Off",
+    "emailInstant": "Instant",
+    "emailDaily": "Daily digest",
+    "digestHour": "Daily digest time",
+    "digestHint": "Notifications set to “Daily digest” arrive in a single email per day. Those already read in the app are left out."
   },
   "reminders": {
     "new": "New reminder",

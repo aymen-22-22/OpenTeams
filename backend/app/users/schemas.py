@@ -17,6 +17,7 @@ class UserOut(BaseModel):
     display_name: str
     locale: str
     role: Role
+    digest_hour: int = 8
 
 
 class PersonOut(BaseModel):
@@ -32,6 +33,7 @@ class PersonOut(BaseModel):
 class MeUpdate(BaseModel):
     display_name: str | None = Field(default=None, min_length=1, max_length=120)
     locale: Locale | None = None
+    digest_hour: int | None = Field(default=None, ge=0, le=23)
 
 
 class TeamOut(BaseModel):

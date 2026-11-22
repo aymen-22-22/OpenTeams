@@ -20,7 +20,7 @@ export function mockApi(routes: Routes) {
   return fetchMock
 }
 
-export const ME = { id: 'me', email: 'me@example.com', display_name: 'Moi', locale: 'fr', role: 'employee' }
+export const ME = { id: 'me', email: 'me@example.com', display_name: 'Moi', locale: 'fr', role: 'employee', digest_hour: 8 }
 
 export const PEOPLE = [
   { id: 'me', display_name: 'Moi', role: 'employee', presence: 'online', ai_active: false },

@@ -3,7 +3,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.reminders.models import NotificationType, Recurrence, TargetType
+from app.reminders.models import EmailFrequency, NotificationType, Recurrence, TargetType
 
 
 class NotificationOut(BaseModel):
@@ -27,6 +27,7 @@ class PreferenceItem(BaseModel):
     type: NotificationType
     in_app: bool
     email: bool
+    email_frequency: EmailFrequency = EmailFrequency.INSTANT
 
 
 class ReminderOut(BaseModel):

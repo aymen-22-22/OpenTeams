@@ -17,10 +17,13 @@ export interface AppNotification {
   created_at: string
 }
 
+export type EmailFrequency = 'instant' | 'daily'
+
 export interface Preference {
   type: NotificationType
   in_app: boolean
   email: boolean
+  email_frequency: EmailFrequency
 }
 
 export interface Reminder {

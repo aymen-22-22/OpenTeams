@@ -33,7 +33,7 @@ PASSWORD = "correct-horse-battery"
 TABLES = (
     "request_steps, requests, project_milestones, project_members, projects, "
     "calendar_event_attendees, calendar_events, playbook_runs, playbooks, "
-    "email_outbox, notifications, notification_preferences, reminders, "
+    "email_outbox, digest_items, notifications, notification_preferences, reminders, "
     "ai_audit_log, ai_messages, ai_conversations, ai_profiles, "
     "task_events, tasks, file_versions, files, realtime_events, pins, message_reads, messages, "
     "conversation_members, conversations, audit_log, sessions, team_members, teams, users"

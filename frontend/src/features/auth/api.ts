@@ -11,6 +11,7 @@ export interface User {
   display_name: string
   locale: string
   role: Role
+  digest_hour?: number // local hour of the daily digest email
 }
 
 export interface Person {
@@ -34,6 +35,15 @@ export function useMe() {
 
 export function usePeople() {
   return useQuery({ queryKey: PEOPLE_KEY, queryFn: () => api<Person[]>('/users') })
+}
+
+export function useUpdateMe() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (body: Partial<Pick<User, 'display_name' | 'locale' | 'digest_hour'>>) =>
+      api<User>('/users/me', { method: 'PATCH', body }),
+    onSuccess: (user) => qc.setQueryData(ME_KEY, user),
+  })
 }
 
 export function useLogin() {

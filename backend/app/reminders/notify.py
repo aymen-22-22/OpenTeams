@@ -1,6 +1,7 @@
 """One entry point for notifications: respects preferences, stores, pushes live, queues email."""
 
 import uuid
+from dataclasses import dataclass
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,7 +10,14 @@ from app.chat.models import ConversationMember
 from app.core import clock
 from app.core.realtime import hub
 from app.reminders.email import render_notification
-from app.reminders.models import EmailOutbox, Notification, NotificationPreference, NotificationType
+from app.reminders.models import (
+    DigestItem,
+    EmailFrequency,
+    EmailOutbox,
+    Notification,
+    NotificationPreference,
+    NotificationType,
+)
 from app.reminders.schemas import NotificationOut
 from app.users.models import User
 
@@ -24,17 +32,22 @@ DEFAULT_EMAIL = {
 }
 
 
-async def channels(
-    db: AsyncSession, user_id: uuid.UUID, type_: NotificationType
-) -> tuple[bool, bool]:
+@dataclass(frozen=True)
+class Channels:
+    in_app: bool
+    email: bool
+    frequency: EmailFrequency = EmailFrequency.INSTANT
+
+
+async def channels(db: AsyncSession, user_id: uuid.UUID, type_: NotificationType) -> Channels:
     pref = await db.scalar(
         select(NotificationPreference).where(
             NotificationPreference.user_id == user_id, NotificationPreference.type == type_
         )
     )
     if pref is None:
-        return True, type_ in DEFAULT_EMAIL
-    return pref.in_app, pref.email
+        return Channels(in_app=True, email=type_ in DEFAULT_EMAIL)
+    return Channels(pref.in_app, pref.email, pref.email_frequency)
 
 
 async def notify(
@@ -50,29 +63,41 @@ async def notify(
     """Create the notification in the current transaction. Call `push` after commit.
 
     `allow_*` let the sender narrow the channels; the user's preferences always apply too.
+    Email goes out at once (outbox) or waits for the daily digest, as the user chose.
     """
     user = await db.get(User, user_id)
     if user is None or not user.is_active:
         return None
-    in_app, email = await channels(db, user_id, type_)
-    in_app, email = in_app and allow_in_app, email and allow_email
-    if email:
-        rendered = render_notification(type_.value, title, body, link, user.locale)
-        db.add(
-            EmailOutbox(
-                to_email=user.email,
-                subject=rendered.subject,
-                html=rendered.html,
-                text=rendered.text,
-                next_attempt_at=clock.now(),
+    ch = await channels(db, user_id, type_)
+    title = title[:200]
+    notification = None
+    if ch.in_app and allow_in_app:
+        notification = Notification(user_id=user_id, type=type_, title=title, body=body, link=link)
+        db.add(notification)
+    if ch.email and allow_email:
+        if ch.frequency == EmailFrequency.DAILY:
+            db.add(
+                DigestItem(
+                    user_id=user_id,
+                    type=type_,
+                    title=title,
+                    body=body,
+                    link=link,
+                    notification=notification,
+                    created_at=clock.now(),  # the digest cutoff follows the app clock
+                )
             )
-        )
-    if not in_app:
-        return None
-    notification = Notification(
-        user_id=user_id, type=type_, title=title[:200], body=body, link=link
-    )
-    db.add(notification)
+        else:
+            rendered = render_notification(type_.value, title, body, link, user.locale)
+            db.add(
+                EmailOutbox(
+                    to_email=user.email,
+                    subject=rendered.subject,
+                    html=rendered.html,
+                    text=rendered.text,
+                    next_attempt_at=clock.now(),
+                )
+            )
     return notification
 
 

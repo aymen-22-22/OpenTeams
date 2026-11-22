@@ -98,9 +98,10 @@ Each user can connect their own AI in **My assistant → Settings**: Claude, Ope
 ## Notifications, reminders and email
 
 - **Notification center** (bell): new messages, files, task assignments, reminders, overdue tasks. Each user chooses per type: in the app and/or by email (*Notification preferences*).
+- **Daily digest**: for each type, email can be *Off*, *Instant* or *Daily digest*. Digest notifications are collected (`digest_items`) and sent as one email per day at the hour the user picks (default 08:00, in `TIMEZONE`), grouped by type. Anything already read in the app is left out, and no email is sent when there is nothing new. Items that arrive after today's digest time wait for tomorrow's.
 - **Reminders**: one-time or recurring (daily, weekly, monthly), optionally attached to a message or task; shown in the side panel.
 - **Emails** are never sent during a request: they go to the `email_outbox` table, and a scheduled job sends them with retries (exponential backoff, 5 attempts). Each email is responsive HTML with a plain-text version, a button that opens the right page (`APP_URL`), and a link to the preferences. Arabic emails are right-to-left.
-- **Scheduled jobs** (APScheduler, inside the API): due reminders (30 s), outbox (20 s), overdue-task nudge (daily 08:30), deletion of real-time events older than 7 days (daily). Run a single API instance, or set `SCHEDULER_ENABLED=false` on extra ones.
+- **Scheduled jobs** (APScheduler, inside the API): due reminders (30 s), outbox (20 s), overdue-task nudge (daily 08:30), daily digests (checked every 10 min), deletion of real-time events older than 7 days (daily). Run a single API instance, or set `SCHEDULER_ENABLED=false` on extra ones.
 - **Development**: emails arrive in Mailpit at http://localhost:8025. In production set the `SMTP_*` variables.
 
 ## Playbooks (automatic reports)

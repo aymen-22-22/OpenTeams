@@ -1,10 +1,10 @@
 import { QueryClient } from '@tanstack/react-query'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { App } from '@/app/App'
 import i18n from '@/i18n'
-import { LOGGED_IN, message, mockApi, task } from '@/test/mockApi'
+import { LOGGED_IN, ME, message, mockApi, task } from '@/test/mockApi'
 
 const renderApp = () => render(<App client={new QueryClient({ defaultOptions: { queries: { retry: false } } })} />)
 
@@ -76,7 +76,7 @@ test('remind me on a message creates a reminder attached to it', async () => {
 })
 
 test('notification preferences can be changed', async () => {
-  const prefs = ['message', 'reminder', 'file', 'task', 'approval'].map((type) => ({ type, in_app: true, email: type !== 'message' }))
+  const prefs = ['message', 'reminder', 'file', 'task', 'approval'].map((type) => ({ type, in_app: true, email: type !== 'message', email_frequency: 'instant' }))
   const fetchMock = mockApi({
     ...LOGGED_IN,
     'GET /notifications/preferences': { status: 200, body: prefs },
@@ -85,10 +85,40 @@ test('notification preferences can be changed', async () => {
   renderApp()
   await userEvent.click(await screen.findByRole('button', { name: /Notifications/ }))
   await userEvent.click(screen.getByRole('button', { name: 'Préférences de notification' }))
-  await userEvent.click(await screen.findByLabelText('Nouveau message — E-mail'))
+  const messageEmail = await screen.findByLabelText('Nouveau message — E-mail')
+  expect(messageEmail).toHaveValue('off')
+  await userEvent.selectOptions(messageEmail, 'instant')
+  await userEvent.selectOptions(screen.getByLabelText('Tâche — E-mail'), 'off')
   await userEvent.click(screen.getByRole('button', { name: 'Enregistrer' }))
   const body = JSON.parse(String(fetchMock.mock.calls.find(([, init]) => init?.method === 'PUT')![1]!.body))
-  expect(body[0]).toEqual({ type: 'message', in_app: true, email: true })
+  expect(body[0]).toEqual({ type: 'message', in_app: true, email: true, email_frequency: 'instant' })
+  expect(body[3]).toMatchObject({ type: 'task', email: false })
+  expect(fetchMock.mock.calls.some(([, init]) => init?.method === 'PATCH')).toBe(false) // hour unchanged
+})
+
+test('daily digest: choose it per type and pick the hour', async () => {
+  const prefs = ['message', 'task'].map((type) => ({ type, in_app: true, email: type === 'task', email_frequency: 'instant' }))
+  const fetchMock = mockApi({
+    ...LOGGED_IN,
+    'GET /notifications/preferences': { status: 200, body: prefs },
+    'PUT /notifications/preferences': { status: 200, body: prefs },
+    'PATCH /users/me': { status: 200, body: { ...ME, digest_hour: 18 } },
+  })
+  renderApp()
+  await userEvent.click(await screen.findByRole('button', { name: /Notifications/ }))
+  await userEvent.click(screen.getByRole('button', { name: 'Préférences de notification' }))
+  const hour = await screen.findByLabelText('Heure du résumé quotidien')
+  expect(hour).toBeDisabled() // no type uses the digest yet
+  await userEvent.selectOptions(screen.getByLabelText('Tâche — E-mail'), 'daily')
+  expect(hour).toBeEnabled()
+  expect(hour).toHaveValue('8')
+  await userEvent.selectOptions(hour, '18')
+  await userEvent.click(screen.getByRole('button', { name: 'Enregistrer' }))
+  await waitFor(() => expect(fetchMock.mock.calls.some(([, init]) => init?.method === 'PATCH')).toBe(true))
+  const put = JSON.parse(String(fetchMock.mock.calls.find(([, init]) => init?.method === 'PUT')![1]!.body))
+  expect(put[1]).toEqual({ type: 'task', in_app: true, email: true, email_frequency: 'daily' })
+  const patch = JSON.parse(String(fetchMock.mock.calls.find(([, init]) => init?.method === 'PATCH')![1]!.body))
+  expect(patch).toEqual({ digest_hour: 18 })
 })
 
 test('a deep link from an email opens the task', async () => {

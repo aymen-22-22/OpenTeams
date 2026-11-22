@@ -66,8 +66,12 @@ async def mark_all_read(user: CurrentUser, db: DB) -> None:
 async def get_preferences(user: CurrentUser, db: DB) -> list[PreferenceItem]:
     result = []
     for type_ in NotificationType:
-        in_app, email = await channels(db, user.id, type_)
-        result.append(PreferenceItem(type=type_, in_app=in_app, email=email))
+        ch = await channels(db, user.id, type_)
+        result.append(
+            PreferenceItem(
+                type=type_, in_app=ch.in_app, email=ch.email, email_frequency=ch.frequency
+            )
+        )
     return result
 
 
@@ -85,6 +89,7 @@ async def set_preferences(
             pref = NotificationPreference(user_id=user.id, type=item.type)
             db.add(pref)
         pref.in_app, pref.email = item.in_app, item.email
+        pref.email_frequency = item.email_frequency
     await db.commit()
     return await get_preferences(user, db)
 

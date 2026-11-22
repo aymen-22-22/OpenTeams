@@ -1,0 +1,16 @@
+{{ subject }}
+
+{{ t.digest_intro }}
+{% for group in groups %}
+== {{ group.label }} ==
+{% for item in group.entries -%}
+- {{ item.title }}
+{% if item.body %}  {{ item.body }}
+{% endif %}  {{ item.url }}
+{% endfor -%}
+{% if group.more %}{{ group.more }}
+{% endif %}{% endfor %}
+{{ t.open_app }}: {{ base_url }}/
+
+--
+{{ t.footer }} {{ t.preferences }}: {{ preferences_url }}

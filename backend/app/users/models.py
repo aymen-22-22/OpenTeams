@@ -1,7 +1,8 @@
 import enum
 import uuid
+from datetime import date
 
-from sqlalchemy import Boolean, Enum, ForeignKey, String, UniqueConstraint
+from sqlalchemy import Boolean, Date, Enum, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
@@ -33,6 +34,9 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     # SHA-256 of the private iCal feed token (the token itself is never stored).
     ical_token_hash: Mapped[str | None] = mapped_column(String(64), unique=True)
+    # Daily digest email: local hour (app TIMEZONE) and the last day it was sent.
+    digest_hour: Mapped[int] = mapped_column(Integer, default=8)
+    digest_last_sent_on: Mapped[date | None] = mapped_column(Date)
 
 
 class Team(Base):

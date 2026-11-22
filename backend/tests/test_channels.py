@@ -168,4 +168,9 @@ async def test_mention_email_by_default(team: Team) -> None:
     prefs = {
         p["type"]: p for p in (await team.lucas.get("/api/v1/notifications/preferences")).json()
     }
-    assert prefs["mention"] == {"type": "mention", "in_app": True, "email": True}
+    assert prefs["mention"] == {
+        "type": "mention",
+        "in_app": True,
+        "email": True,
+        "email_frequency": "instant",
+    }

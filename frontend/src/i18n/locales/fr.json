@@ -212,7 +212,12 @@
       "report": "Rapport",
       "event": "Réunion",
       "mention": "Mention"
-    }
+    },
+    "emailOff": "Désactivé",
+    "emailInstant": "Immédiat",
+    "emailDaily": "Résumé quotidien",
+    "digestHour": "Heure du résumé quotidien",
+    "digestHint": "Les notifications réglées sur « Résumé quotidien » arrivent dans un seul e-mail par jour. Celles déjà lues dans l'application n'y figurent pas."
   },
   "reminders": {
     "new": "Nouveau rappel",

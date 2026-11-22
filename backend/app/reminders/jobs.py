@@ -2,7 +2,7 @@
 
 import calendar
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
 from sqlalchemy import delete, select
@@ -11,7 +11,15 @@ from app.chat.events import RealtimeEvent
 from app.core.db import SessionLocal
 from app.core.settings import get_settings
 from app.reminders import email
-from app.reminders.models import EmailOutbox, EmailStatus, NotificationType, Recurrence, Reminder
+from app.reminders.models import (
+    DigestItem,
+    EmailOutbox,
+    EmailStatus,
+    Notification,
+    NotificationType,
+    Recurrence,
+    Reminder,
+)
 from app.reminders.notify import notify, push
 from app.reminders.targets import target_link
 from app.tasks.models import Task, TaskStatus
@@ -93,6 +101,52 @@ async def send_outbox(now: datetime) -> int:
                     mail.next_attempt_at = now + timedelta(minutes=2**mail.attempts)
             await db.commit()
     return sent
+
+
+async def send_digests(now: datetime) -> int:
+    """Send each user one daily digest, at their hour, of what they did not already read.
+
+    Items created after today's digest time wait for tomorrow's. Returns emails queued.
+    """
+    tz = ZoneInfo(get_settings().timezone)
+    local_now = now.astimezone(tz)
+    today = local_now.date()
+    queued = 0
+    async with SessionLocal() as db:
+        user_ids = list(await db.scalars(select(DigestItem.user_id).distinct()))
+        for user_id in user_ids:
+            user = await db.get(User, user_id)
+            if user is None:
+                continue
+            cutoff = datetime.combine(today, time(user.digest_hour), tz)
+            if local_now < cutoff or user.digest_last_sent_on == today:
+                continue
+            rows = (
+                await db.execute(
+                    select(DigestItem, Notification.read_at)
+                    .outerjoin(Notification, Notification.id == DigestItem.notification_id)
+                    .where(DigestItem.user_id == user_id, DigestItem.created_at < cutoff)
+                    .order_by(DigestItem.created_at)
+                )
+            ).all()
+            unread = [item for item, read_at in rows if read_at is None]
+            if user.is_active and unread:
+                entries = [email.DigestEntry(i.type.value, i.title, i.body, i.link) for i in unread]
+                rendered = email.render_digest(entries, user.locale)
+                db.add(
+                    EmailOutbox(
+                        to_email=user.email,
+                        subject=rendered.subject,
+                        html=rendered.html,
+                        text=rendered.text,
+                        next_attempt_at=now,
+                    )
+                )
+                queued += 1
+            await db.execute(delete(DigestItem).where(DigestItem.id.in_([i.id for i, _ in rows])))
+            user.digest_last_sent_on = today
+            await db.commit()
+    return queued
 
 
 async def nudge_overdue_tasks(now: datetime) -> int:
