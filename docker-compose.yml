@@ -81,7 +81,8 @@ services:
     image: caddy:2-alpine
     environment:
       SITE_ADDRESS: ${SITE_ADDRESS:-localhost}
-    ports: ["80:80", "443:443"]
+    # Behind another web server (Apache/Nginx): HTTP_BIND=127.0.0.1:8080 and SITE_ADDRESS=:80
+    ports: ["${HTTP_BIND:-80}:80", "${HTTPS_BIND:-443}:443"]
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy-data:/data

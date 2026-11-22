@@ -39,6 +39,45 @@ Keep `SECRET_KEY` and `AI_ENCRYPTION_KEY` safe and stable: changing `SECRET_KEY`
 
 **Email bridge** (optional): create a mailbox, e.g. `team@example.com`, check that `team+test@example.com` is delivered to it (plus-addressing), then set `BRIDGE_ADDRESS`, `BRIDGE_IMAP_HOST`, `BRIDGE_IMAP_PORT` (993, TLS), `BRIDGE_IMAP_USER` and `BRIDGE_IMAP_PASSWORD`. Send yourself a test: open a conversation, create its address in the side panel, and email it from your OpenTeams address. If nothing appears, look at the latest rows of `inbound_emails` (column `reason`): `not_authenticated` means your server does not add `dmarc=pass` (fix DMARC, or set `BRIDGE_REQUIRE_DMARC=false` for an internal-only server).
 
+### Behind an existing Apache (ports 80/443 already used)
+
+When Apache already serves other sites on this host (e.g. OpenProject), let Apache handle HTTPS
+for a new subdomain and forward it to OpenTeams on a local port:
+
+1. In `.env`: `SITE_ADDRESS=:80`, `HTTP_BIND=127.0.0.1:8080`, `HTTPS_BIND=127.0.0.1:8443`, and
+   `APP_URL=https://teams.example.com`, `ALLOWED_ORIGINS=["https://teams.example.com"]`.
+2. Point the subdomain's DNS to the server, then enable the modules once:
+   `a2enmod proxy proxy_http proxy_wstunnel headers ssl rewrite`.
+3. Create `/etc/apache2/sites-available/openteams.conf`:
+
+```apache
+<VirtualHost *:80>
+    ServerName teams.example.com
+    RewriteEngine On
+    RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,R=permanent]
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName teams.example.com
+    SSLEngine on
+    # Filled in by certbot (step 4), or your own certificate files:
+    # SSLCertificateFile    /etc/letsencrypt/live/teams.example.com/fullchain.pem
+    # SSLCertificateKeyFile /etc/letsencrypt/live/teams.example.com/privkey.pem
+    ProxyPreserveHost On
+    RequestHeader set X-Forwarded-Proto "https"
+    LimitRequestBody 115343360
+    ProxyTimeout 300
+    # upgrade=websocket keeps the real-time connection (/ws) working.
+    ProxyPass        / http://127.0.0.1:8080/ upgrade=websocket
+    ProxyPassReverse / http://127.0.0.1:8080/
+</VirtualHost>
+```
+
+4. `a2ensite openteams && apache2ctl configtest && systemctl reload apache2`, then the certificate:
+   `certbot --apache -d teams.example.com` (or your own certificate in the two lines above).
+
+Caddy still adds the security headers (CSP, HSTS); OpenTeams is only reachable through Apache.
+
 ## 3. Start
 
 ```bash

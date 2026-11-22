@@ -1,5 +1,14 @@
+# Requests forwarded by a web server in front (Apache/Nginx on the same host) keep their
+# real client address and https scheme. Caddy is then only reachable from that server.
+{
+	servers {
+		trusted_proxies static private_ranges
+	}
+}
+
 # SITE_ADDRESS is "localhost" in development (local HTTPS certificate)
 # and your domain in production (automatic Let's Encrypt certificate).
+# Behind Apache/Nginx (which handles HTTPS): SITE_ADDRESS=:80 (plain HTTP inside).
 {$SITE_ADDRESS:localhost} {
 	encode gzip
 
