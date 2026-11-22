@@ -25,6 +25,7 @@ import { TaskForm } from '@/features/tasks/TaskForm'
 import { TaskView } from '@/features/tasks/TaskView'
 import { EmptyState } from '@/components/ui/empty-state'
 import { HomeView } from '@/features/home/HomeView'
+import { AdminView } from '@/features/admin/AdminView'
 import { api } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
@@ -35,7 +36,7 @@ import { Logo } from './Logo'
 import { TopBar } from './TopBar'
 
 type Column = 'people' | 'conversation' | 'details'
-type View = { kind: 'home' } | { kind: 'person' } | { kind: 'myTasks' } | { kind: 'assistant' } | { kind: 'preferences' }
+type View = { kind: 'home' } | { kind: 'admin' } | { kind: 'person' } | { kind: 'myTasks' } | { kind: 'assistant' } | { kind: 'preferences' }
   | { kind: 'playbooks' }
   | { kind: 'calendar' }
   | { kind: 'requests' }
@@ -45,7 +46,7 @@ type View = { kind: 'home' } | { kind: 'person' } | { kind: 'myTasks' } | { kind
   | { kind: 'channels' }
   | { kind: 'report'; runId: string } | { kind: 'task'; taskId: string }
 
-const PAGE_KINDS = new Set<string>(['home', 'assistant', 'myTasks', 'calendar', 'projects', 'requests', 'playbooks', 'dashboard'])
+const PAGE_KINDS = new Set<string>(['home', 'admin', 'assistant', 'myTasks', 'calendar', 'projects', 'requests', 'playbooks', 'dashboard'])
 /** Conversations show the side panel (pins, files, tasks, reminders); full pages use the whole width. */
 const SIDE_PANEL_VIEWS = new Set<string>(['person', 'channel'])
 
@@ -53,7 +54,7 @@ const SIDE_PANEL_VIEWS = new Set<string>(['person', 'channel'])
 const VIEW_LABELS: Record<string, string> = {
   myTasks: 'tasks.myTasks', calendar: 'calendar.title', projects: 'projects.title', requests: 'requests.title',
   playbooks: 'playbooks.title', report: 'playbooks.title', dashboard: 'dashboard.title', assistant: 'people.myAssistant',
-  preferences: 'notifications.preferences', channels: 'channels.browse', task: 'tabs.tasks',
+  preferences: 'notifications.preferences', admin: 'admin.title', channels: 'channels.browse', task: 'tabs.tasks',
 }
 
 /** Three columns on desktop; one column at a time with bottom navigation on mobile. */
@@ -140,6 +141,7 @@ export function AppShell({ me }: { me: User }) {
     else if (kind === 'projects') show({ kind: 'projects', projectId: id })
     else if (kind === 'dashboard') show({ kind: 'dashboard' })
     else if (kind === 'preferences') show({ kind: 'preferences' })
+    else if (kind === 'admin' && me.role === 'admin') show({ kind: 'admin' })
     else if (!kind) show({ kind: 'home' })
   }
 
@@ -169,6 +171,7 @@ export function AppShell({ me }: { me: User }) {
             activePage={PAGE_KINDS.has(view.kind) ? (view.kind as Page) : undefined}
             onSelect={(p) => showPerson(p.id)}
             isManager={me.role !== 'employee'}
+            isAdmin={me.role === 'admin'}
             channels={channels}
             selectedChannelId={view.kind === 'channel' ? view.channelId : undefined}
             onOpenChannel={(id) => show({ kind: 'channel', channelId: id })}
@@ -192,6 +195,7 @@ export function AppShell({ me }: { me: User }) {
               )}
               {view.kind === 'assistant' && <AssistantView me={me} people={peopleById} />}
               {view.kind === 'preferences' && <PreferencesView />}
+              {view.kind === 'admin' && me.role === 'admin' && <AdminView meId={me.id} />}
               {view.kind === 'calendar' && (
                 <CalendarView me={me} people={peopleById} onOpenTask={(id) => openTask({ id })}
                   onOpenProject={(id) => show({ kind: 'projects', projectId: id })}

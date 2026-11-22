@@ -1,4 +1,4 @@
-import { BellRing, LogOut } from 'lucide-react'
+import { BellRing, LogOut, ShieldCheck } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -45,6 +45,12 @@ export function AccountMenu({ me, onNavigate }: { me: User; onNavigate: (link: s
             </div>
           </div>
           <div className="my-1 h-px bg-border" />
+          {me.role === 'admin' && (
+            <button type="button" role="menuitem" className={entry} onClick={() => { setOpen(false); onNavigate('/admin') }}>
+              <ShieldCheck className="size-4 text-muted-foreground" aria-hidden />
+              {t('admin.title')}
+            </button>
+          )}
           <button type="button" role="menuitem" className={entry} onClick={() => { setOpen(false); onNavigate('/preferences') }}>
             <BellRing className="size-4 text-muted-foreground" aria-hidden />
             {t('notifications.preferences')}

@@ -1,6 +1,7 @@
 import uuid
+from datetime import datetime
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from app.users.models import Role
 from app.users.schemas import Locale
@@ -27,3 +28,21 @@ class TeamCreate(BaseModel):
 
 class TeamMemberAdd(BaseModel):
     user_id: uuid.UUID
+
+
+class TeamUpdate(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+
+
+class AdminUserOut(BaseModel):
+    """A user as the administration page sees it (deactivated ones included)."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    email: EmailStr
+    display_name: str
+    role: Role
+    locale: str
+    is_active: bool
+    created_at: datetime

@@ -2,7 +2,7 @@ import uuid
 
 from httpx import AsyncClient
 
-from tests.conftest import make_user
+from tests.conftest import make_user, new_client
 
 NEW_USER = {
     "email": "Lucas@Example.com",
@@ -101,3 +101,60 @@ async def test_team_validation(admin_client: AsyncClient) -> None:
 async def test_team_forbidden(employee_client: AsyncClient) -> None:
     r = await employee_client.post("/api/v1/admin/teams", json={"name": "Ops"})
     assert r.status_code == 403
+
+
+async def test_list_users_includes_deactivated(admin_client: AsyncClient) -> None:
+    created = (await admin_client.post("/api/v1/admin/users", json=NEW_USER)).json()
+    assert created["is_active"] is True and "password" not in str(created)
+    await admin_client.patch(f"/api/v1/admin/users/{created['id']}", json={"is_active": False})
+    users = (await admin_client.get("/api/v1/admin/users")).json()
+    lucas = next(u for u in users if u["email"] == "lucas@example.com")
+    assert lucas["is_active"] is False and lucas["role"] == "manager"
+    assert users[-1]["email"] == "lucas@example.com"  # deactivated accounts last
+    assert all("password" not in "".join(u.keys()) for u in users)
+    # The people panel still only shows active people.
+    people = (await admin_client.get("/api/v1/users")).json()
+    assert all(p["display_name"] != "Lucas" for p in people)
+
+
+async def test_list_users_admin_only(employee_client: AsyncClient) -> None:
+    assert (await employee_client.get("/api/v1/admin/users")).status_code == 403
+    anonymous = await new_client()
+    assert (await anonymous.get("/api/v1/admin/users")).status_code == 401
+    await anonymous.aclose()
+
+
+async def test_rename_and_delete_team(admin_client: AsyncClient) -> None:
+    ops = (await admin_client.post("/api/v1/admin/teams", json={"name": "Ops"})).json()
+    await admin_client.post("/api/v1/admin/teams", json={"name": "Sales"})
+    user = await make_user("lucas@example.com")
+    await admin_client.post(
+        f"/api/v1/admin/teams/{ops['id']}/members", json={"user_id": str(user.id)}
+    )
+    r = await admin_client.patch(f"/api/v1/admin/teams/{ops['id']}", json={"name": "Support"})
+    assert r.status_code == 200 and r.json() == {
+        "id": ops["id"],
+        "name": "Support",
+        "member_ids": [str(user.id)],
+    }
+    taken = await admin_client.patch(f"/api/v1/admin/teams/{ops['id']}", json={"name": "Sales"})
+    assert taken.status_code == 409
+    assert (
+        await admin_client.patch(f"/api/v1/admin/teams/{ops['id']}", json={"name": ""})
+    ).status_code == 422
+    assert (await admin_client.delete(f"/api/v1/admin/teams/{ops['id']}")).status_code == 204
+    assert [t["name"] for t in (await admin_client.get("/api/v1/teams")).json()] == ["Sales"]
+    assert (await admin_client.delete(f"/api/v1/admin/teams/{ops['id']}")).status_code == 404
+    # The member's account is untouched.
+    assert any(
+        u["email"] == "lucas@example.com"
+        for u in (await admin_client.get("/api/v1/admin/users")).json()
+    )
+
+
+async def test_rename_delete_team_forbidden(employee_client: AsyncClient) -> None:
+    fake = uuid.uuid4()
+    assert (
+        await employee_client.patch(f"/api/v1/admin/teams/{fake}", json={"name": "x"})
+    ).status_code == 403
+    assert (await employee_client.delete(f"/api/v1/admin/teams/{fake}")).status_code == 403

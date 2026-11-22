@@ -1,4 +1,4 @@
-import { Bot, CalendarDays, House, ClipboardCheck, FolderKanban, Gauge, Hash, KanbanSquare, Lock, Plus, Sparkles, Workflow, type LucideIcon } from 'lucide-react'
+import { Bot, CalendarDays, House, ShieldCheck, ClipboardCheck, FolderKanban, Gauge, Hash, KanbanSquare, Lock, Plus, Sparkles, Workflow, type LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -16,9 +16,9 @@ export interface Activity {
 }
 
 /** Pages reachable from the top of the left panel. */
-export type Page = 'home' | 'assistant' | 'myTasks' | 'calendar' | 'projects' | 'requests' | 'playbooks' | 'dashboard'
+export type Page = 'home' | 'admin' | 'assistant' | 'myTasks' | 'calendar' | 'projects' | 'requests' | 'playbooks' | 'dashboard'
 
-const PAGES: { page: Page; Icon: LucideIcon; label: string; managersOnly?: boolean }[] = [
+const PAGES: { page: Page; Icon: LucideIcon; label: string; managersOnly?: boolean; adminOnly?: boolean }[] = [
   { page: 'home', Icon: House, label: 'home.title' },
   { page: 'assistant', Icon: Bot, label: 'people.myAssistant' },
   { page: 'myTasks', Icon: KanbanSquare, label: 'tasks.myTasks' },
@@ -27,6 +27,7 @@ const PAGES: { page: Page; Icon: LucideIcon; label: string; managersOnly?: boole
   { page: 'requests', Icon: ClipboardCheck, label: 'requests.title' },
   { page: 'playbooks', Icon: Workflow, label: 'playbooks.title' },
   { page: 'dashboard', Icon: Gauge, label: 'dashboard.title', managersOnly: true },
+  { page: 'admin', Icon: ShieldCheck, label: 'admin.title', adminOnly: true },
 ]
 
 const item = 'group flex min-h-10 w-full items-center gap-2.5 rounded-lg px-2.5 text-start text-sm transition-colors duration-150'
@@ -75,6 +76,7 @@ interface Props {
   selectedId: string | undefined
   activePage?: Page
   isManager: boolean
+  isAdmin?: boolean
   channels: Channel[]
   selectedChannelId: string | undefined
   onOpenChannel: (id: string) => void
@@ -84,13 +86,13 @@ interface Props {
 }
 
 export function PeoplePanel(props: Props) {
-  const { people, activity, selectedId, activePage, isManager, channels, selectedChannelId, onOpenChannel, onBrowseChannels, onSelect, onOpen } = props
+  const { people, activity, selectedId, activePage, isManager, isAdmin = false, channels, selectedChannelId, onOpenChannel, onBrowseChannels, onSelect, onOpen } = props
   const { t, i18n } = useTranslation()
 
   return (
     <nav aria-label={t('people.title')} className="flex flex-col gap-4 px-2.5 pb-4">
       <ul className="flex flex-col gap-0.5">
-        {PAGES.filter((p) => isManager || !p.managersOnly).map(({ page, Icon, label }) => (
+        {PAGES.filter((p) => (isManager || !p.managersOnly) && (isAdmin || !p.adminOnly)).map(({ page, Icon, label }) => (
           <li key={page}>
             <button type="button" onClick={() => onOpen(page)} aria-current={page === activePage ? 'page' : undefined}
               className={cn(item, page === activePage ? itemActive : itemIdle)}>

@@ -148,6 +148,15 @@ Open **Requests**: leave (dates and type), equipment, expense (amount) or other.
 - **Projects**: name, description, status (active, on hold, finished), dates, members and milestones. Tasks can belong to a project (choose it when creating a task). The project page shows its milestones, tasks by status and the files of the task chats you belong to. Projects are visible to their members and to managers/admins; the owner, managers and admins can change them. Weekly and monthly reports include a per-project section; global search also finds tasks and projects.
 - **Dashboard** (managers and admins): for this week or month, and optionally one team: open and overdue tasks per person, finished versus planned (tasks due in the period), and the list of delays.
 
+## Administration
+
+Admins have an **Administration** page (left panel and account menu): every account with its role
+and status, create accounts (a strong password is generated and shown once to hand over), change
+name or role, reset a password (signs the person out everywhere), deactivate or reactivate an
+account (messages and tasks are kept). The Teams tab creates, renames and deletes teams and manages
+their members. Admins cannot change their own role or deactivate themselves. Every change is in the
+audit log. The first admin is created from the server: `python -m app.cli create-admin`.
+
 ## Real-time events
 
 One WebSocket at `/ws`. Stored events have an `id`; reconnect with `/ws?last_event_id=<id>` to get what you missed.
