@@ -20,7 +20,8 @@
       "offline": "Hors ligne"
     },
     "empty": "Aucune autre personne pour l'instant.",
-    "unread": "{{count}} non lus"
+    "unread": "{{count}} non lus",
+    "youSaid": "Vous : {{text}}"
   },
   "tabs": {
     "chat": "Chat",

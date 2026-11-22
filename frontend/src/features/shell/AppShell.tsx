@@ -28,7 +28,7 @@ import { api } from '@/lib/api'
 import { cn } from '@/lib/utils'
 
 import { ConversationArea, type ConversationTab } from './ConversationArea'
-import { PeoplePanel, type Page } from './PeoplePanel'
+import { PeoplePanel, type Activity, type Page } from './PeoplePanel'
 import { SidePanel } from './SidePanel'
 import { Logo } from './Logo'
 import { TopBar } from './TopBar'
@@ -76,16 +76,22 @@ export function AppShell({ me }: { me: User }) {
   const person = people.find((p) => p.id === selectedId) ?? people[0]
   const conversation = useDirectConversation(person?.id).data
 
-  // Unread count per person, from their direct conversation with me.
-  const unread = useMemo(() => {
-    const map = new Map<string, number>()
+  // Unread count, last message and time per person (direct chat) and per channel.
+  const activity = useMemo(() => {
+    const map = new Map<string, Activity>()
     for (const c of conversations ?? []) {
-      const other = c.type === 'direct' ? c.member_ids.find((id) => id !== me.id) : undefined
-      if (other && other !== person?.id) map.set(other, c.unread_count)
-      if (c.type === 'channel') map.set(c.id, c.unread_count) // channel badges are keyed by channel id
+      const key = c.type === 'direct' ? c.member_ids.find((id) => id !== me.id) : c.type === 'channel' ? c.id : undefined
+      if (!key) continue
+      const last = c.last_message
+      map.set(key, {
+        unread: key === person?.id && view.kind === 'person' ? 0 : c.unread_count, // the open chat is being read
+        preview: last ? (last.deleted ? t('chat.deleted') : last.body.split('\n').find((l) => l.trim()) ?? '') : '',
+        at: last?.created_at,
+        mine: last?.author_id === me.id,
+      })
     }
     return map
-  }, [conversations, me.id, person?.id])
+  }, [conversations, me.id, person?.id, view.kind, t])
 
   const showPerson = (id: string, nextTab: ConversationTab = 'chat') => {
     setSelectedId(id)
@@ -155,7 +161,7 @@ export function AppShell({ me }: { me: User }) {
           </div>
           <PeoplePanel
             people={people}
-            unread={unread}
+            activity={activity}
             selectedId={view.kind === 'person' ? person?.id : undefined}
             activePage={PAGE_KINDS.has(view.kind) ? (view.kind as Page) : undefined}
             onSelect={(p) => showPerson(p.id)}
