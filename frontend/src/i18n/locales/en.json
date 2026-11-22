@@ -461,5 +461,21 @@
     "replace": "New address",
     "replaceWarning": "The current address will stop working immediately.",
     "replaceConfirm": "Replace address"
+  },
+  "push": {
+    "title": "Notifications on this device",
+    "column": "Push",
+    "enable": "Turn on",
+    "disable": "Turn off",
+    "test": "Send a test",
+    "testSent": "Test notification sent.",
+    "state": {
+      "on": "On: you get an alert even when OpenTeams is closed (unless you are already in the app).",
+      "off": "Get an alert on this browser or phone, even when OpenTeams is closed.",
+      "denied": "Notifications are blocked for this site. Allow them in the browser settings, then come back here.",
+      "unsupported": "This browser cannot show notifications. On iPhone, first add OpenTeams to the home screen (Share → Add to Home Screen).",
+      "unavailable": ""
+    },
+    "failed": "Could not turn on notifications on this device. Try again later."
   }
 }

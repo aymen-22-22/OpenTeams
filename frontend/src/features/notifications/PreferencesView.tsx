@@ -1,3 +1,4 @@
+import { BellRing } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -5,11 +6,48 @@ import { Button } from '@/components/ui/button'
 import { useMe, useUpdateMe } from '@/features/auth/api'
 
 import { usePreferences, useSavePreferences, type EmailFrequency, type Preference } from './api'
+import { usePushState, useTestPush, useTogglePush } from './push'
 
 type EmailChoice = 'off' | EmailFrequency
 const HOURS = Array.from({ length: 24 }, (_, h) => h)
 
-function PreferencesForm({ initial, initialHour }: { initial: Preference[]; initialHour: number }) {
+/** Turn push notifications on or off for this browser or phone. */
+function PushCard() {
+  const { t } = useTranslation()
+  const data = usePushState().data
+  const toggle = useTogglePush()
+  const test = useTestPush()
+  if (!data || data.state === 'unavailable') return null
+  const { state, publicKey } = data
+  return (
+    <div className="card flex max-w-xl flex-col gap-3 p-4">
+      <div className="flex items-start gap-3">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent-soft text-accent-soft-foreground">
+          <BellRing className="size-[18px]" aria-hidden />
+        </span>
+        <div className="flex flex-col gap-0.5">
+          <h3 className="text-sm font-semibold">{t('push.title')}</h3>
+          <p role="status" className="text-[13px] text-muted-foreground">{t(`push.state.${state}`)}</p>
+        </div>
+      </div>
+      {(state === 'on' || state === 'off') && publicKey && (
+        <div className="flex flex-wrap gap-2">
+          <Button variant={state === 'on' ? 'outline' : 'default'} disabled={toggle.isPending}
+            onClick={() => toggle.mutate({ on: state === 'off', publicKey })}>
+            {state === 'on' ? t('push.disable') : t('push.enable')}
+          </Button>
+          {state === 'on' && (
+            <Button variant="ghost" onClick={() => test.mutate()} disabled={test.isPending}>{t('push.test')}</Button>
+          )}
+        </div>
+      )}
+      {test.isSuccess && <p className="text-[13px] text-accent">{t('push.testSent')}</p>}
+      {toggle.isError && <p role="alert" className="text-[13px] text-danger">{t('push.failed')}</p>}
+    </div>
+  )
+}
+
+function PreferencesForm({ initial, initialHour, pushColumn }: { initial: Preference[]; initialHour: number; pushColumn: boolean }) {
   const { t, i18n } = useTranslation()
   const save = useSavePreferences()
   const updateMe = useUpdateMe()
@@ -37,6 +75,7 @@ function PreferencesForm({ initial, initialHour }: { initial: Preference[]; init
             <th className="py-2 text-start font-medium">{t('notifications.type')}</th>
             <th className="py-2 font-medium">{t('notifications.inApp')}</th>
             <th className="py-2 text-start font-medium">{t('notifications.email')}</th>
+            {pushColumn && <th className="py-2 font-medium">{t('push.column')}</th>}
           </tr>
         </thead>
         <tbody>
@@ -58,6 +97,12 @@ function PreferencesForm({ initial, initialHour }: { initial: Preference[]; init
                     <option value="daily">{t('notifications.emailDaily')}</option>
                   </select>
                 </td>
+                {pushColumn && (
+                  <td className="text-center">
+                    <input type="checkbox" className="size-5" checked={p.push ?? false} onChange={(e) => set(p.type, { push: e.target.checked })}
+                      aria-label={`${label} — ${t('push.column')}`} />
+                  </td>
+                )}
               </tr>
             )
           })}
@@ -83,11 +128,15 @@ export function PreferencesView() {
   const { t } = useTranslation()
   const prefs = usePreferences().data
   const me = useMe().data
+  const pushState = usePushState().data?.state
   return (
     <section aria-label={t('notifications.preferences')} className="h-full overflow-y-auto">
       <div className="page flex animate-fade-in flex-col gap-5">
         <h2 className="page-title">{t('notifications.preferences')}</h2>
-        {prefs && me && <PreferencesForm initial={prefs} initialHour={me.digest_hour ?? 8} />}
+        <PushCard />
+        {prefs && me && (
+          <PreferencesForm initial={prefs} initialHour={me.digest_hour ?? 8} pushColumn={Boolean(pushState && pushState !== 'unavailable')} />
+        )}
       </div>
     </section>
   )

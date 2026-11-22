@@ -152,6 +152,7 @@ async def test_preferences_defaults_and_update(pair: Pair) -> None:
         "in_app": True,
         "email": False,
         "email_frequency": "instant",
+        "push": True,
     }
     assert prefs["task"]["email"] is True
     r = await pair.lucas.put(

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
+import { disablePush } from '@/features/notifications/push'
 import { api, ApiError } from '@/lib/api'
 
 export type Role = 'admin' | 'manager' | 'employee'
@@ -58,7 +59,10 @@ export function useLogin() {
 export function useLogout() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: () => api<void>('/auth/logout', { method: 'POST' }),
+    mutationFn: async () => {
+      await disablePush().catch(() => undefined) // a shared device must not alert the next person
+      return api<void>('/auth/logout', { method: 'POST' })
+    },
     onSettled: () => {
       // Drop all cached data, then mark the user as signed out so the login page shows.
       qc.removeQueries({ predicate: (q) => q.queryKey !== ME_KEY && q.queryKey[0] !== ME_KEY[0] })

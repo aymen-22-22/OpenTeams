@@ -69,7 +69,11 @@ async def get_preferences(user: CurrentUser, db: DB) -> list[PreferenceItem]:
         ch = await channels(db, user.id, type_)
         result.append(
             PreferenceItem(
-                type=type_, in_app=ch.in_app, email=ch.email, email_frequency=ch.frequency
+                type=type_,
+                in_app=ch.in_app,
+                email=ch.email,
+                email_frequency=ch.frequency,
+                push=ch.push,
             )
         )
     return result
@@ -86,10 +90,13 @@ async def set_preferences(
             )
         )
         if pref is None:
-            pref = NotificationPreference(user_id=user.id, type=item.type)
+            current = await channels(db, user.id, item.type)
+            pref = NotificationPreference(user_id=user.id, type=item.type, push=current.push)
             db.add(pref)
         pref.in_app, pref.email = item.in_app, item.email
         pref.email_frequency = item.email_frequency
+        if item.push is not None:
+            pref.push = item.push
     await db.commit()
     return await get_preferences(user, db)
 

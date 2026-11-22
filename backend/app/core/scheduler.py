@@ -28,10 +28,12 @@ def create_scheduler() -> AsyncIOScheduler:
     from app.bridge.service import poll_mailbox
     from app.playbooks import jobs as playbook_jobs  # local imports: jobs depend on most modules
     from app.reminders import jobs
+    from app.reminders.push import send_push
 
     scheduler = AsyncIOScheduler(timezone=get_settings().timezone)
     scheduler.add_job(_run(jobs.process_due_reminders), "interval", seconds=30, id="reminders")
     scheduler.add_job(_run(jobs.send_outbox), "interval", seconds=20, id="outbox")
+    scheduler.add_job(_run(send_push), "interval", seconds=5, id="push")
     scheduler.add_job(_run(jobs.nudge_overdue_tasks), "cron", hour=8, minute=30, id="overdue")
     scheduler.add_job(_run(jobs.send_digests), "interval", minutes=10, id="digests")
     scheduler.add_job(_run(jobs.cleanup_realtime_events), "cron", hour=3, id="cleanup")

@@ -35,6 +35,8 @@ Keep `SECRET_KEY` and `AI_ENCRYPTION_KEY` safe and stable: changing `SECRET_KEY`
 
 **Email**: set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_STARTTLS=true` and `MAIL_FROM` for your mail server.
 
+**Push notifications** (optional): run `docker compose run --rm api python -m app.cli vapid-keys` once and copy the two lines into `.env` (plus `VAPID_SUBJECT=mailto:you@yourdomain`). Keep the keys stable. Push needs HTTPS (Caddy provides it). The API container must reach the push services over HTTPS: `fcm.googleapis.com` (Chrome, Edge, Android), `updates.push.services.mozilla.com` (Firefox), `web.push.apple.com` (Safari, iPhone); allow them if your firewall filters outgoing traffic.
+
 **Email bridge** (optional): create a mailbox, e.g. `team@example.com`, check that `team+test@example.com` is delivered to it (plus-addressing), then set `BRIDGE_ADDRESS`, `BRIDGE_IMAP_HOST`, `BRIDGE_IMAP_PORT` (993, TLS), `BRIDGE_IMAP_USER` and `BRIDGE_IMAP_PASSWORD`. Send yourself a test: open a conversation, create its address in the side panel, and email it from your OpenTeams address. If nothing appears, look at the latest rows of `inbound_emails` (column `reason`): `not_authenticated` means your server does not add `dmarc=pass` (fix DMARC, or set `BRIDGE_REQUIRE_DMARC=false` for an internal-only server).
 
 ## 3. Start

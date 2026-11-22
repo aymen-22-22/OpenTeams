@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.chat.models import ConversationMember
 from app.core import clock
 from app.core.realtime import hub
+from app.core.settings import get_settings
 from app.reminders.email import render_notification
 from app.reminders.models import (
     DigestItem,
@@ -17,6 +18,8 @@ from app.reminders.models import (
     Notification,
     NotificationPreference,
     NotificationType,
+    PushItem,
+    PushSubscription,
 )
 from app.reminders.schemas import NotificationOut
 from app.users.models import User
@@ -31,12 +34,22 @@ DEFAULT_EMAIL = {
     NotificationType.MENTION,
 }
 
+# Push (phone/desktop alert) by default only for what needs a quick look.
+DEFAULT_PUSH = {
+    NotificationType.MESSAGE,
+    NotificationType.MENTION,
+    NotificationType.REMINDER,
+    NotificationType.TASK,
+    NotificationType.APPROVAL,
+}
+
 
 @dataclass(frozen=True)
 class Channels:
     in_app: bool
     email: bool
     frequency: EmailFrequency = EmailFrequency.INSTANT
+    push: bool = False
 
 
 async def channels(db: AsyncSession, user_id: uuid.UUID, type_: NotificationType) -> Channels:
@@ -46,8 +59,17 @@ async def channels(db: AsyncSession, user_id: uuid.UUID, type_: NotificationType
         )
     )
     if pref is None:
-        return Channels(in_app=True, email=type_ in DEFAULT_EMAIL)
-    return Channels(pref.in_app, pref.email, pref.email_frequency)
+        return Channels(in_app=True, email=type_ in DEFAULT_EMAIL, push=type_ in DEFAULT_PUSH)
+    return Channels(pref.in_app, pref.email, pref.email_frequency, pref.push)
+
+
+async def has_push_devices(db: AsyncSession, user_id: uuid.UUID) -> bool:
+    if not get_settings().push_enabled:
+        return False
+    found = await db.scalar(
+        select(PushSubscription.id).where(PushSubscription.user_id == user_id).limit(1)
+    )
+    return found is not None
 
 
 async def notify(
@@ -74,6 +96,13 @@ async def notify(
     if ch.in_app and allow_in_app:
         notification = Notification(user_id=user_id, type=type_, title=title, body=body, link=link)
         db.add(notification)
+    # Push is an alert for the in-app channel, so a sender's allow_in_app applies to it too.
+    if ch.push and allow_in_app and await has_push_devices(db, user_id):
+        db.add(
+            PushItem(
+                user_id=user_id, title=title, body=body[:300], link=link, created_at=clock.now()
+            )
+        )
     if ch.email and allow_email:
         if ch.frequency == EmailFrequency.DAILY:
             db.add(

@@ -66,6 +66,22 @@ class Settings(BaseSettings):
     def bridge_enabled(self) -> bool:
         return bool(self.bridge_address and self.bridge_imap_host)
 
+    # Web push (optional). Generate the keys with: python -m app.cli vapid-keys
+    vapid_public_key: str = ""
+    vapid_private_key: str = ""
+    vapid_subject: str = "mailto:admin@example.com"  # contact for push services
+    # Push endpoints must be on these hosts (or their subdomains): the browsers' push services.
+    push_allowed_hosts: list[str] = [
+        "fcm.googleapis.com",
+        "updates.push.services.mozilla.com",
+        "push.apple.com",
+        "notify.windows.com",
+    ]
+
+    @property
+    def push_enabled(self) -> bool:
+        return bool(self.vapid_public_key and self.vapid_private_key)
+
     login_max_attempts: int = 5
     login_window_seconds: int = 300
 

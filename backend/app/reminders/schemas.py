@@ -28,6 +28,7 @@ class PreferenceItem(BaseModel):
     in_app: bool
     email: bool
     email_frequency: EmailFrequency = EmailFrequency.INSTANT
+    push: bool | None = None  # in requests: None keeps the current choice
 
 
 class ReminderOut(BaseModel):
@@ -55,3 +56,23 @@ class ReminderUpdate(BaseModel):
     remind_at: datetime | None = None
     recurrence: Recurrence | None = None
     active: bool | None = None
+
+
+class PushKeys(BaseModel):
+    p256dh: str = Field(min_length=20, max_length=200)
+    auth: str = Field(min_length=8, max_length=100)
+
+
+class PushSubscriptionIn(BaseModel):
+    """What the browser's PushSubscription.toJSON() returns."""
+
+    endpoint: str = Field(min_length=10, max_length=1000)
+    keys: PushKeys
+
+
+class PushEndpoint(BaseModel):
+    endpoint: str = Field(min_length=10, max_length=1000)
+
+
+class PushConfig(BaseModel):
+    public_key: str | None  # None: push is not configured on this server

@@ -15,6 +15,8 @@ from app.reminders.models import (
     EmailOutbox,
     Notification,
     NotificationPreference,
+    PushItem,
+    PushSubscription,
     Reminder,
 )
 from app.requests.models import Request, RequestStep
@@ -24,6 +26,8 @@ from app.users.models import Team, TeamMember, User
 __all__ = [
     "DigestItem",
     "InboundEmail",
+    "PushItem",
+    "PushSubscription",
     "CalendarEvent",
     "EventAttendee",
     "EmailOutbox",

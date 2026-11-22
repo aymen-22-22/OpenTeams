@@ -24,6 +24,7 @@ export interface Preference {
   in_app: boolean
   email: boolean
   email_frequency: EmailFrequency
+  push?: boolean
 }
 
 export interface Reminder {

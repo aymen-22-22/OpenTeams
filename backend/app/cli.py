@@ -2,6 +2,7 @@
 
     python -m app.cli create-admin EMAIL "Display Name"
     python -m app.cli create-user EMAIL "Display Name" [--role employee|manager|admin]
+    python -m app.cli vapid-keys      (prints new keys for web push, to put in .env)
 
 The password is asked interactively, or read from OPENTEAMS_PASSWORD (for automation).
 """
@@ -35,6 +36,12 @@ async def create_admin(email: str, display_name: str, password: str) -> None:
 
 def main() -> None:
     args = sys.argv[1:]
+    if args == ["vapid-keys"]:
+        from app.reminders.push import generate_vapid_keys
+
+        public, private = generate_vapid_keys()
+        print(f"VAPID_PUBLIC_KEY={public}\nVAPID_PRIVATE_KEY={private}")
+        return
     role = Role.ADMIN
     if "--role" in args:
         i = args.index("--role")

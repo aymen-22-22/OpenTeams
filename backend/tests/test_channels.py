@@ -173,4 +173,5 @@ async def test_mention_email_by_default(team: Team) -> None:
         "in_app": True,
         "email": True,
         "email_frequency": "instant",
+        "push": True,
     }

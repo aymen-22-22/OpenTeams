@@ -96,6 +96,33 @@ class NotificationPreference(Base):
     email_frequency: Mapped[EmailFrequency] = mapped_column(
         _enum(EmailFrequency), default=EmailFrequency.INSTANT
     )
+    push: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
+class PushSubscription(Base):
+    """One browser or phone that accepted push notifications."""
+
+    __tablename__ = "push_subscriptions"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    endpoint: Mapped[str] = mapped_column(String(1000), unique=True)
+    p256dh: Mapped[str] = mapped_column(String(200))  # browser's public key
+    auth: Mapped[str] = mapped_column(String(100))  # browser's auth secret
+    user_agent: Mapped[str] = mapped_column(String(200), default="")
+
+
+class PushItem(Base):
+    """A push waiting to be sent by the push job (requests never wait for push services)."""
+
+    __tablename__ = "push_queue"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    title: Mapped[str] = mapped_column(String(200))
+    body: Mapped[str] = mapped_column(Text, default="")
+    link: Mapped[str] = mapped_column(String(300), default="/")
+    force: Mapped[bool] = mapped_column(Boolean, default=False)  # test push: even if online
 
 
 class DigestItem(Base):

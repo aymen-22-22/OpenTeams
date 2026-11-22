@@ -461,5 +461,21 @@
     "replace": "Nouvelle adresse",
     "replaceWarning": "L'adresse actuelle cessera de fonctionner immédiatement.",
     "replaceConfirm": "Remplacer l'adresse"
+  },
+  "push": {
+    "title": "Notifications sur cet appareil",
+    "column": "Push",
+    "enable": "Activer",
+    "disable": "Désactiver",
+    "test": "Envoyer un test",
+    "testSent": "Notification de test envoyée.",
+    "state": {
+      "on": "Activées : vous recevez une alerte même quand OpenTeams est fermé (sauf si vous êtes déjà dans l'application).",
+      "off": "Recevez une alerte sur ce navigateur ou ce téléphone, même quand OpenTeams est fermé.",
+      "denied": "Les notifications sont bloquées pour ce site. Autorisez-les dans les réglages du navigateur, puis revenez ici.",
+      "unsupported": "Ce navigateur ne permet pas les notifications. Sur iPhone, ajoutez d'abord OpenTeams à l'écran d'accueil (Partager → Sur l'écran d'accueil).",
+      "unavailable": ""
+    },
+    "failed": "Impossible d'activer les notifications sur cet appareil. Réessayez plus tard."
   }
 }
