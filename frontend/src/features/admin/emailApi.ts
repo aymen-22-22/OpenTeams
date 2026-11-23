@@ -134,3 +134,10 @@ export function useTestKind() {
     mutationFn: (body: { to: string; kind: EmailKind; lang: Lang }) => api<void>('/admin/email/test', { method: 'POST', body }),
   })
 }
+
+export function useTestAll() {
+  return useMutation({
+    mutationFn: (body: { to: string; lang: 'all' | 'fr' | 'en' | 'ar' }) =>
+      api<{ queued: number }>('/admin/email/test-all', { method: 'POST', body }),
+  })
+}

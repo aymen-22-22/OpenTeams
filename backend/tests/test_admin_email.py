@@ -481,3 +481,32 @@ async def test_preview_of_unsaved_custom_html(admin_client: AsyncClient) -> None
     )
     assert "<h1>Préparer le rapport mensuel</h1>" in r.json()["html"]
     assert (await admin_client.get(f"{URL}/texts")).json()["overrides"] == {}
+
+
+async def test_send_all_examples_goes_through_the_outbox(
+    admin_client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        email_router, "send_sync", lambda *a: pytest.fail("no SMTP during the request")
+    )
+    r = await admin_client.post(f"{URL}/test-all", json={"to": "me@example.com", "lang": "ar"})
+    assert r.status_code == 202 and r.json() == {"queued": 9}
+    r = await admin_client.post(f"{URL}/test-all", json={"to": "me@example.com"})
+    assert r.json() == {"queued": 27}
+    async with SessionLocal() as db:
+        mails = list(await db.scalars(select(EmailOutbox)))
+    assert len(mails) == 36 and all(m.to_email == "me@example.com" for m in mails)
+    subjects = {m.subject for m in mails}
+    assert any(s.startswith("[AR] ") for s in subjects) and any(
+        s.startswith("[EN] Your daily summary") for s in subjects
+    )
+
+
+async def test_send_all_examples_validation_and_access(
+    admin_client: AsyncClient, employee_client: AsyncClient
+) -> None:
+    assert (await admin_client.post(f"{URL}/test-all", json={"to": "nope"})).status_code == 422
+    assert (
+        await admin_client.post(f"{URL}/test-all", json={"to": "a@b.dz", "lang": "de"})
+    ).status_code == 422
+    assert (await employee_client.post(f"{URL}/test-all", json={"to": "a@b.dz"})).status_code == 403

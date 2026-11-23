@@ -20,6 +20,7 @@ from app.admin.org import (
     smtp_config,
 )
 from app.auth.deps import DB, AdminUser
+from app.core import clock
 from app.core.crypto import encrypt
 from app.core.errors import AppError
 from app.reminders import custom_html
@@ -31,6 +32,7 @@ from app.reminders.email import (
     render_digest,
     render_notification,
 )
+from app.reminders.models import EmailOutbox
 
 router = APIRouter(prefix="/admin/email", tags=["admin"])
 
@@ -85,6 +87,15 @@ class TestEmailIn(BaseModel):
     to: EmailStr
     kind: Kind = "test"
     lang: Lang | None = None  # default: the admin's language
+
+
+class TestAllIn(BaseModel):
+    to: EmailStr
+    lang: Lang | Literal["all"] = "all"
+
+
+class TestAllOut(BaseModel):
+    queued: int
 
 
 class Branding(BaseModel):
@@ -360,3 +371,30 @@ async def send_test_email(body: TestEmailIn, admin: AdminUser, db: DB) -> None:
         ) from exc
     audit.record(db, admin.id, "admin.email_test_sent", "org_settings", None)
     await db.commit()
+
+
+@router.post("/test-all", response_model=TestAllOut, status_code=202)
+async def send_all_examples(body: TestAllIn, admin: AdminUser, db: DB) -> TestAllOut:
+    """Queue one sample of every email type (in one or all languages) to review them all.
+
+    Goes through the outbox like real emails: the request never waits on SMTP.
+    """
+    brand = await email_brand(db)
+    langs = list(TEXTS) if body.lang == "all" else [body.lang]
+    queued = 0
+    for lang in langs:
+        for kind in KINDS:
+            rendered = _sample(kind, lang, brand)
+            db.add(
+                EmailOutbox(
+                    to_email=str(body.to),
+                    subject=f"[{lang.upper()}] {rendered.subject}",
+                    html=rendered.html,
+                    text=rendered.text,
+                    next_attempt_at=clock.now(),
+                )
+            )
+            queued += 1
+    audit.record(db, admin.id, "admin.email_examples_queued", "org_settings", None, count=queued)
+    await db.commit()
+    return TestAllOut(queued=queued)

@@ -612,7 +612,12 @@
       "sending": "Sending…",
       "testSent": "Email sent to {{to}}. Check the inbox (and spam).",
       "failedAuth": "The server rejected the username or password.",
-      "failedConnect": "Could not reach the server, or sending was refused."
+      "failedConnect": "Could not reach the server, or sending was refused.",
+      "allHint": "Receive one sample of every email type (task, mention, reminder, digest…) to check how they look.",
+      "allLanguages": "All languages",
+      "sendAll": "Send all examples",
+      "allQueued_one": "{{count}} email on its way to {{to}}.",
+      "allQueued_other": "{{count}} emails on their way to {{to}} (within a minute)."
     },
     "design": {
       "appearance": "Email appearance",

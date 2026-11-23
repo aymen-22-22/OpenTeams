@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ApiError } from '@/lib/api'
 
 import { EmailDesign } from './EmailDesign'
-import { useEmailSettings, useSaveEmailSettings, useTestEmail, type EmailSettings, type Security } from './emailApi'
+import { useEmailSettings, useSaveEmailSettings, useTestAll, useTestEmail, type EmailSettings, type Security } from './emailApi'
 
 const DEFAULT_PORTS: Record<Security, number> = { none: 25, starttls: 587, ssl: 465 }
 
@@ -86,7 +86,9 @@ function SmtpForm({ initial }: { initial: EmailSettings }) {
 function TestEmail({ defaultTo }: { defaultTo: string }) {
   const { t } = useTranslation()
   const test = useTestEmail()
+  const all = useTestAll()
   const [to, setTo] = useState(defaultTo)
+  const [lang, setLang] = useState<'all' | 'fr' | 'en' | 'ar'>('all')
   const reason = test.error instanceof ApiError ? test.error.details?.reason : undefined
   return (
     <form className="card flex flex-col gap-3 p-5" aria-labelledby="test-title"
@@ -105,6 +107,22 @@ function TestEmail({ defaultTo }: { defaultTo: string }) {
           {reason && reason !== 'auth' && <span dir="ltr" className="ms-1 font-mono text-xs">({reason})</span>}
         </p>
       )}
+      <div className="mt-2 flex flex-col gap-2 border-t border-border pt-4">
+        <p className="text-[13px] text-muted-foreground">{t('admin.smtp.allHint')}</p>
+        <div className="flex flex-wrap gap-2">
+          <select value={lang} onChange={(e) => setLang(e.target.value as typeof lang)} aria-label={t('app.language')} className="field">
+            <option value="all">{t('admin.smtp.allLanguages')}</option>
+            <option value="fr">Français</option>
+            <option value="en">English</option>
+            <option value="ar">العربية</option>
+          </select>
+          <Button type="button" variant="outline" disabled={all.isPending || !to} onClick={() => all.mutate({ to, lang })}>
+            {t('admin.smtp.sendAll')}
+          </Button>
+        </div>
+        {all.isSuccess && <p role="status" className="flex items-center gap-1.5 text-sm text-success"><CheckCircle2 className="size-4" aria-hidden />{t('admin.smtp.allQueued', { count: all.data.queued, to })}</p>}
+        {all.isError && <p role="alert" className="text-sm text-danger">{t('admin.errors.failed')}</p>}
+      </div>
     </form>
   )
 }

@@ -273,3 +273,10 @@ test('custom HTML per type: insert the starter, preview it, save; invalid HTML i
   await userEvent.click(within(wording).getByRole('button', { name: 'Enregistrer' }))
   expect(await within(wording).findByRole('alert')).toHaveTextContent('HTML refusé : il doit contenir {{preferences_url}}')
 })
+
+test('send one example of every email type', async () => {
+  const fetchMock = await openEmailTab({ 'POST /admin/email/test-all': { status: 202, body: { queued: 27 } } })
+  await userEvent.click(screen.getByRole('button', { name: 'Envoyer tous les exemples' }))
+  expect(await screen.findByText(/27 e-mails en route vers me@example.com/)).toBeInTheDocument()
+  expect(body(fetchMock, 'POST', '/admin/email/test-all')).toEqual({ to: 'me@example.com', lang: 'all' })
+})

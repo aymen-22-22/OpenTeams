@@ -612,7 +612,12 @@
       "sending": "Envoi…",
       "testSent": "E-mail envoyé à {{to}}. Vérifiez la boîte de réception (et les indésirables).",
       "failedAuth": "Le serveur a refusé l'identifiant ou le mot de passe.",
-      "failedConnect": "Impossible de joindre le serveur ou envoi refusé."
+      "failedConnect": "Impossible de joindre le serveur ou envoi refusé.",
+      "allHint": "Recevez un exemple de chaque type d'e-mail (tâche, mention, rappel, résumé…) pour vérifier leur rendu.",
+      "allLanguages": "Toutes les langues",
+      "sendAll": "Envoyer tous les exemples",
+      "allQueued_one": "{{count}} e-mail en route vers {{to}}.",
+      "allQueued_other": "{{count}} e-mails en route vers {{to}} (arrivée sous une minute)."
     },
     "design": {
       "appearance": "Apparence des e-mails",
