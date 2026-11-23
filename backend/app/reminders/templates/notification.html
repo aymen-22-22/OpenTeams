@@ -1,9 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
-{% if intro %}<p style="margin:0 0 16px;color:#525252;white-space:pre-line;">{{ intro }}</p>{% endif %}
-<h1 style="margin:0 0 12px;font-size:20px;color:#171717;" dir="auto">{{ title }}</h1>
-{% if body %}<p style="margin:0 0 20px;white-space:pre-line;" dir="auto">{{ body }}</p>{% endif %}
-<table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="border-radius:6px;background:{{ brand.color }};">
-  <a href="{{ link_url }}" style="display:inline-block;padding:12px 20px;color:{{ brand.on_color }};text-decoration:none;font-weight:bold;">{{ t.open }}</a>
-</td></tr></table>
+<span style="display:inline-block;padding:4px 10px;border-radius:999px;background:{{ brand.soft }};color:{{ brand.text_color }};font-size:12px;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;">{{ kind_label }}</span>
+{% if intro %}<p class="ot-muted" style="margin:18px 0 0;color:#4b5563;white-space:pre-line;">{{ intro }}</p>{% endif %}
+<h1 style="margin:16px 0 0;font-size:22px;line-height:1.35;color:#111827;font-weight:700;" dir="auto">{{ title }}</h1>
+{% if body %}
+  {% if quote %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;"><tr>
+  <td class="ot-quote" style="background:#f9fafb;border-{{ start }}:4px solid {{ brand.color }};border-radius:6px;padding:14px 18px;font-size:15px;white-space:pre-line;" dir="auto">{{ body }}</td>
+</tr></table>
+  {% else %}
+<p class="ot-muted" style="margin:8px 0 0;color:#4b5563;white-space:pre-line;" dir="auto">{{ body }}</p>
+  {% endif %}
+{% endif %}
+{% with url=link_url, label=t.open %}{% include "_button.html" %}{% endwith %}
 {% endblock %}

@@ -455,7 +455,7 @@ async def test_custom_digest_html_gets_items(admin_client: AsyncClient) -> None:
     )
     out = (await admin_client.post(f"{URL}/preview", json={"kind": "digest", "lang": "fr"})).json()
     assert "<div>4 nouveautés</div>" in out["html"] and "Préparer le rapport mensuel" in out["html"]
-    assert "<h2" in out["html"]  # items are our own HTML, inserted as is
+    assert ">Voir</a>" in out["html"]  # items are our own HTML, inserted as is
 
 
 @pytest.mark.parametrize(

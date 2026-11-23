@@ -30,6 +30,7 @@ TEXTS = {
         "mention": "Mention",
         "sep": " : ",
         "open": "Ouvrir",
+        "view": "Voir",
         "footer": "Vous recevez cet e-mail via {name}.",
         "preferences": "Gérer mes notifications",
         "digest_subject": "Votre résumé quotidien : {n} notification(s)",
@@ -48,6 +49,7 @@ TEXTS = {
         "mention": "Mention",
         "sep": ": ",
         "open": "Open",
+        "view": "View",
         "footer": "You receive this email from {name}.",
         "preferences": "Manage my notifications",
         "digest_subject": "Your daily summary: {n} notification(s)",
@@ -66,6 +68,7 @@ TEXTS = {
         "mention": "إشارة",
         "sep": ": ",
         "open": "فتح",
+        "view": "عرض",
         "footer": "تصلك هذه الرسالة من {name}.",
         "preferences": "إدارة إشعاراتي",
         "digest_subject": "ملخصك اليومي: {n} إشعار",
@@ -91,6 +94,8 @@ class DigestEntry:
     link: str
 
 
+# Notification types whose body is a person's message (shown as a quote)
+QUOTED = {"message", "mention"}
 DIGEST_GROUP_LIMIT = 10  # items listed per type; the rest is counted ("and 4 more")
 
 
@@ -133,6 +138,9 @@ def render_notification(
         "body": body,
         "intro": brand.text(kind, lang, "intro"),
         "link_url": f"{ctx['base_url']}{link}",
+        "kind_label": label,
+        "quote": kind in QUOTED,  # the body is someone's words: shown as a quote
+        "preheader": (body or title)[:120],
     }
     custom = brand.text(kind, lang, "html")
     if custom:
@@ -154,6 +162,7 @@ def render_digest(
     subject = brand.text("digest", lang, "subject") or t["digest_subject"]
     ctx = _base_context(subject.replace("{n}", str(len(entries))), lang, brand)
     ctx["intro"] = brand.text("digest", lang, "intro") or t["digest_intro"]
+    ctx["preheader"] = ctx["intro"][:120]
     groups = []
     for kind in dict.fromkeys(e.kind for e in entries):
         items = [e for e in entries if e.kind == kind]

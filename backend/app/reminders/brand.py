@@ -26,5 +26,17 @@ class Brand:
         luminance = 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2]
         return "#111111" if luminance > 0.4 else "#ffffff"
 
+    @property
+    def soft(self) -> str:
+        """A very light tint of the brand color (badges, quote bars' background)."""
+        r, g, b = (int(self.color[i : i + 2], 16) for i in (1, 3, 5))
+        mix = [round(c * 0.12 + 255 * 0.88) for c in (r, g, b)]
+        return "#{:02x}{:02x}{:02x}".format(*mix)
+
+    @property
+    def text_color(self) -> str:
+        """The brand color when it is dark enough to read on white, else a dark gray."""
+        return self.color if self.on_color == "#ffffff" else "#1f2937"
+
 
 DEFAULT_BRAND = Brand()

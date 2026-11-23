@@ -1,20 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
-<h1 style="margin:0 0 8px;font-size:20px;color:#171717;">{{ subject }}</h1>
-<p style="margin:0 0 20px;color:#525252;white-space:pre-line;">{{ intro }}</p>
-{% for group in groups %}
-<h2 style="margin:20px 0 8px;font-size:13px;letter-spacing:0.04em;text-transform:uppercase;color:{{ brand.color }};">{{ group.label }}</h2>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-  {% for item in group.entries %}
-  <tr><td style="padding:8px 0;border-bottom:1px solid #eeeeee;text-align:{{ start }};">
-    <a href="{{ item.url }}" style="color:#171717;font-weight:bold;text-decoration:none;" dir="auto">{{ item.title }}</a>
-    {% if item.body %}<div style="margin-top:2px;color:#525252;font-size:14px;white-space:pre-line;" dir="auto">{{ item.body }}</div>{% endif %}
-  </td></tr>
-  {% endfor %}
-</table>
-{% if group.more %}<p style="margin:6px 0 0;color:#525252;font-size:13px;">{{ group.more }}</p>{% endif %}
-{% endfor %}
-<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:24px;"><tr><td style="border-radius:6px;background:{{ brand.color }};">
-  <a href="{{ base_url }}/" style="display:inline-block;padding:12px 20px;color:{{ brand.on_color }};text-decoration:none;font-weight:bold;">{{ t.open_app }}</a>
-</td></tr></table>
+<h1 style="margin:0;font-size:22px;line-height:1.35;color:#111827;font-weight:700;">{{ subject }}</h1>
+<p class="ot-muted" style="margin:8px 0 0;color:#4b5563;white-space:pre-line;">{{ intro }}</p>
+{% include "digest_items.html" %}
+{% with url=base_url ~ "/", label=t.open_app %}{% include "_button.html" %}{% endwith %}
 {% endblock %}

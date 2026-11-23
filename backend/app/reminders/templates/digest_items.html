@@ -1,12 +1,18 @@
 {% for group in groups %}
-<h2 style="margin:20px 0 8px;font-size:13px;letter-spacing:0.04em;text-transform:uppercase;color:{{ brand.color }};">{{ group.label }}</h2>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+<p style="margin:28px 0 10px;font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:{{ brand.text_color }};">{{ group.label }} · {{ group.entries|length }}</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="ot-line" style="border:1px solid #e5e7eb;border-radius:10px;border-collapse:separate;">
   {% for item in group.entries %}
-  <tr><td style="padding:8px 0;border-bottom:1px solid #eeeeee;text-align:{{ start }};">
-    <a href="{{ item.url }}" style="color:#171717;font-weight:bold;text-decoration:none;" dir="auto">{{ item.title }}</a>
-    {% if item.body %}<div style="margin-top:2px;color:#525252;font-size:14px;white-space:pre-line;" dir="auto">{{ item.body }}</div>{% endif %}
+  <tr><td class="ot-line" style="padding:14px 16px;{% if not loop.last %}border-bottom:1px solid #e5e7eb;{% endif %}text-align:{{ start }};">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+      <td width="14" valign="top" style="padding-top:7px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{{ brand.color }};"></span></td>
+      <td style="text-align:{{ start }};">
+        <a href="{{ item.url }}" class="ot-strong" style="color:#111827;font-weight:700;font-size:15px;" dir="auto">{{ item.title }}</a>
+        {% if item.body %}<div class="ot-muted" style="margin-top:2px;color:#6b7280;font-size:14px;white-space:pre-line;" dir="auto">{{ item.body }}</div>{% endif %}
+      </td>
+      <td width="56" valign="top" style="text-align:{{ 'left' if dir == 'rtl' else 'right' }};"><a href="{{ item.url }}" style="color:{{ brand.text_color }};font-size:13px;font-weight:700;">{{ t.view }}</a></td>
+    </tr></table>
   </td></tr>
   {% endfor %}
 </table>
-{% if group.more %}<p style="margin:6px 0 0;color:#525252;font-size:13px;">{{ group.more }}</p>{% endif %}
+{% if group.more %}<p class="ot-muted" style="margin:8px 0 0;color:#6b7280;font-size:13px;">{{ group.more }}</p>{% endif %}
 {% endfor %}
